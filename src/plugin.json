@@ -1,0 +1,23 @@
+{
+  "type": "datasource",
+  "name": "KDB+",
+  "id": "kdb",
+  "info": {
+    "description ": "KDB+ Data Source for Grafana",
+    "author": {
+      "name": "AquaQ Analytics",
+      "url": "https://www.aquaq.co.uk"
+    },
+    "logos": {
+      "small": "img/kdb_logo.png",
+      "large": "img/kdb_logo.png"
+    },
+    "version": "0.1.01"
+  },
+  "alerting": true,
+  "annotations": false,
+  "metrics": true,
+  "queryOptions": {
+    "minInterval": true
+  }
+}

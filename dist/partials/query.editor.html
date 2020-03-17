@@ -1,0 +1,446 @@
+<query-editor-row query-ctrl="ctrl" has-text-edit-mode="true">
+
+  <!--Choosing the type of query to construct, a query builder or functional-->
+  
+  <div class="gf-form-inline">
+    <div class = "gf-form">
+      <label class="gf-form-label query-keyword width-10">Query Type</label>
+      <div class="gf-form-select-wrapper">
+         <select class="gf-form-input gf-size-auto" ng-model="ctrl.target.queryType" ng-options="qT.value as qT.text for qT in ctrl.queryTypes" ng-change="ctrl.onQueryChange()"></select>
+      </div>
+    </div>
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+  </div>
+
+
+  <!-- <div ng-if="!ctrl.target.rawQuery"> -->
+  <div ng-if= "ctrl.target.queryType=='selectQuery'">                             <!--"ctrl.useQueryBuilder"-->
+
+    <div class="gf-form-inline">
+      <div class="gf-form">
+
+        <label class="gf-form-label query-keyword width-10">From</label>
+        <metric-segment segment="ctrl.tableSegment" get-options="ctrl.getTableSegments()" on-change="ctrl.onTableChanged()"></metric-segment>
+
+<!--        <label class="gf-form-label query-keyword width-9">-->
+<!--          Metric column-->
+<!--          <info-popover mode="right-normal">Column to be used as metric name for the value column.</info-popover>-->
+<!--        </label>-->
+<!--        <metric-segment segment="ctrl.metricColumnSegment" get-options="ctrl.getMetricColumnSegments()" on-change="ctrl.metricColumnChanged()"></metric-segment>-->
+<!--        <label class="gf-form-label query-keyword">-->
+<!--            Limit-->
+<!--          <info-popover mode="right-normal">The number of rows to return. Leave empty or set to 0 to return all rows.</info-popover>-->
+<!--        </label>-->
+<!--        <input type="number" class="gf-form-input width-4" ng-model="ctrl.target.limit" ng-change="ctrl.refresh()"></input>-->
+
+      </div>
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+
+    </div>
+    <div ng-if="ctrl.target.useTemporalField" class= "gf-form-inline">
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword width-10">Time Column
+          <info-popover mode="left-absolute">
+            Time series data is plotted against this column.  Results are also automatically filtered on this field using the date extents of the graph.
+          </info-popover>
+        </label>
+        <metric-segment segment="ctrl.timeColumnSegment" get-options="ctrl.getTimeColumnSegments()" on-change="ctrl.timeColumnChanged()"></metric-segment>
+      </div>
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+    </div>
+
+    <div class="gf-form-inline" ng-repeat="selectParts in ctrl.selectParts">
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword width-10">
+          <span ng-show="$index === 0">Select</span>&nbsp;
+        </label>
+      </div>
+
+      <div class="gf-form" ng-repeat="part in selectParts">
+        <sql-part-editor class="gf-form-label sql-part" part="part" handle-event="ctrl.handleSelectPartEvent(part, $index, $event, selectParts)">
+        </sql-part-editor>
+        <!--
+        <label class="gf-form-label width-7">
+          <span>Data Type: {{ctrl.colMeta}}</span>
+        </label>
+        -->
+      </div>
+
+      <div class="gf-form">
+        <label class="dropdown"
+                dropdown-typeahead="ctrl.selectMenu"
+                dropdown-typeahead-on-select="ctrl.addSelectPart(selectParts, $item, $subItem)">
+        </label>
+      </div>
+
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+    </div>
+
+    <!-- Where Clause -->
+    <div class="gf-form-inline" ng-if="ctrl.whereParts.length == 0">
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword width-10">Where
+          <info-popover mode="left-absolute">
+            'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75).
+          </info-popover>
+        </label>
+      </div>
+      <div class="gf-form">
+        <metric-segment segment="ctrl.whereAdd" get-options="ctrl.addWhereAction(0, 0)"> </metric-segment>  <!-- get-options="ctrl.getWhereOptions()" on-change="ctrl.addWhereAction(part, $index)"></metric-segment> -->
+      </div>
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+    </div>
+    <div class="gf-form-inline" ng-repeat="part in ctrl.whereParts" ng-if="ctrl.whereParts.length!==0">
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword width-10">
+        <span ng-show="$index === 0">Where
+          <info-popover mode="left-absolute">
+            'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75).
+          </info-popover>
+        </span>&nbsp;
+        </label>
+      </div>
+
+      <div class="gf-form">
+        <sql-part-editor class="gf-form-label sql-part" part="part" handle-event="ctrl.handleWherePartEvent(ctrl.whereParts, part, $event, $index)">
+        </sql-part-editor>
+      </div>
+
+      <div class="gf-form" ng-if="$index == ctrl.whereParts.length - 1">
+        <metric-segment segment="ctrl.whereAdd" get-options="ctrl.addWhereAction(part, $index)"></metric-segment>  <!-- get-options="ctrl.getWhereOptions()" on-change="ctrl.addWhereAction(part, $index)"></metric-segment> -->
+      </div>
+
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+    </div>
+
+  </div>
+  <!-- End of div for the select query-->
+
+    <!--Start of div for function builder-->
+    <div ng-if="ctrl.target.queryType=='functionQuery'"> <!--</div>"!ctrl.target.useQueryBuilder"-->
+
+    <!--Declare the function used-->
+    <div class="gf-form-inline">
+      <div class="gf-form">
+          <span class="gf-form-label query-keyword width-10">Function</span>
+          <input type="text" class="gf-form-input width-20" ng-model='ctrl.target.kdbFunction' placeholder="Enter function" ng-change="ctrl.functionChanged()"></input>
+      </div>
+      
+      <!--
+      <div class = "gf-form">
+        <label class="gf-form-label query-keyword width-6">Function</label>
+        <metric-segment segment="ctrl.functionSegment" on-change="ctrl.functionChanged()"></metric-segment>
+      </div>
+    -->
+      <div class="gf-form gf-form--grow">
+          <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+    </div>
+    
+    <!--Add Parameters
+    23/01/2019 - CHO - This code was a work in progress, to be looked at in version 2 of the adaptor.
+    <div class="gf-form-inline" ng-repeat="selectParts in ctrl.selectParts">
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword width-8">
+          <span ng-show="$index === 0">Add Parameter</span>&nbsp;
+        </label>
+      </div>
+
+      <div class="gf-form" ng-repeat="part in selectParts">
+        <sql-part-editor class="gf-form-label sql-part" part="part" handle-event="ctrl.handleSelectPartEvent(part, $index, $event)">
+        </sql-part-editor>
+
+      </div>
+
+      <div class="gf-form">
+        <label class="dropdown"
+                dropdown-typeahead="ctrl.selectMenu"
+                dropdown-typeahead-on-select="ctrl.addSelectPart(selectParts, $item, $subItem)">
+        </label>
+      </div>
+
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+    </div>
+    -->
+  
+  </div>
+  <!--End of the div for the function query-->
+
+    <div ng-if="ctrl.target.queryType!=='kdbSideQuery'">
+    <div ng-if= " ( ctrl.target.panelType!=='graph' && ctrl.target.panelType!=='heatmap' ) || ctrl.target.queryType=='functionQuery'">
+        <div class='gf-form-inline'>
+          <div ng-if= " ( ctrl.target.panelType!=='graph' && ctrl.target.panelType!=='heatmap' ) ">
+          <div class = "gf-form">
+            <label class="gf-form-label width-13">
+              <span><input type="checkbox" class="width-2" ng-model="ctrl.target.useTemporalField" ng-change="ctrl.temporalFieldToggled()" value="useTemporalField"></span>
+              <span>Use Temporal Field</span>
+              <info-popover mode="right-absolute">
+                Used to enable a date/time column, acting as a key for each record.
+              </info-popover>
+            </label>
+          </div>
+        </div>
+          <div ng-if="ctrl.target.useTemporalField && ctrl.target.queryType=='functionQuery'">
+              <div class="gf-form-inline">
+                <div class="gf-form">
+                  <span class="gf-form-label query-keyword width-10">Time Column
+                    <info-popover mode="left-absolute">
+                      Time series data is plotted against this column.  Results are also automatically filtered on this field using the date extents of the graph.
+                    </info-popover>
+                  </span>
+                  <input type="text" class="gf-form-input width-10" ng-model='ctrl.target.funcTimeCol' placeholder="Time" ng-change="ctrl.functionChanged()"></input>
+                </div>
+              </div>
+            </div>
+          <div class="gf-form gf-form--grow">
+            <div class="gf-form-label gf-form-label--grow"></div>
+          </div>
+        </div>
+      </div>
+      <div ng-if="ctrl.target.format!=='table'">
+        <div class="gf-form-inline">
+            <div class="gf-form">
+              <label class="gf-form-label width-13">
+                <span><input type="checkbox" class="width-2" ng-model="ctrl.target.useGrouping" ng-change="ctrl.groupingToggled()" value="useGrouping"></span>
+                <span>Use Grouping</span>
+                <info-popover mode="right-absolute">
+                  Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to seperate your data.
+                </info-popover>
+              </label>
+            </div>
+            <div ng-if="ctrl.target.useGrouping && ctrl.target.queryType=='selectQuery'" class="gf-form">
+              <label class="gf-form-label query-keyword width-7">Group By</label>
+              <metric-segment segment="ctrl.groupingSegment" get-options="ctrl.getGroupingSegments()" on-change="ctrl.groupingChanged()"></metric-segment>
+            </div>
+            <div ng-if="ctrl.target.useGrouping && ctrl.target.queryType=='functionQuery'">
+                <div class="gf-form-inline">
+                  <div class="gf-form">
+                    <span class="gf-form-label query-keyword width-10">Grouping Column</span>
+                    <input type="text" class="gf-form-input width-10" ng-model='ctrl.target.funcGroupCol' placeholder="Grouping Field" ng-change="ctrl.functionChanged()"></input>
+                  </div>
+                </div>
+              </div>
+          <div class="gf-form gf-form--grow">
+            <div class="gf-form-label gf-form-label--grow"></div>
+          </div>
+        </div>
+      </div>
+  </div>
+
+
+  <!-- Start of div for KDB server-side function panel -->
+  <div ng-if="ctrl.target.queryType=='kdbSideQuery'">
+
+    <!--Declare the function used -->
+    <div class="gf-form-inline">
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword width-10">Function</label>
+          <metric-segment segment="ctrl.kdbSideFunctionSegment" get-options="ctrl.getKdbServerFunctions()" on-change="ctrl.kdbSideFunctionChanged()" placeholder="Example Text In Segment"></metric-segment>
+      </div>
+      <div class="gf-form gf-form--grow">
+          <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+    </div>
+    <!-- Declare the arguments for the function used -->
+    <div class="gf-form-inline">
+      <div class="gf-form">
+        <span class="gf-form-label query-keyword width-10">Arguments
+            <info-popover mode="left-absolute">
+              Arguments to supply to the given function in the same order as they are defined on KDB.
+            </info-popover>
+          </span>
+      </div>
+
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+      </div>
+    </div>
+  
+  <!-- Section for Conflation -->
+  <div ng-if="ctrl.target.useTemporalField">
+    <div class="gf-form-inline">
+      <div class="gf-form">
+        <label class="gf-form-label width-13">
+          <span><input type="checkbox" class="width-2" ng-model="ctrl.target.useConflation" ng-change="ctrl.resetConflationFields()" value="Query Conflation"></span>
+          <span>Use Conflation</span>
+          <info-popover mode="right-absolute">
+            The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket.
+          </info-popover>
+        </label>
+      </div>
+      <div ng-if="ctrl.target.useConflation" class = "gf-form">
+        <label class="gf-form-label query-keyword width-6">Duration</label>
+        <metric-segment segment="ctrl.conflationDurationSegment" handle-event="ctrl.handleConflationDurationChange()"  on-change="ctrl.conflationSettingsChanged()"></metric-segment> <!--get-options="ctrl.getConflationDurationSegments()"-->
+      </div>
+      <div ng-if="ctrl.target.useConflation" class="gf-form">
+        <label class="gf-form-label query-keyword width-6">Units</label>
+        <div class="gf-form-select-wrapper">
+          <select class="gf-form-input gf-size-auto" ng-model="ctrl.target.conflationUnit" ng-options="f.value as f.text for f in ctrl.durationUnits" ng-change="ctrl.conflationSettingsChanged()"></select>
+        </div>
+      </div>
+      <div ng-if="ctrl.target.useConflation" class="gf-form">
+        <label class="gf-form-label query-keyword">Default Aggregation
+          <info-popover mode="left-absolute">
+            The data in each bucket are reduced to a single value per bucket via an aggregation. E.G. 'Average' would take the mean of all points within each 5 minute peroid, for every 5 minute period of your time series data. It would then be the means that are plotted.
+          </info-popover>
+        </label>
+        <div class="gf-form-select-wrapper">
+          <select class="gf-form-input gf-size-auto" ng-model="ctrl.target.conflationDefaultAggType" ng-options="f.value as f.text for f in ctrl.aggMenu" ng-change="ctrl.panelCtrl.refresh()"></select>
+        </div>
+      </div>
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
+    </div>
+  </div>
+
+  <!--Time Series or Tabular Data-->
+  <div class="gf-form-inline">
+    <div class="gf-form">
+      <label class="gf-form-label query-keyword">Format as</label>
+      <div class="gf-form-select-wrapper">
+        <select class="gf-form-input gf-size-auto" ng-model="ctrl.target.format" ng-options="f.value as f.text for f in ctrl.formats" ng-change="ctrl.queryFormatRefresh()"></select>
+      </div>
+    </div>
+    <div class = "gf-form">
+        <label class="gf-form-label query-keyword width-8">Row Limit
+          <info-popover mode="right-normal">
+            An integer used to limit the number of rows loaded by Grafana for performance purposes.
+          </info-popover>
+      </label>
+      <metric-segment segment="ctrl.rowCountLimitSegment" on-change="ctrl.rowCountLimitChanged()"></metric-segment>
+    </div>
+    <!--
+    Probably to be deleted, superceded by box at the top
+    <div class="gf-form">
+      <label class="gf-form-label query-keyword pointer" ng-click="ctrl.toggleEditorMode()">
+        <span ng-show="ctrl.target.useQueryBuilder">Functional Query</span>
+        <span ng-hide="ctrl.target.useQueryBuilder">Query Builder</span>
+      </label>
+    </div>
+    -->
+    <div class="gf-form">
+      <label class="gf-form-label query-keyword pointer" ng-click="ctrl.showHelp = !ctrl.showHelp">
+        Show Help
+        <i class="fa fa-caret-down" ng-show="ctrl.showHelp"></i>
+        <i class="fa fa-caret-right" ng-hide="ctrl.showHelp"></i>
+      </label>
+    </div>
+    <div ng-if="ctrl.target.queryType=='kdbSideQuery'">
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword pointer" ng-click="ctrl.showFunctionCode = !ctrl.showFunctionCode">
+          Show Selected Function
+          <i class="fa fa-caret-down" ng-show="ctrl.showFunctionCode"></i>
+          <i class="fa fa-caret-right" ng-hide="ctrl.showFunctionCode"></i>
+        </label>
+      </div>
+    </div>
+    <div class="gf-form" ng-show="ctrl.lastQueryMeta">
+      <label class="gf-form-label query-keyword pointer" ng-click="ctrl.showLastQuerySQL = !ctrl.showLastQuerySQL">
+        Generated SQL
+        <i class="fa fa-caret-down" ng-show="ctrl.showLastQuerySQL"></i>
+        <i class="fa fa-caret-right" ng-hide="ctrl.showLastQuerySQL"></i>
+      </label>
+    </div>
+    
+    <div class="gf-form" ng-show="ctrl.showLastQuerySQL">
+      <pre class="gf-form-pre">{{ctrl.lastQueryMeta.sql}</pre>
+    </div>
+    
+  
+    <div class="gf-form gf-form--grow">
+      <div class="gf-form-label gf-form-label--grow"></div>
+    </div>
+  </div>
+
+  <div class="gf-form"  ng-show="ctrl.showHelp">
+    <pre class="gf-form-pre alert alert-info">
+      First, choose the datasource you wish to query.
+      Query Type - Built Query:
+        Essential:
+          From - Select Table:
+          - Click 'Select Table' and type in the table you wish to query. If not tables appear in a drop down, check your datasource is connected.
+          Time Column - Select Time:
+          - Click 'Select Time' and type the column you wish to use as the time axis for the graph. This field can be diabled in on table visualisation.
+          Select - Select Column:
+          - Click 'select column' and type the column you wish to select for your visualisation. More columns may be added using the plus button beside and typing 'Column'.
+          - To remove a column, click 'Column:' and press 'Remove' in the drop-down.
+          - The identification of a column can be customised by clicking the plus button bside the column and entering 'Alias'.
+          - If conflation is used, the aggregate function applied to a column can be changed by clicking the plus button, typing 'Aggregate' and choosing from the drop-down menu. 
+          - If you are creating a table and selecting a time coloumn, you may need to change the 'type' to 'time' in the visualisation menu.
+          Row Limit:
+          - This limits the number of records that can be returned by the server to aid the performance of Grafana. If row limit is reached, either change the number or use conflation.
+
+        Optional:
+          Where - Expression:
+          - Click the plus button and type 'Expression' to add a where-clause template.
+          - Each element can be changed in the where-clause by clicking on them.
+          - Click 'Expr:' and click 'Remove' to remove an expression.
+          Grouping - Select Field:
+          - To enable grouping, check the box. Then click 'Select Field', type the field by which to categorise your data.
+          Conflation - Duration, Units, Default Aggregation:
+          - To enable conflation, check the box. Then adjust the time-buckets by changing the number and units.
+          - The Default Aggregation is the operation applied across the records per time-bucket. This can be overriden under the 'Select Column' section by using the plus button.
+        
+        Example of using Alias, Where and Conflation:
+        FROM: trade
+        TIME COLUMN: time
+        SELECT: Column: price; Alias: GOOG
+        WHERE: Expr: sym = GOOG
+        USE CONFLATION: Duration - 30; Units - Seconds; Aggregation - Last
+      
+        
+      Query Type - Free-form Query:
+        Esential:
+          Function - Enter function:
+          - Enter a kdb select statement into the textbox.
+          - If using graph visualisation, ensure time is selected in your statement.
+          Time Column - time (Graph visualisation):
+          - Enter here the time column against which Grafana will plot your timeseries data.
+          - This can be disabled in table visualisation using the checkbox.
+
+        Optional:
+          Grouping - Select Field:
+          - In the function, ensure to select the column by which to group your data. DO NOT put it in the by-clause of the function for graphical visualisation.
+          - Type the column name into the grouping field.
+          Conflation - Duration, Units, Default Aggregation:
+          - To enable conflation, check the box. Then adjust the time-buckets by changing the number and units.
+          - The Default Aggregation is the operation applied across the records per time-bucket. 
+          - This is not currently independently configurable. To aggregate columns differently, add duplicate your query and change the column and aggregation.
+
+          
+      Query Type - Function:
+          - Click 'Select Function' and type/choose the function to be used.
+          - The plugin will attempt to detect the number of arguments and create segments to be adjusted. If this fails, more argument segments can be added using the plus button.
+          - Conflation and row limit functions are explaining in the Built Query mode.
+
+{{ctrl.target.version}}
+    </pre>
+  </div>
+
+  <div class="gf-form"  ng-show="ctrl.showFunctionCode">
+      <pre class="gf-form-pre alert alert-info">
+  ctrl.FunctionCode
+      </pre>
+    </div>
+
+  <div ng-if="ctrl.target.errorFound" class="gf-form">
+    <pre class="gf-form-pre alert alert-error">{{ctrl.target.lastQueryError}}</pre>
+  </div>
+
+</query-editor-row>
