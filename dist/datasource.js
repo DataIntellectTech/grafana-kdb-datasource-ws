@@ -316,6 +316,9 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                             (options.targets[i].hide === true)) {
                             blankRefIDs.push(options.targets[i].refId);
                         }
+                        else if (!options.targets[i].queryError) {
+                            blankRefIDs.push(options.targets[i].refId);
+                        }
                         else if (options.targets[i].queryError.error.indexOf(true) !== -1) {
                             errorList.push({
                                 refId: options.targets[i].refId,

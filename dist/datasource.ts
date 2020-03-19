@@ -288,6 +288,8 @@ export class KDBDatasource {
                 (options.targets[i].queryType === 'functionQuery' && options.targets[i].kdbFunction === "" ) ||
                 (options.targets[i].hide === true)) {
                     blankRefIDs.push(options.targets[i].refId);
+                } else if (!options.targets[i].queryError) {
+                    blankRefIDs.push(options.targets[i].refId)
                 } else if(options.targets[i].queryError.error.indexOf(true) !== -1) {
                     errorList.push({
                         refId: options.targets[i].refId,

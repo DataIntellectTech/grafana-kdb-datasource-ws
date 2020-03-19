@@ -9,10 +9,10 @@
       "url": "https://www.aquaq.co.uk"
     },
     "logos": {
-      "small": "img/kdb_logo.png",
-      "large": "img/kdb_logo.png"
+      "small": "img/aquaq_logo.png",
+      "large": "img/aquaq_logo.png"
     },
-    "version": "0.1.01"
+    "version": "1.0.0o"
   },
   "alerting": true,
   "annotations": false,

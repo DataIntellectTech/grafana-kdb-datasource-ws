@@ -89,7 +89,7 @@ System.register([], function(exports_1) {
                 };
                 KDBMetaQuery.prototype.buildTableQuery = function () {
                     // return table containing tablenames
-                    return 'select table from ([] table:tables[])';
+                    return 'flip enlist[`table]!enlist (asc tables[`.]),asc .Q.dd[`;]each raze {.Q.dd[x;] each tables .Q.dd[`;x]}each key `';
                 };
                 KDBMetaQuery.prototype.buildColumnQuery = function (type) {
                     // return table of columns names in table that fit the schema appropriate to type

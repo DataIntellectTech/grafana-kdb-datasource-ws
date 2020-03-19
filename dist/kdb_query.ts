@@ -68,7 +68,7 @@ export default class KDBQuery {
         target.limit = target.limit || 0;
 
                //Error handling object
-         target.queryError = {
+        target.queryError = {
             //Errors present: From(table), conflation, Row Count, funcGroupCol
             error: [false,false,false,false],
             message: ['','','','']

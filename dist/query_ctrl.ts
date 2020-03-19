@@ -125,6 +125,15 @@ export class KDBQueryCtrl extends QueryCtrl {
             
         this.target.version = this.datasource.meta.info.version;
 
+        //If queryError isn't present, build it
+        if(!this.target.queryError) {
+            this.target.queryError = {
+                //Errors present: From(table), conflation, Row Count, funcGroupCol
+                error: [false,false,false,false],
+                message: ['','','','']
+            };
+        }
+
         //Initialise the conflation if it doesn't already exist;
         if(!this.target.useConflation){
             //this.useConflation = false;
@@ -163,7 +172,7 @@ export class KDBQueryCtrl extends QueryCtrl {
         else {
             //this.functionSegment = this.uiSegmentSrv.newSegment({value: this.target.kdbFunction, fake: false});
             this.kdbFunction = this.target.kdbFunction;
-        }      
+        }
         //Need to handle the parameters here
     }
 
@@ -180,6 +189,15 @@ export class KDBQueryCtrl extends QueryCtrl {
         //else populate the pre-existing value
         else {
             this.timeColumnSegment = this.uiSegmentSrv.newSegment(this.target.timeColumn);
+        }
+
+        //If queryError isn't present, build it
+        if(!this.target.queryError) {
+            this.target.queryError = {
+                //Errors present: From(table), conflation, Row Count, funcGroupCol
+                error: [false,false,false,false],
+                message: ['','','','']
+            };
         }
         
         

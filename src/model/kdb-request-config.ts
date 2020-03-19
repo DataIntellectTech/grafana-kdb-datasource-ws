@@ -11,7 +11,7 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' conc:{ \n ' +
 ` .[x;(y;z);{'\"Function:conc - Error:\",x}]}[{[d;raw] \n ` +
 ' \n ' +
-' c:(cols raw) except @[key;raw;()],raze d[`grouping`temporal_field]; \n ' +
+' c:(cols raw) except $[`unkeyed in key d;key d[`unkeyed];()],raze d[`grouping`temporal_field]; \n ' +
 ' ca:{$[x ~ ();last;value x]}d[`conflation;`agg]; \n ' +
 ' :c!ca,/:c,:(); \n ' +
 ' }]; \n ' +
@@ -20,7 +20,8 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ` @[x;(y);{'\"Function:conb - Error:\",x}]}[{[d] \n ` +
 ' \n ' +
 ' cv: value d[`conflation;`val];cf:d[`temporal_field]; \n ' +
-' :(enlist cf)!enlist(xbar;cv;cf); \n ' +
+' :((enlist cf)!enlist(xbar;cv;cf)), \n ' +
+' $[`unkeyed in key d;d[`unkeyed];()]; \n ' +
 ' }]; \n ' +
 ' \n ' +
 ' wbuild:{ \n ' +
@@ -73,14 +74,18 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' \n ' +
 ' d:dict`queryParam; \n ' +
 ' qt:d[`query;`type]; \n ' +
-' b:bbuild[d;end]; \n ' +
-' w:wbuild[d]; \n ' +
+' funcparts:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
+' gr:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
+' funcparts[`b]:bbuild[d;end]; \n ' +
+' funcparts[`w]:wbuild[d]; \n ' +
 ' \n ' +
 ' \n ' +
 ' if[qt=`select; \n ' +
 ' t:d[`table]; \n ' +
-' c:cbuild[d;end]; \n ' +
-' raw:.[{[t;w;b;c] ?[t;w;0b;$[b~0b;c;c,b]]};(t;w;b;c); \n ' +
+' gr[`grouped]:0b; \n ' +
+' funcparts[`c]:cbuild[d;end]; \n ' +
+' raw:.[{[t;w;b;c] ?[t;w;0b;$[b~0b;c;c,b]]}; \n ' +
+' (t;funcparts[`w];funcparts[`b];funcparts[`c]); \n ' +
 ` {'\"Error in data selection: \",x, \n ` +
 ' \". Hint: check selected columns.\"}]; \n ' +
 ' \n ' +
@@ -96,7 +101,7 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ` :{'x}"Time column defined (",` + 'string[d[`temporal_field]], \n ' + 
 ' ") is not present in function output."];\n ' + 
 ' \n ' + 
-' if[not (type raze raw[d[`temporal_field]]) in (12 15h); \n ' + 
+' if[not (type raze (0!raw)[d[`temporal_field]]) in (12 15h); \n ' + 
 ` :{'x}"Time column selected is not type timestamp or datetime."]; \n ` + 
 ' \n ' + 
 ' if[enlist[d`temporal_field]~cols raw; \n ' +
@@ -107,26 +112,21 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' if[0=count raw; \n ' +
 ` :{'x}` + '\"Custom function has generated no data - \", \n ' +
 ' \"Please inspect your query.\"]; \n ' +
-' grouped:99h=type raw; \n ' +
+' gr[`grouped]:99h=type raw; \n ' +
 ' \n ' +
-' if[grouped; \n ' +
-' grby:{x!x}key flip key raw; \n ' +
-' grcols:{x!x}key flip value raw; \n ' +
+' if[gr[`grouped]; \n ' +
+' d[`unkeyed]:gr[`grby]:{x!x}cols key raw; \n ' +
+' gr[`grcols]:{x!x}cols value raw; \n ' +
 ' \n ' +
-' keyvals:{raze{first[x]#last x} \n ' +
+' gr[`keyvals]:{raze{first[x]#last x} \n ' +
 ' each flip(count each first each value x; \n ' +
 ' raze value[flip key x])}raw; \n ' +
 ' \n ' +
 ' raw:flip {(cols[key x]!enlist y),cols[value x]! \n ' +
-' raze each value flip value x}[raw;keyvals]; \n ' +
+' raze each value flip value x}[raw;gr[`keyvals]]; \n ' +
 ' ]; \n ' +
 ' \n ' +
-' raw:?[raw;w;0b;()]; \n ' +
-' \n ' +
-' $[grouped; \n ' +
-' [raw:?[raw;();grby;grcols];c:();]; \n ' +
-' c:{x!x}cols[raw]except d`grouping \n ' +
-' ]; \n ' +
+' raw:?[raw;funcparts[`w];0b;()]; \n ' +
 ' ]; \n ' +
 ' end:1b; \n ' +
 ' \n ' +
@@ -134,15 +134,16 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' con:0b; \n ' +
 ' if[not()~d[`conflation]; \n ' +
 ' con:1b; \n ' +
-' cb:conb[d],$[b~0b;();b]; \n ' +
+' cb:conb[d],$[funcparts[`b]~0b;();funcparts[`b]]; \n ' +
 ' cc:$[qt=`select;1_cbuild[d;end];conc[d;raw]]; \n ' +
 ' ]; \n ' +
 ' \n ' +
 ' \n ' +
 ' if[con; \n ' +
-` raw:.[{?[x;();y;z]};(raw;cb;cc);{'\"Error during conflation: \",x, \n ` +
-'  \". Hint: check \",x, \n ' +
-'  \" of all selected variables\"}]; \n ' +
+' raw:.[{?[x;();y;z]};(raw;cb;cc); \n ' +
+` {'"Error during conflation: ",x, \n ` +
+' ". Most likely ",x, \n ' +
+' " not present in selection"}]; \n ' +
 ' end:0b; \n ' +
 ' if[qt=`select; \n ' +
 ' raw:(cols[key raw],cc:{`$x}each count[cols value raw]#.Q.a)xcol raw]; \n ' +
@@ -150,8 +151,8 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' \n ' +
 ' \n ' +
 ' if[qt=`select; \n ' +
-' b:bbuild[d;end]; \n ' +
-' c:$[con;{x!x}d[`temporal_field],cc;cbuild[d;end]]; \n ' +
+' funcparts[`b]:bbuild[d;end]; \n ' +
+' funcparts[`c]:$[con;{x!x}d[`temporal_field],cc;cbuild[d;end]]; \n ' +
 ' ]; \n ' +
 ' \n ' +
 ' \n ' +
@@ -164,7 +165,11 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ` :{'x}` + '\"Result table contains no data, \",\n ' +
 ' \"check your where clauses and time filter.\"]; \n ' +
 ' \n ' +
-' final:?[raw;();b;c]; \n ' +
+' $[gr[`grouped]; \n ' +
+' [raw:?[raw;();gr[`grby];gr[`grcols]];funcparts[`c]:();]; \n ' +
+' funcparts[`c]:{x!x}cols[raw]except d`grouping \n ' +
+' ]; \n ' +
+' final:?[raw;();funcparts[`b];funcparts[`c]]; \n ' +
 ' if[qt=`select; \n ' +
 ' final:{[t]((cols t)[0],{`$x}each count[1_cols t]#.Q.a)xcol t}final]; \n ' +
 ' final \n ' +
@@ -179,7 +184,7 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ' conc:{ \n ' +
 ` .[x;(y;z);{'\"Function:conc - Error Type:\",x}]}[{[d;raw] \n ` +
 ' \n ' +
-' c:(cols raw) except @[key;raw;()],raze d[`grouping`temporal_field]; \n ' +
+' c:(cols raw) except $[`unkeyed in key d;key d[`unkeyed];()],raze d[`grouping`temporal_field]; \n ' +
 ' ca:{$[x ~ ();last;value x]}d[`conflation;`agg]; \n ' +
 ' :c!ca,/:c,:(); \n ' +
 ' }]; \n ' +
@@ -188,7 +193,8 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ` @[x;(y);{'\"Function:conb - Error Type:\",x}]}[{[d] \n ` +
 ' \n ' +
 ' cv: value d[`conflation;`val];cf:d[`temporal_field]; \n ' +
-' :(enlist cf)!enlist(xbar;cv;cf); \n ' +
+' :((enlist cf)!enlist(xbar;cv;cf)), \n ' +
+' $[`unkeyed in key d;d[`unkeyed];()]; \n ' +
 ' }]; \n ' +
 ' \n ' +
 ' wbuild:{ \n ' +
@@ -243,16 +249,21 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ' \n ' +
 ' d:dict`queryParam; \n ' +
 ' qt:d[`query;`type]; \n ' +
-' b:bbuild[d;end]; \n ' +
-' w:wbuild[d]; \n ' +
+' funcparts:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
+' gr:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
+' funcparts[`b]:bbuild[d;end]; \n ' +
+' funcparts[`w]:wbuild[d]; \n ' +
 ' \n ' +
 ' \n ' +
 ' if[qt=`select; \n ' +
 ' t:d[`table]; \n ' +
-' c:cbuild[d;end]; \n ' +
+' gr[`grouped]:0b; \n ' +
+' funcparts[`c]:cbuild[d;end]; \n ' +
 ' if[not ()~d[`temporal_field]; \n ' +
-' c:{enlist[x]!enlist[x]}[d`temporal_field],c]; \n ' +
-' raw:.[{[t;w;b;c] ?[t;w;0b;$[b~0b;c;c,b]]};(t;w;b;c); \n ' +
+' funcparts[`c]:{enlist[x]!enlist[x]} \n ' + 
+' [d`temporal_field],funcparts[`c]]; \n ' +
+' raw:.[{[t;w;b;c] ?[t;w;0b;$[b~0b;c;c,b]]}; \n ' + 
+' (t;funcparts[`w];funcparts[`b];funcparts[`c]); \n ' +
 ` {'\"Error in data selection: \",x, \n ` +
 ' \". Hint: check selected columns.\"}]; \n ' +
 ' ]; \n ' +
@@ -265,20 +276,20 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ` :{'x}` + '\"Custom function has generated no data - \", \n ' +
 ' \"Please inspect your query.\"]; \n ' +
 ' \n ' +
-' if[99h=type raw; \n ' +
-' grby:{x!x}key flip key raw; \n ' +
-' grcols:{x!x}key flip value raw; \n ' +
+' if[gr[`grouped]:99h=type raw; \n ' +
+' d[`unkeyed]:gr[`grby]:{x!x}cols key raw; \n ' +
+' gr[`grcols]:{x!x}cols value raw; \n ' +
 ' \n ' +
-' keyvals:{raze{first[x]#last x} \n ' +
+' gr[`keyvals]:{raze{first[x]#last x} \n ' +
 ' each flip(count each first each value x; \n ' +
 ' raze value[flip key x])}raw; \n ' +
 ' \n ' +
 ' raw:flip {(cols[key x]!enlist y),cols[value x]! \n ' +
-' raze each value flip value x}[raw;keyvals]; \n ' +
+' raze each value flip value x}[raw;gr[`keyvals]]; \n ' +
 ' ]; \n ' +
 ' \n ' +
 ' if[not d[`temporal_field]~(); \n ' +
-' raw:?[raw;w;0b;()]; \n ' +
+' raw:?[raw;funcparts[`w];0b;()]; \n ' +
 ' ]; \n ' +
 ' ]; \n ' +
 ' \n ' +
@@ -288,7 +299,7 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ' con:0b; \n ' +
 ' if[not()~d[`conflation]; \n ' +
 ' con:1b; \n ' +
-' cb:conb[d],$[b~0b;();b]; \n ' +
+' cb:conb[d],$[funcparts[`b]~0b;();funcparts[`b]]; \n ' +
 ' cc:.[{[qt;cbuild;d;end;raw;conc] \n ' +
 ' $[qt=`select;1_cbuild[d;end];conc[d;raw]]}; \n ' +
 ' (qt;cbuild;d;end;raw;conc); \n ' +
@@ -297,9 +308,10 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ' \n ' +
 ' \n ' +
 ' if[con; \n ' +
-` raw:.[{?[x;();y;z]};(raw;cb;cc);{'\"Error during conflation: \",x, \n ` +
-'  \". Hint: check \",x, \n ' +
-'  \" of all selected variables\"}]; \n ' +
+' raw:.[{?[x;();y;z]};(raw;cb;cc); \n ' +
+` {'"Error during conflation: ",x, \n ` +
+' ". Most likely ",x, \n ' +
+' " not present in selection"}]; \n ' +
 ' end:0b; \n ' +
 ' if[qt=`select; \n ' +
 ' raw:(cols[key raw],cc:{`$x}each count[cols value raw]#.Q.a)xcol raw]; \n ' +
@@ -307,8 +319,8 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ' \n ' +
 ' \n ' +
 ' if[qt=`select; \n ' +
-' b:bbuild[d;end]; \n ' +
-' c:$[con;{x!x}d[`temporal_field],cc;cbuild[d;end]]; \n ' +
+' funcparts[`b]:bbuild[d;end]; \n ' +
+' funcparts[`c]:$[con;{x!x}d[`temporal_field],cc;cbuild[d;end]]; \n ' +
 ' ]; \n ' +
 ' \n ' +
 ' if[control[`rowlimit]<count raw; \n ' +
@@ -320,7 +332,7 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ` :{'x}` + '\"Result table contains no data, \",\n ' +
 ' \"check your where clauses and time filter.\"]; \n ' +
 ' \n ' +
-' final:?[raw;();b;c]; \n ' +
+' final:?[raw;();funcparts[`b];$[99h=type funcparts[`c];funcparts[`c];()!()]]; \n ' +
 ' if[qt=`select;final:{[t]((cols t)[0],{`$x} each count[1_cols t]#.Q.a) xcol t}final]; \n ' +
 ' final \n ' +
 ' ; \n ' +

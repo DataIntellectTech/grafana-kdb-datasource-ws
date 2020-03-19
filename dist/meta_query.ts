@@ -93,7 +93,7 @@ export class KDBMetaQuery {
 
     buildTableQuery() {
         // return table containing tablenames
-        return 'select table from ([] table:tables[])';
+        return 'flip enlist[`table]!enlist (asc tables[`.]),asc .Q.dd[`;]each raze {.Q.dd[x;] each tables .Q.dd[`;x]}each key `';
     }
 
     buildColumnQuery(type?: string) {

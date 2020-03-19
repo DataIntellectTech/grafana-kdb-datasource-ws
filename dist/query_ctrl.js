@@ -88,6 +88,14 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                         { text: 'Minutes', value: 'm' },
                         { text: 'Hours', value: 'h' }];
                     this.target.version = this.datasource.meta.info.version;
+                    //If queryError isn't present, build it
+                    if (!this.target.queryError) {
+                        this.target.queryError = {
+                            //Errors present: From(table), conflation, Row Count, funcGroupCol
+                            error: [false, false, false, false],
+                            message: ['', '', '', '']
+                        };
+                    }
                     //Initialise the conflation if it doesn't already exist;
                     if (!this.target.useConflation) {
                         //this.useConflation = false;
@@ -138,6 +146,14 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     }
                     else {
                         this.timeColumnSegment = this.uiSegmentSrv.newSegment(this.target.timeColumn);
+                    }
+                    //If queryError isn't present, build it
+                    if (!this.target.queryError) {
+                        this.target.queryError = {
+                            //Errors present: From(table), conflation, Row Count, funcGroupCol
+                            error: [false, false, false, false],
+                            message: ['', '', '', '']
+                        };
                     }
                     //Table field
                     if (!this.target.table || this.target.table == 'select Table') {

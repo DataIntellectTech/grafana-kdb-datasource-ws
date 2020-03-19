@@ -7,14 +7,10 @@ import {SqlPart} from './sql_part/sql_part';
 import KDBQuery from './kdb_query';
 import sqlPart from './sql_part';
 import { defaultRowCountLimit } from './model/kdb-request-config';
-//import {PanelEvents} from '@grafana/data';
-
 //Declaring default constants
 const conflationUnitDefault: string = 'm';
 const conflationDurationDefault: string = "5";
-//const queryTypeDefault: string = 'selectQuery';
 
-//02/01/2020 - CHO - I think that this needs to be updated
 export interface QueryMeta {
     sql: string;
 }
@@ -26,7 +22,6 @@ export class KDBQueryCtrl extends QueryCtrl {
     showLastQuerySQL: boolean; //needed?
     showHelp: boolean;
     useByClause: boolean;
-    //useConflation: boolean;
 
     //High level objects
     queryModel: KDBQuery;
@@ -125,9 +120,17 @@ export class KDBQueryCtrl extends QueryCtrl {
             
         this.target.version = this.datasource.meta.info.version;
 
+        //If queryError isn't present, build it
+        if(!this.target.queryError) {
+            this.target.queryError = {
+                //Errors present: From(table), conflation, Row Count, funcGroupCol
+                error: [false,false,false,false],
+                message: ['','','','']
+            };
+        }
+
         //Initialise the conflation if it doesn't already exist;
         if(!this.target.useConflation){
-            //this.useConflation = false;
             this.target.conflationUnit = conflationUnitDefault;
             this.target.conflationDuration = conflationDurationDefault;
             this.target.conflationDurationMS = Number(conflationDurationDefault) * (conflationUnitDefault == 'Seconds' ? Math.pow(10,9) : (conflationUnitDefault == 'Minutes' ? 60 * Math.pow(10,9) : 3600 * Math.pow(10,9)));
@@ -135,14 +138,12 @@ export class KDBQueryCtrl extends QueryCtrl {
         if(!this.target.kdbSideFunction){
             this.target.kdbSideFunction = 'Select Function'
         }
-        
-        //this.target.rowCountLimit = defaultRowCountLimit;
+
         this.conflationDurationSegment = this.uiSegmentSrv.newSegment({value: this.target.conflationDuration.toString(), fake: false});
         this.conflationAggregateSegment = this.uiSegmentSrv.newSegment({value: this.target.conflationDefaultAggType, fake: false});
         this.rowCountLimitSegment = this.uiSegmentSrv.newSegment({value: this.target.rowCountLimit.toString(), fake: false});
         this.kdbSideFunctionSegment = this.uiSegmentSrv.newSegment({value: this.target.kdbSideFunction.toString(), fake: false});
 
-        //Not sure what these do, can they be removed?
         this.panelCtrl.events.on('data-received', this.onDataReceived.bind(this), $scope);
         this.panelCtrl.events.on('data-error', this.onDataError.bind(this), $scope);
     
@@ -154,17 +155,14 @@ export class KDBQueryCtrl extends QueryCtrl {
         } else this.buildQueryBuilderPanel();
     }
 
-    //Look into what this does. Seems to be circular at the moment.
+
     buildFunctionQueryPanel() {
         if(!this.target.kdbFunction || this.target.kdbFunction == 'Enter function') {
-            //this.functionSegment = this.uiSegmentSrv.newSegment({value: 'Enter function', fake: true});
             this.kdbFunction = ''
         }
         else {
-            //this.functionSegment = this.uiSegmentSrv.newSegment({value: this.target.kdbFunction, fake: false});
             this.kdbFunction = this.target.kdbFunction;
-        }      
-        //Need to handle the parameters here
+        }
     }
 
     //This function builds the datasource if the panel type is a graph
@@ -172,8 +170,6 @@ export class KDBQueryCtrl extends QueryCtrl {
         //default to query builder
         this.metricColumnSegment = this.uiSegmentSrv.newSegment('dummy');
 
-        //if(this.target.rawQuery === false) {
-        //Time column
         if(!this.target.timeColumn || this.target.timeColumn == 'Select Field'){
             this.timeColumnSegment = this.uiSegmentSrv.newSegment('Select Field');
         }
@@ -181,8 +177,16 @@ export class KDBQueryCtrl extends QueryCtrl {
         else {
             this.timeColumnSegment = this.uiSegmentSrv.newSegment(this.target.timeColumn);
         }
-        
-        
+
+        //If queryError isn't present, build it
+        if(!this.target.queryError) {
+            this.target.queryError = {
+                //Errors present: From(table), conflation, Row Count, funcGroupCol
+                error: [false,false,false,false],
+                message: ['','','','']
+            };
+        }
+          
         //Table field
         if(!this.target.table || this.target.table == 'select Table'){
             this.tableSegment = this.uiSegmentSrv.newSegment({value: 'Select Table', fake: true});
@@ -201,13 +205,6 @@ export class KDBQueryCtrl extends QueryCtrl {
         if(!this.target.select){
             this.target.select = [[{type: 'column', params: ['Select Column']}]];
         }
-            //If the group field is null the initialise it
-            /*
-            if(!this.target.group){
-                this.target.group = [[{type: 'column', params: ['Select Group']}]];
-            }
-            */
-        //}
 
         this.whereAdd = this.uiSegmentSrv.newPlusButton();
         this.setupAdditionalMenu();
@@ -219,7 +216,6 @@ export class KDBQueryCtrl extends QueryCtrl {
 
     setupAdditionalMenu() {
         this.buildSelectMenu();
-        //this.buildGroupMenu();
         this.updateProjection();
         this.panelCtrl.refresh();
     }
@@ -287,7 +283,6 @@ export class KDBQueryCtrl extends QueryCtrl {
     //This function resets other values in the query if the table is reselected
     onTableChanged() {
         this.target.table = this.tableSegment.value;
-        //this.target.group = [[{type: 'column', params: ['select group']}]];
         this.target.select = [[{type: 'column', params: ['select column']}]];
         this.target.where = [];
         const segment = this.uiSegmentSrv.newSegment('Select Field');
@@ -313,7 +308,6 @@ export class KDBQueryCtrl extends QueryCtrl {
 
     timeColumnChanged() {
         this.target.timeColumn = this.timeColumnSegment.value;
-        //Not sure what code below this line is doing? I guess its trying to get the datatype for the time column and do some conversion based on that?
         this.datasource.metricFindQuery(this.metaBuilder.buildDatatypeQuery(this.target.timeColumn)).then(result => {
             if (Array.isArray(result)) {
                 if (typeof result[0].t == 'string') {
@@ -571,7 +565,6 @@ export class KDBQueryCtrl extends QueryCtrl {
                 this.selectParts.splice(modelsIndex, 1);
             }
         } else {
-                //const partIndex = _.indexOf(selectParts, part);
                 selectParts.splice(index, 1);
         }
         
@@ -733,7 +726,6 @@ export class KDBQueryCtrl extends QueryCtrl {
 
     //This function resets various paramaeters and performs a number of checks in the query format has been reset
     queryFormatRefresh() {
-        //need to delete non numeric columns if switching to a column query
         if (this.target.format == 'table') {
             this.target.useGrouping = false;
             this.groupingToggled();
