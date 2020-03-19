@@ -1,32 +1,65 @@
 # Grafana and KDB+ Plugin Installation Instructions
 
+### Quick Install Guide
+
+#### Installing Grafana:
+ - If Grafana is not already installed, install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the installation guide for the relevant operating system.
+
+#### Installing kdb+ datasource plugin:
+ - Download the [latest release](https://github.com/AquaQAnalytics/kdb-datasource/releases/tag/v0.1.1b). UPDATE LINK BEFORE RELEASE
+ - Extract the kdb-datasource folder into *{GRAFANA}/grafana/data/plugins/kdb-datasource*. CHECK EXTRACT STRUCTURE
+ - Restart grafana-server.
+ 
+#### Configuring kdb+ instance:
+To set websocket handler on kdb+ instance set the .z.ws message handler as below:
+``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$"'",x}];ds[`ID])}``
+
+#### Adding datasource:
+Navigate to the data-sources page in grafana and click 'Add data source'.
+At the bottom of this page under 'Others' should be KDB+, click on this to set settings.
+'Host' should be only the address and port of the kdb+ instance given as:
+`ADDRESS:PORT`
+('ws://' is not required)
+Default Timeout is how long in ms each query will wait for a response (will default to 5000 ms).
+
+#### Authentication:
+The plugin supports Basic authentication over insecure connections (not recommended) or secure WebSockets (recommended).
+Insecure connections send all data (including user:password pairs) unencrypted.
+Secure WebSockets require the kdb+ instance to be in TLS mode (see https://code.kx.com/q/kb/ssl/).
+
+#### Security:
+We STRONGLY recommend running dedicated kdb+ instances only for grafana connections; no other services should operate off these instances.
+If using in an open system we recommend running any kdb+ instances users can connect as a seperate (non-root) user on the machine.
+Do not allow that user to write to any directories or files on the machine.
+Be aware the 'Free-form Query' 'Function' box and 'Built Query' 'Where' box allow users to run unfiltered commands on the kdb+ instance (including 'system' commands), so non-backed up system critical data should not be held on these instances and ideally only trusted users should be allowed to connect (see Authentication).
+
+#### Supported Browsers:
+Formally this adaptor has the same [compatibility as grafana](https://grafana.com/docs/grafana/latest/installation/requirements/),
+however there are known bugs with lesser used browsers:
+- Using authentication with Microsoft Edge is not supported.
+
+We recommend using the latest version of either Google Chrome or Mozilla Firefox.
+
+
 ### Initial Setup
 
-- You must be on an Administrator account on a Windows 64-bit computer.
-- Install node and npm in order to build the plugin. Visit https://www.npmjs.com/get-npm and select the *Download Node.js and npm* download button.
-- Click the LTS download for most users. Then install with default settings to default location **except on the 5th pane, select “Automatically install the necessary tools. Note this will also install Chocolatey”** then click *Next*, then *Install*. This may take some time, wait until complete.
-- Install [GIT for windows](https://git-scm.com/downloads). Under *Downloads*, click ‘Windows’. Then the download should then start.
-- Run the installation and use default settings **except on the 8th pane, select “Use Windows’ default console window”** then click *Next*, then *Install*.
-- Install version **6.5.3** of Grafana for **Windows** from [grafana.com](https://grafana.com/grafana/download/6.5.3?platform=windows) and click ‘Download the installer’ under *Windows Installer*. Then run the program and install using all default settings. 
-- In your browser, navigate to https://github.com/AquaQAnalytics/kdb-datasource/releases. Click on the latest release and click the ‘Source code (zip)’ link to download the plugin.
-- Move the zip file to *C:\program files\grafanalabs\grafana\data\plugins* then right click and select *Extract All…* then change the target directory to *C:\program files\grafanalabs\grafana\data\plugins* then click *Extract*.
-- Before moving on, check that the README.md is at the following location: *C:\program files\grafanalabs\grafana\data\plugins\kdb-datasource-`<VERSION>`\README.md*. (Where `<VERSION>` is the current version code of the plugin. e.g. `0.0.03`)
-- Open CMD by pressing the *windows key* [] (or start button) then type ‘CMD’ then right click the application and click *Run as Administrator*.
-- Then use the change directory command `cd C:\program files\grafanalabs\grafana\data\plugins\` to navigate to the plugin location. 
-- Then use it again to open the kdb-datasource folder; `cd kdb-datasource-<VERSION>` (where `<VERSION>` is the current version code of the plugin e.g. `cd kdb-datasource-0.0.03`)
-- Type `npm install -g grunt -cli` and press *enter*. Wait until it is installed.
-- Type `npm install` and press *enter*. Wait until installed.
-- Type `grunt` and press *enter*. Wait until it has completed.
-- Open file-explorer and navigate into *C:\program files\grafanalabs\grafana\data\plugins\kdb-datasource-`<VERSION>`* then right-click and cut the file named *custom*. Then navigate into *C:\Program Files\GrafanaLabs\grafana\conf* then right-click and paste. Confirm that this file, *custom*, is present at the following location : *C:\Program Files\GrafanaLabs\grafana\conf\.
-- Reopen CMD as before, change directory once more using `cd C:\program files\grafanalabs\grafana\bin`, then type `grafana-server.exe` and press *enter*.
-- This CMD window is now running the Grafana server. It must remain operational to use Grafana. If it is closed and needs starting, only repeat the previous step from now on.
-- Launch your browser (e.g. Chrome or Edge) then use the following URL to open Grafana: [localhost:8080/](localhost:8080/) and sign in using Usr:`admin` Pwd:`admin` (You will be prompted for changing password. *Skip*.)
-- If you currently do not have a KDB+ session to connect, go to the Setup a TorQ Stack section of these instructions to create a session that simulates a financial data capture system. Proceed to next step if there is already a session, to which you will connect, on your network.
-- Once you have setup your KDB+ data source, your IP-address will be `localhost` and you should have a port corresponding to the process whose data you will be visualising. If you already have a session on your network, you should have the IP-address (numbers separated by full stops) and the port number (usually a 4- or 5-digit number).
+- Install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the installation guide for the relevant operating system.
+- In your browser, navigate to https://github.com/AquaQAnalytics/kdb-datasource/releases. UPDATE LINK BEFORE RELEASE. Click on the latest release and click the ‘Source code (zip)’ link to download the plugin.
+- Extract the zip file in *{Grafana Install Directory}\grafana\data\plugins*.
+- Before moving on, check that the README.md is at the following location: *{Grafana Install Directory}\grafana\data\plugins\kdb-datasource-`<VERSION>`\README.md*. (Where `<VERSION>` is the current version code of the plugin. e.g. `1.0`)
+- (Windows: Start grafana from administrator-mode command line (*{Grafana Install Directory}\grafana\bin\grafana-server.exe*))
+- (Linux: Start the grafana-server instance (`sudo systemctl start grafana-server`))
+- -----------------DONT THINK THIS IS NESSECCARY---------- Open file-explorer and navigate into *{Grafana Install Directory}\data\plugins\kdb-datasource-`<VERSION>`* then right-click and cut the file named *custom*. Then navigate into *C:\Program Files\GrafanaLabs\grafana\conf* then right-click and paste. Confirm that this file, *custom*, is present at the following location : *C:\Program Files\GrafanaLabs\grafana\conf\.
+- This window is now running the Grafana server. It must remain operational to use Grafana. If it is closed and needs starting, repeat the previous step.
+- Setup the kdb+ instance you wish to query as per **kdb+ Setup** below.
+- Launch your browser (see **Supported Browsers**) then use the following URL to open Grafana: [localhost:8080/](localhost:8080/) and sign in using Usr:`admin` Pwd:`admin` (You will be prompted for changing password. *Skip*.)
+- REMOVE If you currently do not have a KDB+ session to connect, go to the Setup a TorQ Stack section of these instructions to create a session that simulates a financial data capture system. Proceed to next step if there is already a session, to which you will connect, on your network.
+- REMOVE Once you have setup your KDB+ data source with correct WebSocket handler, your IP-address will be `localhost` and you should have a port corresponding to the process whose data you will be visualising. If you already have a session on your network, you should have the IP-address (numbers separated by full stops) and the port number (usually a 4- or 5-digit number).
 - Go to your Grafana instance on your browser by navigating to [localhost:8080/](localhost:8080/) as before. Click on the *cog* configuration icon on the left tab of the webpage, then click on the green *Add data source* button.
-- Select *KDB+* from the list.
+- Select *KDB+* under *Others* from the list.
 - In the textbox that follows ‘Host’, type in the IP address followed by a colon, followed by the port. E.g. `localhost:6002` or `192.168.1.48:6002`
-- Click the green *Save & Test* button to save and test the connection. The webpage will return a message depending on whether it was a success. If cannot be connected, then review each step again. If success, you may now create a dashboard in Grafana visualising real time KDB+ data.
+- If authentication is present on the kdb+ process, select 'Use Authentication' and enter authentication details. If TLS is enabled on the kdb+ process select 'Use TLS' (see **Authentication**).
+- Click the green *Save & Test* button to save and test the connection. The webpage will return a message depending on whether it was a success. If it cannot be connected, review each step again. If successful, you may now create a dashboard.
 
 ### Setup a TorQ Stack (On Windows)
 
