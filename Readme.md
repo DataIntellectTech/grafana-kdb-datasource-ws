@@ -7,19 +7,23 @@
 
 #### Installing kdb+ datasource plugin:
  - Download the [latest release](https://github.com/AquaQAnalytics/kdb-datasource/releases/tag/v0.1.1b). UPDATE LINK BEFORE RELEASE
- - Extract the kdb-datasource folder into *{GRAFANA}/grafana/data/plugins/kdb-datasource*. CHECK EXTRACT STRUCTURE
- - Restart grafana-server.
+ - Extract the kdb-datasource folder into *{Grafana Install Directory}/grafana/data/plugins/kdb-datasource*. CHECK EXTRACT STRUCTURE
+ - Load/restart the grafana-server.
  
 #### Configuring kdb+ instance:
 To set websocket handler on kdb+ instance set the .z.ws message handler as below:
+
 ``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$"'",x}];ds[`ID])}``
 
 #### Adding datasource:
-Navigate to the data-sources page in grafana and click 'Add data source'.
-At the bottom of this page under 'Others' should be KDB+, click on this to set settings.
-'Host' should be only the address and port of the kdb+ instance given as:
+Navigate to the data-sources page in grafana and click *Add data source*.
+At the bottom of this page under *Others* should be *KDB+*, click on this to set settings.
+*Host* should be only the address and port of the kdb+ instance given as:
+
 `ADDRESS:PORT`
-('ws://' is not required)
+
+*'ws://' is not required*
+
 Default Timeout is how long in ms each query will wait for a response (will default to 5000 ms).
 
 #### Authentication:
@@ -28,9 +32,10 @@ Insecure connections send all data (including user:password pairs) unencrypted.
 Secure WebSockets require the kdb+ instance to be in TLS mode (see https://code.kx.com/q/kb/ssl/).
 
 #### Security:
-We STRONGLY recommend running dedicated kdb+ instances only for grafana connections; no other services should operate off these instances.
-If using in an open system we recommend running any kdb+ instances users can connect as a seperate (non-root) user on the machine.
-Do not allow that user to write to any directories or files on the machine.
+We **strongly** recommend running dedicated kdb+ instances only for grafana connections; no other services should operate from these instances.
+If using in an open system we recommend running any kdb+ instances users can connect to as a seperate (non-root) user on the machine.
+Do not allow this user to write to any directories or files on the machine.
+
 Be aware the 'Free-form Query' 'Function' box and 'Built Query' 'Where' box allow users to run unfiltered commands on the kdb+ instance (including 'system' commands), so non-backed up system critical data should not be held on these instances and ideally only trusted users should be allowed to connect (see Authentication).
 
 #### Supported Browsers:
