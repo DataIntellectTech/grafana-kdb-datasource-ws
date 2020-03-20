@@ -18,7 +18,7 @@ Set the .z.ws WebSocket message handler on kdb+ instance as below:
 Ensure the kdb+ process has an [open listening port](https://code.kx.com/q/basics/listening-port/).
 
 #### Adding datasource:
-Navigate to the data-sources page in grafana (*default address: http://localhost:3000*)and click *Add data source*.
+Navigate to the data-sources page in grafana (*default address: http://localhost:3000*) and click *Add data source*.
 At the bottom of this page under *Others* should be *KDB+*, click on this to set settings.
 *Host* should be only the address and port of the kdb+ instance given as:
 
