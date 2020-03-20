@@ -7,7 +7,7 @@
 
 #### Installing kdb+ datasource plugin:
  - Download the [latest release](https://github.com/AquaQAnalytics/kdb-datasource/releases/tag/v0.1.1b). UPDATE LINK BEFORE RELEASE
- - Extract the kdb-datasource folder into *{Grafana Install Directory}/grafana/data/plugins/kdb-datasource*. CHECK EXTRACT STRUCTURE
+ - Extract the kdb-datasource folder into *{Grafana Install Directory}/grafana/data/plugins/grafana-kdb-datasource-ws*. CHECK EXTRACT STRUCTURE
  - Load/restart the grafana-server.
  
 #### Configuring kdb+ instance:
@@ -51,11 +51,17 @@ We recommend using the latest version of either Google Chrome or Mozilla Firefox
 - Install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the installation guide for the relevant operating system.
 - In your browser, navigate to https://github.com/AquaQAnalytics/kdb-datasource/releases. UPDATE LINK BEFORE RELEASE. Click on the latest release and click the ‘Source code (zip)’ link to download the plugin.
 - Extract the zip file in *{Grafana Install Directory}\grafana\data\plugins*.
-- Before moving on, check that the README.md is at the following location: *{Grafana Install Directory}\grafana\data\plugins\kdb-datasource-`<VERSION>`\README.md*. (Where `<VERSION>` is the current version code of the plugin. e.g. `1.0`)
-- (Windows: Start grafana from administrator-mode command line (*{Grafana Install Directory}\grafana\bin\grafana-server.exe*))
-- (Linux: Start the grafana-server instance (`sudo systemctl start grafana-server`))
-- -----------------DONT THINK THIS IS NESSECCARY---------- Open file-explorer and navigate into *{Grafana Install Directory}\data\plugins\kdb-datasource-`<VERSION>`* then right-click and cut the file named *custom*. Then navigate into *C:\Program Files\GrafanaLabs\grafana\conf* then right-click and paste. Confirm that this file, *custom*, is present at the following location : *C:\Program Files\GrafanaLabs\grafana\conf\.
-- This window is now running the Grafana server. It must remain operational to use Grafana. If it is closed and needs starting, repeat the previous step.
+- Before moving on, check that the README.md is at the following location: *{Grafana Install Directory}\grafana\data\plugins\grafana-kdb-datasource-ws\README.md*.
+- Open file-explorer and navigate into *{Grafana Install Directory}\data\plugins\grafana-kdb-datasource-ws* then right-click and cut the file named *custom.ini*. Then navigate into *C:\Program Files\GrafanaLabs\grafana\conf* then right-click and paste. Confirm that this file, *custom.ini*, is present at the following location : *C:\Program Files\GrafanaLabs\grafana\conf\.
+- **Windows only**: Start grafana from an administrator-mode command line:
+
+`*{Grafana Install Directory}\grafana\bin\grafana-server.exe*`
+
+- **Linux only**: Start the grafana-server instance:
+
+`sudo systemctl start grafana-server`
+
+- The Grafana server is now running. If using Windows the command-line window must remain operational to use Grafana. If it is closed and needs starting, repeat the previous step.
 - Setup the kdb+ instance you wish to query as per **kdb+ Setup** below.
 - Launch your browser (see **Supported Browsers**) then use the following URL to open Grafana: [localhost:8080/](localhost:8080/) and sign in using Usr:`admin` Pwd:`admin` (You will be prompted for changing password. *Skip*.)
 - Click on the *cog* configuration icon on the left tab of the webpage, then click on the green *Add data source* button.
