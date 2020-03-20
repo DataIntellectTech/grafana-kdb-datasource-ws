@@ -13,7 +13,7 @@
 #### Configuring kdb+ instance:
 Set the .z.ws WebSocket message handler on kdb+ instance as below:
 
-``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$"'",x}];ds[`ID])}``
+``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{`$"'",x}];ds[`ID])}``
 
 #### Adding datasource:
 Navigate to the data-sources page in grafana and click *Add data source*.
