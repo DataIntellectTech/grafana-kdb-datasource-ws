@@ -3,12 +3,12 @@
 ### Quick Install Guide
 
 #### Installing Grafana:
- - If Grafana is not already installed, install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the installation guide for the relevant operating system.
+ - If Grafana is not already installed, install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the [installation guide](https://grafana.com/docs/grafana/latest/installation/) for the relevant operating system.
 
 #### Installing kdb+ datasource plugin:
- - Download the [latest release](https://github.com/AquaQAnalytics/kdb-datasource/releases/tag/v0.1.1b). UPDATE LINK BEFORE RELEASE
- - Extract the kdb-datasource folder into *{Grafana Install Directory}/grafana/data/plugins/grafana-kdb-datasource-ws*. CHECK EXTRACT STRUCTURE
- - Load/restart the grafana-server.
+ - Download the [latest release](https://github.com/AquaQAnalytics/kdb-datasource/releases/tag/v1.0).
+ - Extract the entire grafana-kdb-datasource-ws folder to *{Grafana Install Directory}/grafana/data/plugins/*.
+ - Start/restart the grafana-server.
  
 #### Configuring kdb+ instance:
 Set the .z.ws WebSocket message handler on kdb+ instance as below:
