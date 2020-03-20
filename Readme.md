@@ -53,9 +53,9 @@ We recommend using the latest version of either Google Chrome or Mozilla Firefox
 - Extract the zip file in *{Grafana Install Directory}\grafana\data\plugins*.
 - Before moving on, check that the README.md is at the following location: *{Grafana Install Directory}\grafana\data\plugins\grafana-kdb-datasource-ws\README.md*.
 - Open file-explorer and navigate into *{Grafana Install Directory}\data\plugins\grafana-kdb-datasource-ws* then right-click and cut the file named *custom.ini*. Then navigate into *C:\Program Files\GrafanaLabs\grafana\conf* then right-click and paste. Confirm that this file, *custom.ini*, is present at the following location : *C:\Program Files\GrafanaLabs\grafana\conf\.
-- **Windows only**: Start grafana from an administrator-mode command line:
+- **Windows only**: Start grafana from an administrator-mode command line window:
 
-`*{Grafana Install Directory}\grafana\bin\grafana-server.exe*`
+`{Grafana Install Directory}\grafana\bin\grafana-server.exe`
 
 - **Linux only**: Start the grafana-server instance:
 
@@ -81,6 +81,7 @@ We recommend using the latest version of either Google Chrome or Mozilla Firefox
 
 - That's it! This kdb+ process should now be accessible to grafana. If the kdb+ process is on a different network to the network you are connecting from, you will need to setup port forwarding to the kdb+ process.
 
+# Demo
 ### Setting up a demo TorQ Stack (Windows)
 
 - [Install TorQ](https://github.com/AquaQAnalytics/TorQ) and [TorQ Finance starter pack](https://github.com/AquaQAnalytics/TorQ-Finance-Starter-Pack) as described [on the AquaQ wiki](https://aquaqanalytics.github.io/TorQ/gettingstarted/).
