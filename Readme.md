@@ -6,8 +6,8 @@
  - If Grafana is not already installed, install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the [installation guide](https://grafana.com/docs/grafana/latest/installation/) for the relevant operating system.
 
 #### Installing kdb+ datasource plugin:
- - Download the [latest release](https://github.com/AquaQAnalytics/kdb-datasource/releases/tag/v1.0).
- - Extract the entire grafana-kdb-datasource-ws folder to *{Grafana Install Directory}/grafana/data/plugins/*.
+ - Download the [latest release](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases/tag/v1.0).
+ - Extract the entire *grafana-kdb-datasource-ws* folder to *{Grafana Install Directory}/grafana/data/plugins/*.
  - Start/restart the grafana-server.
  
 #### Configuring kdb+ instance:
