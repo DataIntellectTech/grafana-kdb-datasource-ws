@@ -27,7 +27,6 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 kdb_request_config_1 = kdb_request_config_1_1;
             }],
         execute: function() {
-            //import {PanelEvents} from '@grafana/data';
             //Declaring default constants
             conflationUnitDefault = 'm';
             conflationDurationDefault = "5";
@@ -98,7 +97,6 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     }
                     //Initialise the conflation if it doesn't already exist;
                     if (!this.target.useConflation) {
-                        //this.useConflation = false;
                         this.target.conflationUnit = conflationUnitDefault;
                         this.target.conflationDuration = conflationDurationDefault;
                         this.target.conflationDurationMS = Number(conflationDurationDefault) * (conflationUnitDefault == 'Seconds' ? Math.pow(10, 9) : (conflationUnitDefault == 'Minutes' ? 60 * Math.pow(10, 9) : 3600 * Math.pow(10, 9)));
@@ -106,12 +104,10 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     if (!this.target.kdbSideFunction) {
                         this.target.kdbSideFunction = 'Select Function';
                     }
-                    //this.target.rowCountLimit = defaultRowCountLimit;
                     this.conflationDurationSegment = this.uiSegmentSrv.newSegment({ value: this.target.conflationDuration.toString(), fake: false });
                     this.conflationAggregateSegment = this.uiSegmentSrv.newSegment({ value: this.target.conflationDefaultAggType, fake: false });
                     this.rowCountLimitSegment = this.uiSegmentSrv.newSegment({ value: this.target.rowCountLimit.toString(), fake: false });
                     this.kdbSideFunctionSegment = this.uiSegmentSrv.newSegment({ value: this.target.kdbSideFunction.toString(), fake: false });
-                    //Not sure what these do, can they be removed?
                     this.panelCtrl.events.on('data-received', this.onDataReceived.bind(this), $scope);
                     this.panelCtrl.events.on('data-error', this.onDataError.bind(this), $scope);
                     if (this.target.queryType == 'selectQuery') {
@@ -123,24 +119,18 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     else
                         this.buildQueryBuilderPanel();
                 }
-                //Look into what this does. Seems to be circular at the moment.
                 KDBQueryCtrl.prototype.buildFunctionQueryPanel = function () {
                     if (!this.target.kdbFunction || this.target.kdbFunction == 'Enter function') {
-                        //this.functionSegment = this.uiSegmentSrv.newSegment({value: 'Enter function', fake: true});
                         this.kdbFunction = '';
                     }
                     else {
-                        //this.functionSegment = this.uiSegmentSrv.newSegment({value: this.target.kdbFunction, fake: false});
                         this.kdbFunction = this.target.kdbFunction;
                     }
-                    //Need to handle the parameters here
                 };
                 //This function builds the datasource if the panel type is a graph
                 KDBQueryCtrl.prototype.buildQueryBuilderPanel = function () {
                     //default to query builder
                     this.metricColumnSegment = this.uiSegmentSrv.newSegment('dummy');
-                    //if(this.target.rawQuery === false) {
-                    //Time column
                     if (!this.target.timeColumn || this.target.timeColumn == 'Select Field') {
                         this.timeColumnSegment = this.uiSegmentSrv.newSegment('Select Field');
                     }
@@ -172,13 +162,6 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     if (!this.target.select) {
                         this.target.select = [[{ type: 'column', params: ['Select Column'] }]];
                     }
-                    //If the group field is null the initialise it
-                    /*
-                    if(!this.target.group){
-                        this.target.group = [[{type: 'column', params: ['Select Group']}]];
-                    }
-                    */
-                    //}
                     this.whereAdd = this.uiSegmentSrv.newPlusButton();
                     this.setupAdditionalMenu();
                 };
@@ -187,7 +170,6 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 };
                 KDBQueryCtrl.prototype.setupAdditionalMenu = function () {
                     this.buildSelectMenu();
-                    //this.buildGroupMenu();
                     this.updateProjection();
                     this.panelCtrl.refresh();
                 };
@@ -247,7 +229,6 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 //This function resets other values in the query if the table is reselected
                 KDBQueryCtrl.prototype.onTableChanged = function () {
                     this.target.table = this.tableSegment.value;
-                    //this.target.group = [[{type: 'column', params: ['select group']}]];
                     this.target.select = [[{ type: 'column', params: ['select column'] }]];
                     this.target.where = [];
                     var segment = this.uiSegmentSrv.newSegment('Select Field');
@@ -270,7 +251,6 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 KDBQueryCtrl.prototype.timeColumnChanged = function () {
                     var _this = this;
                     this.target.timeColumn = this.timeColumnSegment.value;
-                    //Not sure what code below this line is doing? I guess its trying to get the datatype for the time column and do some conversion based on that?
                     this.datasource.metricFindQuery(this.metaBuilder.buildDatatypeQuery(this.target.timeColumn)).then(function (result) {
                         if (Array.isArray(result)) {
                             if (typeof result[0].t == 'string') {
@@ -517,7 +497,6 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                         }
                     }
                     else {
-                        //const partIndex = _.indexOf(selectParts, part);
                         selectParts.splice(index, 1);
                     }
                     this.updatePersistedParts();
@@ -674,7 +653,6 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 //This function resets various paramaeters and performs a number of checks in the query format has been reset
                 KDBQueryCtrl.prototype.queryFormatRefresh = function () {
                     var _this = this;
-                    //need to delete non numeric columns if switching to a column query
                     if (this.target.format == 'table') {
                         this.target.useGrouping = false;
                         this.groupingToggled();

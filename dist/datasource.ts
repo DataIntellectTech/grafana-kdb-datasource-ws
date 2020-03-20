@@ -39,7 +39,6 @@ export class KDBDatasource {
         this.responseParser = new ResponseParser(this.$q);
         this.queryModel = new KDBQuery({});
         this.interval = (instanceSettings.jsonData || {}).timeInterval;
-        //Some of timeout code below(default) should be moved to config_ctrl
         if (!instanceSettings.jsonData.timeoutLength) {
             this.timeoutLength = defaultTimeout
         } else {
@@ -61,8 +60,6 @@ export class KDBDatasource {
             this.wsUrl = 'ws://' + instanceSettings.jsonData.host;
         };
 
-        //Row Count limit - this needs to be updated to look at a pane to be added to the config creation tab
-        //this.maxRowCount = defaultRowCountLimit;
     }
 
     interpolateVariable = (value, variable) => {
@@ -173,7 +170,6 @@ export class KDBDatasource {
                         notStatement = true
                     } else whereClause.push(clause.params[1]);
                     whereClause.push('`' + clause.params[0]);
-                    //need an if here w.r.t. datatype
                     if (clause.datatype == 's') {
                         if (clause.params[1] == "in") {
                             whereClause.push(clause.params[2].split(",").map(str => "`"+str.trim()))
@@ -473,7 +469,6 @@ export class KDBDatasource {
         });
 
     }
-
 
     //This is the function called by Grafana when it is testing a connection on the configuration page
     testDatasource() {

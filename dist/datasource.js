@@ -87,7 +87,6 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                     this.responseParser = new response_parser_1.default(this.$q);
                     this.queryModel = new kdb_query_1.default({});
                     this.interval = (instanceSettings.jsonData || {}).timeInterval;
-                    //Some of timeout code below(default) should be moved to config_ctrl
                     if (!instanceSettings.jsonData.timeoutLength) {
                         this.timeoutLength = kdb_request_config_2.defaultTimeout;
                     }
@@ -111,8 +110,6 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                         this.wsUrl = 'ws://' + instanceSettings.jsonData.host;
                     }
                     ;
-                    //Row Count limit - this needs to be updated to look at a pane to be added to the config creation tab
-                    //this.maxRowCount = defaultRowCountLimit;
                 }
                 //Websocket per request?
                 KDBDatasource.prototype.buildKdbRequest = function (target) {
@@ -200,7 +197,6 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                                 else
                                     whereClause.push(clause.params[1]);
                                 whereClause.push('`' + clause.params[0]);
-                                //need an if here w.r.t. datatype
                                 if (clause.datatype == 's') {
                                     if (clause.params[1] == "in") {
                                         whereClause.push(clause.params[2].split(",").map(function (str) { return "`" + str.trim(); }));
