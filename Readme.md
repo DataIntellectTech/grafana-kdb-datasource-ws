@@ -49,7 +49,7 @@ We recommend using the latest version of either Google Chrome or Mozilla Firefox
 ### Initial Setup
 
 - Install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the installation guide for the relevant operating system.
-- In your browser, navigate to https://github.com/AquaQAnalytics/kdb-datasource/releases. UPDATE LINK BEFORE RELEASE. Click on the latest release and click the ‘Source code (zip)’ link to download the plugin.
+- In your browser, navigate to [grafana-kdb-datasource-ws releases](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases). Click on the latest release and click the ‘Source code (zip)’ link to download the plugin.
 - Extract the zip file in *{Grafana Install Directory}\grafana\data\plugins*.
 - Before moving on, check that the README.md is at the following location: *{Grafana Install Directory}\grafana\data\plugins\grafana-kdb-datasource-ws\README.md*.
 - Open file-explorer and navigate into *{Grafana Install Directory}\data\plugins\grafana-kdb-datasource-ws* then right-click and cut the file named *custom.ini*. Then navigate into *C:\Program Files\GrafanaLabs\grafana\conf* then right-click and paste. Confirm that this file, *custom.ini*, is present at the following location : *C:\Program Files\GrafanaLabs\grafana\conf\.
