@@ -11,7 +11,7 @@
  - Load/restart the grafana-server.
  
 #### Configuring kdb+ instance:
-To set websocket handler on kdb+ instance set the .z.ws message handler as below:
+Set the .z.ws WebSocket message handler on kdb+ instance as below:
 
 ``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$"'",x}];ds[`ID])}``
 
@@ -58,13 +58,22 @@ We recommend using the latest version of either Google Chrome or Mozilla Firefox
 - This window is now running the Grafana server. It must remain operational to use Grafana. If it is closed and needs starting, repeat the previous step.
 - Setup the kdb+ instance you wish to query as per **kdb+ Setup** below.
 - Launch your browser (see **Supported Browsers**) then use the following URL to open Grafana: [localhost:8080/](localhost:8080/) and sign in using Usr:`admin` Pwd:`admin` (You will be prompted for changing password. *Skip*.)
-- REMOVE If you currently do not have a KDB+ session to connect, go to the Setup a TorQ Stack section of these instructions to create a session that simulates a financial data capture system. Proceed to next step if there is already a session, to which you will connect, on your network.
-- REMOVE Once you have setup your KDB+ data source with correct WebSocket handler, your IP-address will be `localhost` and you should have a port corresponding to the process whose data you will be visualising. If you already have a session on your network, you should have the IP-address (numbers separated by full stops) and the port number (usually a 4- or 5-digit number).
-- Go to your Grafana instance on your browser by navigating to [localhost:8080/](localhost:8080/) as before. Click on the *cog* configuration icon on the left tab of the webpage, then click on the green *Add data source* button.
+- Click on the *cog* configuration icon on the left tab of the webpage, then click on the green *Add data source* button.
 - Select *KDB+* under *Others* from the list.
-- In the textbox that follows ‘Host’, type in the IP address followed by a colon, followed by the port. E.g. `localhost:6002` or `192.168.1.48:6002`
+- In the textbox that follows ‘Host’, type in the IP address followed by a colon, followed by the port. E.g. `localhost:6040` or `192.168.1.5:6789`. 
+
+*N.B: If the kdb+ process is on the same machine as you are connecting from, use `localhost` as the IP address. If it's on the same internal network as you are connecting from, you can find it's IP address by running ipconfig (windows) or ifconfig (linux) on the host machine. If it's on an external networking you will need to setup port forwarding (see your system administrator).*
 - If authentication is present on the kdb+ process, select 'Use Authentication' and enter authentication details. If TLS is enabled on the kdb+ process select 'Use TLS' (see **Authentication**).
 - Click the green *Save & Test* button to save and test the connection. The webpage will return a message depending on whether it was a success. If it cannot be connected, review each step again. If successful, you may now create a dashboard.
+
+### kdb+ Setup
+
+- Ensure the kdb+ process you wish to connect to [has an open port](https://code.kx.com/q/basics/listening-port/).
+- Set the WebSocket message handler on this process (.z.ws) as shown below:
+
+``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$"'",x}];ds[`ID])}``
+
+- That's it! This kdb+ process should now be accessible to grafana. If the kdb+ process is on a different network to the network you are connecting from, you will need to setup port forwarding to the kdb+ process.
 
 ### Setup a TorQ Stack (On Windows)
 
