@@ -15,6 +15,8 @@ Set the .z.ws WebSocket message handler on kdb+ instance as below:
 
 ``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{`$"'",x}];ds[`ID])}``
 
+Ensure the kdb+ process has an [open listening port](https://code.kx.com/q/basics/listening-port/).
+
 #### Adding datasource:
 Navigate to the data-sources page in grafana and click *Add data source*.
 At the bottom of this page under *Others* should be *KDB+*, click on this to set settings.
@@ -22,21 +24,21 @@ At the bottom of this page under *Others* should be *KDB+*, click on this to set
 
 `ADDRESS:PORT`
 
-*'ws://' is not required*
+*'ws://' is not required, processes running on the same machine have `localhost` address.*
 
 Default Timeout is how long in ms each query will wait for a response (will default to 5000 ms).
 
 #### Authentication:
 The plugin supports Basic authentication over insecure connections (not recommended) or secure WebSockets (recommended).
 Insecure connections send all data (including user:password pairs) unencrypted.
-Secure WebSockets require the kdb+ instance to be in TLS mode (see https://code.kx.com/q/kb/ssl/).
+Secure WebSockets require the kdb+ instance to be in [TLS mode](https://code.kx.com/q/kb/ssl/).
 
 #### Security:
 We **strongly** recommend running dedicated kdb+ instances only for grafana connections; no other services should operate from these instances.
 If using in an open system we recommend running any kdb+ instances users can connect to as a seperate (non-root) user on the machine.
 Do not allow this user to write to any directories or files on the machine.
 
-Be aware the 'Free-form Query' 'Function' box and 'Built Query' 'Where' box allow users to run unfiltered commands on the kdb+ instance (including 'system' commands), so non-backed up system critical data should not be held on these instances and ideally only trusted users should be allowed to connect (see Authentication).
+Be aware the 'Free-form Query' 'Function' box and 'Built Query' 'Where' box allow users to run unfiltered commands on the kdb+ instance (including 'system' commands), so non-backed up system critical data should not be held on these instances and ideally only trusted users should be allowed to connect (see **Authentication**).
 
 #### Supported Browsers:
 Formally this adaptor has the same [compatibility as grafana](https://grafana.com/docs/grafana/latest/installation/requirements/),
