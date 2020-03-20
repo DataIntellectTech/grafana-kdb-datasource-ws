@@ -62,7 +62,7 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 
 `systemctl restart grafana-server`
 
-## Initial Setup
+## Full Install/Setup Guide
 
 - Install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the installation guide for the relevant operating system.
 - In your browser, navigate to [grafana-kdb-datasource-ws releases](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases). Click on the latest release and click the ‘Source code (zip)’ link to download the plugin.
