@@ -12,12 +12,12 @@
   "dependencies": {
     "ig": "0.0.5",
     "lodash": "^4.17.15",
-    "moment": "^2.18.1",
+    "moment": "^2.24.0",
     "q": "^1.5.0",
-    "systemjs": "^0.19.47",
-    "typescript": "^3.6.4",
-    "websocket": "^1.0.28",
-    "ws": "^6.2.0"
+    "systemjs": "^6.2.6",
+    "typescript": "^3.8.0",
+    "websocket": "^1.0.31",
+    "ws": "^7.2.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.74",
