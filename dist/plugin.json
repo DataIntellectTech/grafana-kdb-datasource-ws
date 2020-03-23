@@ -1,7 +1,7 @@
 {
   "type": "datasource",
   "name": "KDB+",
-  "id": "aquaq-kdb-websocket-adaptor",
+  "id": "aquaqanalytics-kdbadaptor-datasource",
   "info": {
     "description ": "KDB+ Data Source for Grafana",
     "author": {
