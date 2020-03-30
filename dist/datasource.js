@@ -84,7 +84,6 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                     };
                     this.name = instanceSettings.name;
                     this.id = instanceSettings.id;
-                    this.timeOffset = instanceSettings.jsonData.timeOffset;
                     this.responseParser = new response_parser_1.default(this.$q);
                     this.queryModel = new kdb_query_1.default({});
                     this.interval = (instanceSettings.jsonData || {}).timeInterval;
@@ -114,7 +113,6 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                 }
                 //Websocket per request?
                 KDBDatasource.prototype.buildKdbRequest = function (target) {
-                    console.log(target);
                     var queryParam = new query_param_1.QueryParam();
                     var kdbRequest = new kdb_request_1.KdbRequest();
                     var queryDictionary = new queryDictionary_1.QueryDictionary();

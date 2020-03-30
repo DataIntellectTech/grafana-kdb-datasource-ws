@@ -26,7 +26,6 @@ export class KDBDatasource {
     maxRowCount: number;
     connectionStateCycles: number;
     timeoutLength: number;
-    timeOffset: number;
 
     //WebSocket communication variables
     requestSentList: any[];
@@ -37,7 +36,6 @@ export class KDBDatasource {
     constructor(instanceSettings, private backendSrv, private $q, private templateSrv) {
         this.name = instanceSettings.name;
         this.id = instanceSettings.id;
-        this.timeOffset = instanceSettings.jsonData.timeOffset;
         this.responseParser = new ResponseParser(this.$q);
         this.queryModel = new KDBQuery({});
         this.interval = (instanceSettings.jsonData || {}).timeInterval;
@@ -84,7 +82,6 @@ export class KDBDatasource {
     };
     //Websocket per request?
     private buildKdbRequest(target) {
-        console.log(target);
         let queryParam = new QueryParam();
         let kdbRequest = new KdbRequest();
         let queryDictionary = new QueryDictionary();
