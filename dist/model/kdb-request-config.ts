@@ -3,6 +3,7 @@
 //The default for the number 
 export const defaultRowCountLimit : number = 10000;
 export var defaultTimeout : number = 5000;
+export const kdbEpoch : number = 946684800000
 
 //Graph response type
 export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error! - ",x;0b)}]}{[dict] \n ' +
@@ -73,6 +74,7 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' (dict[`queryParam;`maxRowCount];dict[`queryId]); \n ' +
 ' \n ' +
 ' d:dict`queryParam; \n ' +
+' d[`temporal_range]:`timestamp$d[`temporal_range]; \n ' +
 ' qt:d[`query;`type]; \n ' +
 ' funcparts:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
 ' gr:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
@@ -248,6 +250,7 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ' (dict[`queryParam;`maxRowCount];dict[`queryId]); \n ' +
 ' \n ' +
 ' d:dict`queryParam; \n ' +
+' d[`temporal_range]:`timestamp$d[`temporal_range]; \n ' +
 ' qt:d[`query;`type]; \n ' +
 ' funcparts:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
 ' gr:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +

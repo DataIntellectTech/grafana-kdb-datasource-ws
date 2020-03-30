@@ -9,7 +9,7 @@ import { QueryParam } from "./model/query-param";
 import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
-import { tabFunction,defaultTimeout } from './model/kdb-request-config';
+import { tabFunction,defaultTimeout,kdbEpoch } from './model/kdb-request-config';
 export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
@@ -26,6 +26,7 @@ export class KDBDatasource {
     maxRowCount: number;
     connectionStateCycles: number;
     timeoutLength: number;
+    timeOffset: number;
 
     //WebSocket communication variables
     requestSentList: any[];
@@ -36,6 +37,7 @@ export class KDBDatasource {
     constructor(instanceSettings, private backendSrv, private $q, private templateSrv) {
         this.name = instanceSettings.name;
         this.id = instanceSettings.id;
+        this.timeOffset = instanceSettings.jsonData.timeOffset;
         this.responseParser = new ResponseParser(this.$q);
         this.queryModel = new KDBQuery({});
         this.interval = (instanceSettings.jsonData || {}).timeInterval;
@@ -82,6 +84,7 @@ export class KDBDatasource {
     };
     //Websocket per request?
     private buildKdbRequest(target) {
+        console.log(target);
         let queryParam = new QueryParam();
         let kdbRequest = new KdbRequest();
         let queryDictionary = new QueryDictionary();
@@ -146,11 +149,15 @@ export class KDBDatasource {
         };
     };
 
+    private buildKdbTimestamp(date : Date) {
+        return 1000000 * (date.valueOf() - kdbEpoch);
+    }
+
     private buildTemporalRange(range) {
-        let temporalRange: Date[] = [];
+        let temporalRange: number[] = [];
         if (range) {
-            temporalRange.push(new Date(range.from._d));
-            temporalRange.push(new Date(range.to._d));
+            temporalRange.push(this.buildKdbTimestamp(range.from._d));
+            temporalRange.push(this.buildKdbTimestamp(range.to._d));
         }
         return temporalRange;
     };

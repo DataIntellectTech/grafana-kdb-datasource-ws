@@ -1,6 +1,6 @@
 {
-  "name": "aquaq-kdb-datasource",
-  "version": "1.0.0",
+  "name": "aquaqanalytics-kdbadaptor-datasource",
+  "version": "1.0.1",
   "description": "Grafana plugin for visualisation of data from kdb+ servers.",
   "scripts": {
     "build": "grunt",

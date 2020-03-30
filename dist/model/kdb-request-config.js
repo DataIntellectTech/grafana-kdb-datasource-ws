@@ -1,12 +1,13 @@
 //This is where the kdb Functions passed down to kdb+ to interpret a query are declared
 System.register([], function(exports_1) {
-    var defaultRowCountLimit, defaultTimeout, graphFunction, tabFunction, argCounter;
+    var defaultRowCountLimit, defaultTimeout, kdbEpoch, graphFunction, tabFunction, argCounter;
     return {
         setters:[],
         execute: function() {
             //The default for the number 
             exports_1("defaultRowCountLimit", defaultRowCountLimit = 10000);
             exports_1("defaultTimeout", defaultTimeout = 5000);
+            exports_1("kdbEpoch", kdbEpoch = 946684800000);
             //Graph response type
             exports_1("graphFunction", graphFunction = '{@[x;y;{`payload`error`success!(();"Error! - ",x;0b)}]}{[dict] \n ' +
                 ' \n ' +
@@ -76,6 +77,7 @@ System.register([], function(exports_1) {
                 ' (dict[`queryParam;`maxRowCount];dict[`queryId]); \n ' +
                 ' \n ' +
                 ' d:dict`queryParam; \n ' +
+                ' d[`temporal_range]:`timestamp$d[`temporal_range]; \n ' +
                 ' qt:d[`query;`type]; \n ' +
                 ' funcparts:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
                 ' gr:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
@@ -250,6 +252,7 @@ System.register([], function(exports_1) {
                 ' (dict[`queryParam;`maxRowCount];dict[`queryId]); \n ' +
                 ' \n ' +
                 ' d:dict`queryParam; \n ' +
+                ' d[`temporal_range]:`timestamp$d[`temporal_range]; \n ' +
                 ' qt:d[`query;`type]; \n ' +
                 ' funcparts:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
                 ' gr:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +

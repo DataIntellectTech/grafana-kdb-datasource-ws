@@ -4,7 +4,7 @@ export declare class QueryParam {
     column: any[];
     where: string[];
     temporal_field: any;
-    temporal_range: Date[];
+    temporal_range: number[];
     grouping: string[];
     conflation: any;
     query: QueryDictionary;
