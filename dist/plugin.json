@@ -12,7 +12,7 @@
       "small": "img/aquaq_logo.png",
       "large": "img/aquaq_logo.png"
     },
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "alerting": true,
   "annotations": false,

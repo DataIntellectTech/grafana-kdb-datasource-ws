@@ -47,6 +47,9 @@ however there are known bugs with lesser used browsers:
 
 We recommend using the latest version of either Google Chrome or Mozilla Firefox.
 
+#### Time Zones:
+Grafana time ranges have support for UTC time, local browser time or Grafana server time. As kdb+ does not have native time-zone support **all timestamps/datetimes in kdb+ are interpreted as UTC+0**. We recommend dashboards are set to UTC time to avoid confusion.
+
 #### Grafana Service:
 On **Windows** grafana will by default install itself as a service. To view running services, run:
 

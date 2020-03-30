@@ -9,7 +9,7 @@ import { QueryParam } from "./model/query-param";
 import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
-import { tabFunction,defaultTimeout } from './model/kdb-request-config';
+import { tabFunction,defaultTimeout,kdbEpoch } from './model/kdb-request-config';
 export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
@@ -146,11 +146,15 @@ export class KDBDatasource {
         };
     };
 
+    private buildKdbTimestamp(date : Date) {
+        return 1000000 * (date.valueOf() - kdbEpoch);
+    }
+
     private buildTemporalRange(range) {
-        let temporalRange: Date[] = [];
+        let temporalRange: number[] = [];
         if (range) {
-            temporalRange.push(new Date(range.from._d));
-            temporalRange.push(new Date(range.to._d));
+            temporalRange.push(this.buildKdbTimestamp(range.from._d));
+            temporalRange.push(this.buildKdbTimestamp(range.to._d));
         }
         return temporalRange;
     };

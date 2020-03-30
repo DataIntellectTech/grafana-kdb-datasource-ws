@@ -29,6 +29,7 @@ export declare class KDBDatasource {
     interpolateVariable: (value: any, variable: any) => any;
     private buildKdbRequest(target);
     private buildTemporalField(queryDetails);
+    private buildKdbTimestamp(date);
     private buildTemporalRange(range);
     private buildWhereParams(queryWhereList);
     private buildColumnParams(target);

@@ -172,11 +172,14 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                     ;
                 };
                 ;
+                KDBDatasource.prototype.buildKdbTimestamp = function (date) {
+                    return 1000000 * (date.valueOf() - kdb_request_config_2.kdbEpoch);
+                };
                 KDBDatasource.prototype.buildTemporalRange = function (range) {
                     var temporalRange = [];
                     if (range) {
-                        temporalRange.push(new Date(range.from._d));
-                        temporalRange.push(new Date(range.to._d));
+                        temporalRange.push(this.buildKdbTimestamp(range.from._d));
+                        temporalRange.push(this.buildKdbTimestamp(range.to._d));
                     }
                     return temporalRange;
                 };
