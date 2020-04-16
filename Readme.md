@@ -1,3 +1,5 @@
+![AquaQ Analytics](./images/aquaq_bubbles_grafana)
+
 # Grafana and KDB+ Plugin Installation Instructions
 
 ## Quick Install Guide
