@@ -10,8 +10,8 @@
     },
     "keywords": ["kdb", "kdb+"],
     "logos": {
-      "small": "img/aquaq_logo_square.png",
-      "large": "img/aquaq_logo_square.png"
+      "small": "img/AquaQ_Logo_Square.png",
+      "large": "img/AquaQ_Logo_Square.png"
     },
     "links": [
       {"name":"Github", "url":"https://github.com/AquaQAnalytics"},
