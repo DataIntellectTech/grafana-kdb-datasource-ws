@@ -86,12 +86,20 @@ export class KDBDatasource {
     private variablesReplace(target:any, search: string, replace:string) {
         target.kdbFunction = target.kdbFunction.replace(search, replace);
         target.table = target.table.replace(search, replace);
-        /* target.select.forEach(col => {
+        console.log(target.select[0]);
+/*         target.select = target.select.forEach(col => {
             return col[0].params.forEach(str => {
                 return str.replace(search, replace);
             });
-        });
-        if(target.where !== []) {
+        }); */
+        for(let i = 0; i < target.select[0].length; i++) {
+            console.log(target.select[0][i]);
+            for(let y = 0; y < target.select[0][i].params.length; y++) {
+                console.log(target.select[0][i].params[y]);
+                target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
+            };
+        }; 
+       /*  if(target.where !== []) {
             target.where.forEach(col => {
                 return col.params.forEach(str => {
                     return str.replace(search, replace);
