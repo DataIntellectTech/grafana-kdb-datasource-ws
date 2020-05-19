@@ -70,7 +70,7 @@ export class KDBQueryCtrl extends QueryCtrl {
             this.datasource.connectWS();
         };
 
-        //this.target = this.target;98
+        this.templateSrv = templateSrv;
         this.queryModel = new KDBQuery(this.target, templateSrv, this.panel.scopedVars);
         this.metaBuilder = new KDBMetaQuery(this.target, this.queryModel);
         this.updateProjection();
@@ -356,9 +356,24 @@ export class KDBQueryCtrl extends QueryCtrl {
         //Row count limit errors are reported in queryError at index 2
 
         if (isNaN(this.rowCountLimitSegment.value)) {
-            this.target.rowCountLimit = defaultRowCountLimit;
-            this.target.queryError.error[2] = true;
-            this.target.queryError.message[2] = 'Row count must be a positive integer.';
+            //Test if its a variable
+            let instVariables = this.templateSrv.getVariables();
+            let namedVars: string[] = [];
+            for(var i = 0; i < instVariables.length; i++) {
+                namedVars = namedVars.concat('$' + instVariables[i].name);
+            }
+            console.log('VAR NAMES: ', namedVars);
+            //If it is a variable, set target.rowCountLimit to it
+            if(namedVars.indexOf(this.rowCountLimitSegment.value) !== -1) {
+                this.target.rowCountLimit = this.rowCountLimitSegment.value;
+                this.target.queryError.error[2] = false;
+                return this.panelCtrl.refresh();
+            // Otherwise error
+            } else {
+                this.target.rowCountLimit = defaultRowCountLimit;
+                this.target.queryError.error[2] = true;
+                this.target.queryError.message[2] = 'Row count must be a positive integer.';
+            };    
         } else {
             let numberRowCountLimit = Number(this.rowCountLimitSegment.value);
             if (Number.isInteger(numberRowCountLimit) && numberRowCountLimit > 0) {
