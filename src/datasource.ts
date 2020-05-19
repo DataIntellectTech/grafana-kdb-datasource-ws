@@ -14,6 +14,7 @@ export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
     name: any;
+    variables: any;
     responseParser: ResponseParser;
     queryModel: KDBQuery;
     interval: string;
@@ -34,6 +35,7 @@ export class KDBDatasource {
 
     /** @ngInject */
     constructor(instanceSettings, private backendSrv, private $q, private templateSrv) {
+        this.templateSrv = templateSrv
         this.name = instanceSettings.name;
         this.id = instanceSettings.id;
         this.responseParser = new ResponseParser(this.$q);
@@ -62,7 +64,7 @@ export class KDBDatasource {
 
     }
 
-    interpolateVariable = (value, variable) => {
+    /* interpolateVariable = (value, variable) => {
         if (typeof value === 'string') {
             if (variable.multi || variable.includeAll) {
                 return this.queryModel.quoteLiteral(value);
@@ -79,13 +81,52 @@ export class KDBDatasource {
             return this.queryModel.quoteLiteral(v);
         });
         return quotedValues.join(',');
-    };
+    }; */
+
+    private variablesReplace(target:any, search: string, replace:string) {
+        target.kdbFunction = target.kdbFunction.replace(search, replace);
+        target.table = target.table.replace(search, replace);
+        /* target.select.forEach(col => {
+            return col[0].params.forEach(str => {
+                return str.replace(search, replace);
+            });
+        });
+        if(target.where !== []) {
+            target.where.forEach(col => {
+                return col.params.forEach(str => {
+                    return str.replace(search, replace);
+                });
+            });
+        }; */
+        target.timeColumn = target.timeColumn.replace(search, replace);
+        target.funcTimeCol = target.funcTimeCol.replace(search, replace);
+        target.groupingField = target.groupingField.replace(search, replace);
+        target.funcGroupCol = target.funcGroupCol.replace(search, replace);
+        if("string" == typeof target.rowCountLimit) {
+            if(target.rowCountLimit === search) target.rowCountLimit = Number(replace);
+        };
+        //target.conflationDurationMS.replace(search, replace);
+    }
+    private injectVariables(target) {
+        let instVariables = this.templateSrv.getVariables();
+        for(var i = 0; i < instVariables.length; i++) {
+            let search = '$' + instVariables[i].name;
+            let replace = instVariables[i].current.value;
+            this.variablesReplace(target, search, replace);
+        }
+    }
     //Websocket per request?
     private buildKdbRequest(target) {
+        console.log('TARGET: ', target)
         let queryParam = new QueryParam();
         let kdbRequest = new KdbRequest();
         let queryDictionary = new QueryDictionary();
         let conflationParams = new ConflationParams();
+
+        //Inject Variables into target
+        console.log('PRE INJECTION TARGET: ', target);
+        this.injectVariables(target);
+        console.log('POST INJECTION TARGET: ', target);
 
         //Need to take into account quotes in line, replace " with \"
         queryDictionary.type = (target.queryType == 'selectQuery') ? '`select' : '`function';
