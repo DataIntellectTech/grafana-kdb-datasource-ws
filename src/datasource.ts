@@ -9,6 +9,7 @@ import { QueryParam } from "./model/query-param";
 import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
+import { conflationDurationDefault, conflationUnitDefault } from './query_ctrl';
 import { tabFunction,defaultTimeout,kdbEpoch } from './model/kdb-request-config';
 export class KDBDatasource {
     //This is declaring the types of each member
@@ -83,37 +84,52 @@ export class KDBDatasource {
         return quotedValues.join(',');
     }; */
 
-    private variablesReplace(target:any, search: string, replace:string) {
+    private variablesReplace(target:any, search: string, replace:string | string[] | number) {
         target.kdbFunction = target.kdbFunction.replace(search, replace);
         target.table = target.table.replace(search, replace);
-        console.log(target.select[0]);
-/*         target.select = target.select.forEach(col => {
-            return col[0].params.forEach(str => {
-                return str.replace(search, replace);
-            });
-        }); */
         for(let i = 0; i < target.select[0].length; i++) {
-            console.log(target.select[0][i]);
             for(let y = 0; y < target.select[0][i].params.length; y++) {
-                console.log(target.select[0][i].params[y]);
                 target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
             };
         }; 
-       /*  if(target.where !== []) {
-            target.where.forEach(col => {
-                return col.params.forEach(str => {
-                    return str.replace(search, replace);
-                });
-            });
-        }; */
+        if(target.where !== []) {
+            for(let i = 0; i < target.where.length; i++) {
+                for(let y = 0; y < target.where[i].params.length; y++) {
+                    console.log(replace)
+                    if (Array.isArray(replace) && replace.length > 1) {
+                        if(target.where[i].params[y] === search) target.where[i].params[y] = replace;
+                    } else if ("string" == typeof target.where[i].params[y]) {
+                        target.where[i].params[y] = target.where[i].params[y].replace(search, replace);
+                    }
+                };
+            };
+        };
         target.timeColumn = target.timeColumn.replace(search, replace);
         target.funcTimeCol = target.funcTimeCol.replace(search, replace);
         target.groupingField = target.groupingField.replace(search, replace);
         target.funcGroupCol = target.funcGroupCol.replace(search, replace);
+
         if("string" == typeof target.rowCountLimit) {
-            if(target.rowCountLimit === search) target.rowCountLimit = Number(replace);
+            if(target.rowCountLimit === search) {
+                if (Number.isInteger(Number(replace)) && Number(replace) > 0) {
+                    target.rowCountLimit = Number(replace);
+                } else {
+                    target.queryError.error[2] = true;
+                    target.queryError.message[2] = 'Row count limit not a positive integer';
+                }
+            }    
         };
-        //target.conflationDurationMS.replace(search, replace);
+
+        if("string" == typeof target.conflationDuration) {
+            if(target.conflationDuration === search) {
+                if (isNaN(Number(replace))) {
+                    target.queryError.error[1] = true;
+                    target.queryError.message[1] = 'Conflation duration not a number';
+                } else {
+                    target.conflationDuration = Number(replace);
+                }
+            }
+        };
     }
     private injectVariables(target) {
         let instVariables = this.templateSrv.getVariables();
@@ -131,11 +147,6 @@ export class KDBDatasource {
         let queryDictionary = new QueryDictionary();
         let conflationParams = new ConflationParams();
 
-        //Inject Variables into target
-        console.log('PRE INJECTION TARGET: ', target);
-        this.injectVariables(target);
-        console.log('POST INJECTION TARGET: ', target);
-
         //Need to take into account quotes in line, replace " with \"
         queryDictionary.type = (target.queryType == 'selectQuery') ? '`select' : '`function';
         queryDictionary.value = target.kdbFunction;
@@ -149,6 +160,7 @@ export class KDBDatasource {
         if (target.queryType == 'selectQuery') queryParam.where = this.buildWhereParams(target.where);
         //conflation
         if (target.useConflation) {
+            this.buildConflation(target);
             conflationParams.val = target.conflationDurationMS.toString();
             conflationParams.agg = target.conflationDefaultAggType;
             queryParam.conflation = Object.assign({}, conflationParams);
@@ -195,6 +207,27 @@ export class KDBDatasource {
         };
     };
 
+    private buildConflation(queryDetails) {
+        if (["s","m","h","ms"].indexOf(queryDetails.conflationUnit) == -1) {
+            queryDetails.conflationUnit = conflationUnitDefault;
+            queryDetails.queryError.error[1] = true;
+            queryDetails.queryError.message[1] = 'Conflation unit not support. Please post conflation settings on our GitHub page.';
+        };
+        if(queryDetails.conflationUnit == 's') {
+            queryDetails.conflationDurationMS = queryDetails.conflationDuration * Math.pow(10,9);
+        }
+        else if(queryDetails.conflationUnit == 'm') {
+            queryDetails.conflationDurationMS = queryDetails.conflationDuration * 60 * Math.pow(10,9);
+        }
+        else if(queryDetails.conflationUnit == 'h') {
+            queryDetails.conflationDurationMS = queryDetails.conflationDuration * 3600 * Math.pow(10,9);
+        }
+        else {
+            queryDetails.queryError.error[1] = true;
+            queryDetails.queryError.message[1] = 'Unhandled exception in conflation. Please post conflation settings on our GitHub page.'
+        };
+    }
+
     private buildKdbTimestamp(date : Date) {
         return 1000000 * (date.valueOf() - kdbEpoch);
     }
@@ -223,23 +256,28 @@ export class KDBDatasource {
                         notStatement = true
                     } else whereClause.push(clause.params[1]);
                     whereClause.push('`' + clause.params[0]);
-                    if (clause.datatype == 's') {
-                        if (clause.params[1] == "in") {
-                            whereClause.push(clause.params[2].split(",").map(str => "`"+str.trim()))
+//                    if (clause.datatype == 's') {
+                        if (["in","within"].indexOf(clause.params[1]) != -1) {
+                            if("string" == typeof clause.params[2]) {
+                                whereClause.push(clause.params[2].split(",").map(str => str.trim()))
+                            } else {
+                                whereClause.push(clause.params[2])
+                            }
                         } else if (clause.params[1] == "like") {
                             whereClause.push('\"' + clause.params[2] + '\"');
                         } else
-                        whereClause.push('`' + clause.params[2]);
-                    }
-                    else if (clause.datatype == 'c') {
-                        whereClause.push('\"' + clause.params[2] + '\"');
-                    }
-                    else {
-                        if (clause.params[1] == "within") {
-                            whereClause.push(clause.params[2].split(",").map(str => str.trim()))
-                        } else whereClause.push(clause.params[2]);
-                    }
+                        whereClause.push(clause.params[2]);
+//                    }
+//                    else if (clause.datatype == 'c') {
+//                        whereClause.push('\"' + clause.params[2] + '\"');
+//                    }
+//                    else {
+//                        if (clause.params[1] == "within") {
+//                            whereClause.push(clause.params[2].split(",").map(str => str.trim()))
+//                        } else whereClause.push(clause.params[2]);
+//                    }
                     if (notStatement === true) {
+                        console.log('WHERECLAUSE', whereClause)
                         whereClause.push("x")
                     } else whereClause.push("o") 
                     whereArray.push(whereClause);
@@ -324,6 +362,7 @@ export class KDBDatasource {
     };
 
     query(options) {
+        console.log('OPTIONS', options)
         var prefilterResultCount = options.targets.length;
         var allRefIDs = [];
         var blankRefIDs = [];
@@ -331,6 +370,8 @@ export class KDBDatasource {
         var errorList = [];
 
         for(var i = 0; i < prefilterResultCount; i++){
+            //Inject variables into target
+            this.injectVariables(options.targets[i])
             allRefIDs.push(options.targets[i].refId);
             options.targets[i].range = options.range;
             if ((!options.targets[i].table && options.targets[i].queryType === 'selectQuery') || 

@@ -8,8 +8,8 @@ import KDBQuery from './kdb_query';
 import sqlPart from './sql_part';
 import { defaultRowCountLimit } from './model/kdb-request-config';
 //Declaring default constants
-const conflationUnitDefault: string = 'm';
-const conflationDurationDefault: string = "5";
+export const conflationUnitDefault: string = 'm';
+export const conflationDurationDefault: string = "5";
 
 export interface QueryMeta {
     sql: string;
@@ -321,32 +321,31 @@ export class KDBQueryCtrl extends QueryCtrl {
     conflationSettingsChanged() {
         //Conflation errors are reported in queryError at index 1
         this.target.queryError.error[1] = false;
-
+        console.log('CONFLATION CHANGED', this.conflationDurationSegment.value)
+        console.log(this.templateSrv.getVariables())
         if (isNaN(this.conflationDurationSegment.value)) {
+            //Test if its a variable
+            let instVariables = this.templateSrv.getVariables();
+            let namedVars: string[] = [];
+            for(var i = 0; i < instVariables.length; i++) {
+                namedVars = namedVars.concat('$' + instVariables[i].name);
+            }
+            //If it is a variable, set target.conflationDuration to it
+            if(namedVars.indexOf(this.conflationDurationSegment.value) !== -1) {
+                this.target.conflationDuration = this.conflationDurationSegment.value;
+            } else {
+            // Otherwise error
             this.target.queryError.error[1] = true
             this.target.queryError.message[1] = 'Conflation duration must be a number.'
+            };
         } else this.target.conflationDuration = this.conflationDurationSegment.value;
-        if(this.target.conflationUnit == 's') {
-            this.target.conflationDurationMS = this.target.conflationDuration * Math.pow(10,9);
-        }
-        else if(this.target.conflationUnit == 'm') {
-            this.target.conflationDurationMS = this.target.conflationDuration * 60 * Math.pow(10,9);
-        }
-        else if(this.target.conflationUnit == 'h') {
-            this.target.conflationDurationMS = this.target.conflationDuration * 3600 * Math.pow(10,9);
-        }
-        else {
-            this.target.queryError.error[1] = true;
-            this.target.queryError.message[1] = 'Unhandled exception in conflation. Please post conflation settings on our GitHub page.'
-        };
+
         if (this.target.useConflation === false) {
-            console.log(this.selectParts[0][1]);
             this.selectParts.map(partGroup => {
                 for (let i=0;i<partGroup.length;i++) {
                     if(partGroup[i].part.type == "aggregate") partGroup.splice(i,1)
                 }
             })
-            console.log(this.selectParts[0][1]);
         };
         this.updatePersistedParts();
         this.panelCtrl.refresh();
@@ -354,7 +353,6 @@ export class KDBQueryCtrl extends QueryCtrl {
 
     rowCountLimitChanged() {
         //Row count limit errors are reported in queryError at index 2
-
         if (isNaN(this.rowCountLimitSegment.value)) {
             //Test if its a variable
             let instVariables = this.templateSrv.getVariables();
@@ -362,7 +360,6 @@ export class KDBQueryCtrl extends QueryCtrl {
             for(var i = 0; i < instVariables.length; i++) {
                 namedVars = namedVars.concat('$' + instVariables[i].name);
             }
-            console.log('VAR NAMES: ', namedVars);
             //If it is a variable, set target.rowCountLimit to it
             if(namedVars.indexOf(this.rowCountLimitSegment.value) !== -1) {
                 this.target.rowCountLimit = this.rowCountLimitSegment.value;
