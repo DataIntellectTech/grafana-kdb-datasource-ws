@@ -85,7 +85,11 @@ export class KDBDatasource {
     }; */
 
     private variablesReplace(target:any, search: string, replace:string | string[] | number) {
-        target.kdbFunction = target.kdbFunction.replace(search, replace);
+        if (Array.isArray(replace)) {
+            target.kdbFunction = target.kdbFunction.replace(search, '(' + replace.join(';') + ')')
+        } else {
+            target.kdbFunction = target.kdbFunction.replace(search, replace)
+        };
         target.table = target.table.replace(search, replace);
         for(let i = 0; i < target.select[0].length; i++) {
             for(let y = 0; y < target.select[0][i].params.length; y++) {
