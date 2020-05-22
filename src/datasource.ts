@@ -10,7 +10,7 @@ import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
 import { conflationDurationDefault, conflationUnitDefault } from './query_ctrl';
-import { tabFunction,defaultTimeout,kdbEpoch } from './model/kdb-request-config';
+import { tabFunction,defaultTimeout,kdbEpoch,durationMap } from './model/kdb-request-config';
 export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
@@ -84,7 +84,14 @@ export class KDBDatasource {
         return quotedValues.join(',');
     }; */
 
-    private variablesReplace(target:any, search: string, replace:string | string[] | number) {
+    private variablesReplace(target:any, search: string, replace:any) {
+        /* if (Array.isArray(replace)) {
+            let strboolarr: boolean[] = [];
+            for (let i = 0; i < replace.length; i++) {
+                strboolarr.concat("string" == typeof replace[i]);
+            }
+            if (strboolarr.indexOf(false) == -1) replace = '(' + replace.join(';') + ')'
+        } */
         if (Array.isArray(replace)) {
             target.kdbFunction = target.kdbFunction.replace(search, '(' + replace.join(';') + ')')
         } else {
@@ -135,14 +142,30 @@ export class KDBDatasource {
             }
         };
     }
-    private injectVariables(target) {
+    private injectVariables(target, scoped) {
         let instVariables = this.templateSrv.getVariables();
-        for(var i = 0; i < instVariables.length; i++) {
-            let search = '$' + instVariables[i].name;
-            let replace = instVariables[i].current.value;
-            this.variablesReplace(target, search, replace);
+        console.log('templateSrv.getVariables()', instVariables)
+        let scopedVarArray = Object.keys(scoped);
+        let scopedValueArray = [];
+        for(let k = 0; k < scopedVarArray.length; k++) {
+            scopedValueArray = scopedValueArray.concat(scoped[scopedVarArray[k]].value);
+            scopedVarArray[k] = "$" + scopedVarArray[k];
+        };
+        for(let i = 0; i < instVariables.length; i++) {
+            let varname = '$' + instVariables[i].name
+            if(scopedVarArray.indexOf(varname) == -1) {
+                scopedVarArray = scopedVarArray.concat(varname);
+                scopedValueArray = scopedValueArray.concat(instVariables[i].current.value)
+            };
         }
-    }
+        console.log('SEARCHING FOR', scopedVarArray)
+        console.log('REPLACING WITH', scopedValueArray)
+        for(let kv = 0; kv < scopedVarArray.length; kv++) {
+            this.variablesReplace(target, scopedVarArray[kv], scopedValueArray[kv]);
+        }
+
+    };
+
     //Websocket per request?
     private buildKdbRequest(target) {
         console.log('TARGET: ', target)
@@ -217,19 +240,7 @@ export class KDBDatasource {
             queryDetails.queryError.error[1] = true;
             queryDetails.queryError.message[1] = 'Conflation unit not support. Please post conflation settings on our GitHub page.';
         };
-        if(queryDetails.conflationUnit == 's') {
-            queryDetails.conflationDurationMS = queryDetails.conflationDuration * Math.pow(10,9);
-        }
-        else if(queryDetails.conflationUnit == 'm') {
-            queryDetails.conflationDurationMS = queryDetails.conflationDuration * 60 * Math.pow(10,9);
-        }
-        else if(queryDetails.conflationUnit == 'h') {
-            queryDetails.conflationDurationMS = queryDetails.conflationDuration * 3600 * Math.pow(10,9);
-        }
-        else {
-            queryDetails.queryError.error[1] = true;
-            queryDetails.queryError.message[1] = 'Unhandled exception in conflation. Please post conflation settings on our GitHub page.'
-        };
+        queryDetails.conflationDurationMS = queryDetails.conflationDuration * durationMap[queryDetails.conflationUnit]
     }
 
     private buildKdbTimestamp(date : Date) {
@@ -375,7 +386,7 @@ export class KDBDatasource {
 
         for(var i = 0; i < prefilterResultCount; i++){
             //Inject variables into target
-            this.injectVariables(options.targets[i])
+            this.injectVariables(options.targets[i], options.scopedVars)
             allRefIDs.push(options.targets[i].refId);
             options.targets[i].range = options.range;
             if ((!options.targets[i].table && options.targets[i].queryType === 'selectQuery') || 
