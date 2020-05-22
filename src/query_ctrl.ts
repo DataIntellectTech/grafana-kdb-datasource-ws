@@ -6,7 +6,7 @@ import {QueryCtrl} from 'app/plugins/sdk';
 import {SqlPart} from './sql_part/sql_part';
 import KDBQuery from './kdb_query';
 import sqlPart from './sql_part';
-import { defaultRowCountLimit } from './model/kdb-request-config';
+import { defaultRowCountLimit, durationMap } from './model/kdb-request-config';
 //Declaring default constants
 export const conflationUnitDefault: string = 'm';
 export const conflationDurationDefault: string = "5";
@@ -114,6 +114,7 @@ export class KDBQueryCtrl extends QueryCtrl {
 
         this.durationUnits = [
             //NOTE: The text -> value conversion here doesnt work; segment.value is still the 'text' value.
+            {text: 'Miliseconds', value: 'ms'},
             {text: 'Seconds', value: 's'},
             {text: 'Minutes', value: 'm'},
             {text: 'Hours', value: 'h'}];
@@ -133,7 +134,7 @@ export class KDBQueryCtrl extends QueryCtrl {
         if(!this.target.useConflation){
             this.target.conflationUnit = conflationUnitDefault;
             this.target.conflationDuration = conflationDurationDefault;
-            this.target.conflationDurationMS = Number(conflationDurationDefault) * (conflationUnitDefault == 'Seconds' ? Math.pow(10,9) : (conflationUnitDefault == 'Minutes' ? 60 * Math.pow(10,9) : 3600 * Math.pow(10,9)));
+            this.target.conflationDurationMS = Number(conflationDurationDefault) * durationMap[conflationUnitDefault];
         }
         if(!this.target.kdbSideFunction){
             this.target.kdbSideFunction = 'Select Function'
@@ -321,8 +322,6 @@ export class KDBQueryCtrl extends QueryCtrl {
     conflationSettingsChanged() {
         //Conflation errors are reported in queryError at index 1
         this.target.queryError.error[1] = false;
-        console.log('CONFLATION CHANGED', this.conflationDurationSegment.value)
-        console.log(this.templateSrv.getVariables())
         if (isNaN(this.conflationDurationSegment.value)) {
             //Test if its a variable
             let instVariables = this.templateSrv.getVariables();
@@ -330,6 +329,7 @@ export class KDBQueryCtrl extends QueryCtrl {
             for(var i = 0; i < instVariables.length; i++) {
                 namedVars = namedVars.concat('$' + instVariables[i].name);
             }
+            namedVars = namedVars.concat(['$__interval', '$__interval_ms'])
             //If it is a variable, set target.conflationDuration to it
             if(namedVars.indexOf(this.conflationDurationSegment.value) !== -1) {
                 this.target.conflationDuration = this.conflationDurationSegment.value;
