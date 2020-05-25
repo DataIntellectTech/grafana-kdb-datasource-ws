@@ -65,33 +65,7 @@ export class KDBDatasource {
 
     }
 
-    /* interpolateVariable = (value, variable) => {
-        if (typeof value === 'string') {
-            if (variable.multi || variable.includeAll) {
-                return this.queryModel.quoteLiteral(value);
-            } else {
-                return value;
-            }
-        }
-
-        if (typeof value === 'number') {
-            return value;
-        }
-
-        const quotedValues = _.map(value, v => {
-            return this.queryModel.quoteLiteral(v);
-        });
-        return quotedValues.join(',');
-    }; */
-
     private variablesReplace(target:any, search: string, replace:any) {
-        /* if (Array.isArray(replace)) {
-            let strboolarr: boolean[] = [];
-            for (let i = 0; i < replace.length; i++) {
-                strboolarr.concat("string" == typeof replace[i]);
-            }
-            if (strboolarr.indexOf(false) == -1) replace = '(' + replace.join(';') + ')'
-        } */
         if (Array.isArray(replace)) {
             target.kdbFunction = target.kdbFunction.replace(search, '(' + replace.join(';') + ')')
         } else {
@@ -106,7 +80,6 @@ export class KDBDatasource {
         if(target.where !== []) {
             for(let i = 0; i < target.where.length; i++) {
                 for(let y = 0; y < target.where[i].params.length; y++) {
-                    console.log(replace)
                     if (Array.isArray(replace) && replace.length > 1) {
                         if(target.where[i].params[y] === search) target.where[i].params[y] = replace;
                     } else if ("string" == typeof target.where[i].params[y]) {
@@ -142,24 +115,29 @@ export class KDBDatasource {
             }
         };
     }
-    private injectVariables(target, scoped) {
+    private injectVariables(target, scoped, range) {
         let instVariables = this.templateSrv.getVariables();
-        console.log('templateSrv.getVariables()', instVariables)
         let scopedVarArray = Object.keys(scoped);
         let scopedValueArray = [];
+        //scoped variables inject
         for(let k = 0; k < scopedVarArray.length; k++) {
-            scopedValueArray = scopedValueArray.concat(scoped[scopedVarArray[k]].value);
+            scopedValueArray.push(scoped[scopedVarArray[k]].value);
             scopedVarArray[k] = "$" + scopedVarArray[k];
         };
+        //local variables inject (user variables)
         for(let i = 0; i < instVariables.length; i++) {
             let varname = '$' + instVariables[i].name
             if(scopedVarArray.indexOf(varname) == -1) {
-                scopedVarArray = scopedVarArray.concat(varname);
-                scopedValueArray = scopedValueArray.concat(instVariables[i].current.value)
+                scopedVarArray.push(varname);
+                scopedValueArray.push(instVariables[i].current.value)
             };
-        }
-        console.log('SEARCHING FOR', scopedVarArray)
-        console.log('REPLACING WITH', scopedValueArray)
+        };
+        //$__from & $__to inject
+        scopedVarArray.push('$__from');
+        scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.from._d) + ')');
+        scopedVarArray.push('$__to');
+        scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.to._d) + ')');
+        //Replace variables
         for(let kv = 0; kv < scopedVarArray.length; kv++) {
             this.variablesReplace(target, scopedVarArray[kv], scopedValueArray[kv]);
         }
@@ -168,7 +146,6 @@ export class KDBDatasource {
 
     //Websocket per request?
     private buildKdbRequest(target) {
-        console.log('TARGET: ', target)
         let queryParam = new QueryParam();
         let kdbRequest = new KdbRequest();
         let queryDictionary = new QueryDictionary();
@@ -377,7 +354,6 @@ export class KDBDatasource {
     };
 
     query(options) {
-        console.log('OPTIONS', options)
         var prefilterResultCount = options.targets.length;
         var allRefIDs = [];
         var blankRefIDs = [];
@@ -386,7 +362,7 @@ export class KDBDatasource {
 
         for(var i = 0; i < prefilterResultCount; i++){
             //Inject variables into target
-            this.injectVariables(options.targets[i], options.scopedVars)
+            this.injectVariables(options.targets[i], options.scopedVars, options.range)
             allRefIDs.push(options.targets[i].refId);
             options.targets[i].range = options.range;
             if ((!options.targets[i].table && options.targets[i].queryType === 'selectQuery') || 
