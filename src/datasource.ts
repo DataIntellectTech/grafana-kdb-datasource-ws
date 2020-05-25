@@ -224,6 +224,24 @@ export class KDBDatasource {
         return 1000000 * (date.valueOf() - kdbEpoch);
     }
 
+    //Getting it to work via strings would require supporting timezones fully. Rabbit hole.
+    /* private ES2015padStart(obj: string, length: number, fill: string) {
+        //Effectively polyfill for String.padStart (fill length will only fill up to 10 missing characters)
+        let f = length - obj.length;
+        return f > 0 ? fill.repeat(10).substr(0,f) + obj : obj
+    }
+
+    private buildKdbTimestampString(date : Date) {
+        let dt = date.getFullYear().toString() + '.' + 
+            this.ES2015padStart((date.getMonth() + 1).toString(), 2, "0") + '.' + 
+            this.ES2015padStart(date.getDate().toString(), 2, "0");
+        let tm = this.ES2015padStart(date.getHours().toString(), 2, "0") + ':' + 
+            this.ES2015padStart(date.getMinutes().toString(), 2, "0") + ':' + 
+            this.ES2015padStart(date.getSeconds().toString(), 2, "0") + '.' + 
+            this.ES2015padStart(date.getMilliseconds().toString(), 3, "0");
+        return dt + 'D' + tm;
+    } */
+
     private buildTemporalRange(range) {
         let temporalRange: number[] = [];
         if (range) {
