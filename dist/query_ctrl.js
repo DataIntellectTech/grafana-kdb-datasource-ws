@@ -28,8 +28,8 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
             }],
         execute: function() {
             //Declaring default constants
-            conflationUnitDefault = 'm';
-            conflationDurationDefault = "5";
+            exports_1("conflationUnitDefault", conflationUnitDefault = 'm');
+            exports_1("conflationDurationDefault", conflationDurationDefault = "5");
             KDBQueryCtrl = (function (_super) {
                 __extends(KDBQueryCtrl, _super);
                 /** @ngInject */
@@ -45,7 +45,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                         this.datasource.connectWS();
                     }
                     ;
-                    //this.target = this.target;98
+                    this.templateSrv = templateSrv;
                     this.queryModel = new kdb_query_1.default(this.target, templateSrv, this.panel.scopedVars);
                     this.metaBuilder = new meta_query_1.KDBMetaQuery(this.target, this.queryModel);
                     this.updateProjection();
@@ -83,6 +83,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                         { text: 'Variance', value: 'var' }];
                     this.durationUnits = [
                         //NOTE: The text -> value conversion here doesnt work; segment.value is still the 'text' value.
+                        { text: 'Miliseconds', value: 'ms' },
                         { text: 'Seconds', value: 's' },
                         { text: 'Minutes', value: 'm' },
                         { text: 'Hours', value: 'h' }];
@@ -99,7 +100,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     if (!this.target.useConflation) {
                         this.target.conflationUnit = conflationUnitDefault;
                         this.target.conflationDuration = conflationDurationDefault;
-                        this.target.conflationDurationMS = Number(conflationDurationDefault) * (conflationUnitDefault == 'Seconds' ? Math.pow(10, 9) : (conflationUnitDefault == 'Minutes' ? 60 * Math.pow(10, 9) : 3600 * Math.pow(10, 9)));
+                        this.target.conflationDurationMS = Number(conflationDurationDefault) * kdb_request_config_1.durationMap[conflationUnitDefault];
                     }
                     if (!this.target.kdbSideFunction) {
                         this.target.kdbSideFunction = 'Select Function';
@@ -264,34 +265,33 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     //Conflation errors are reported in queryError at index 1
                     this.target.queryError.error[1] = false;
                     if (isNaN(this.conflationDurationSegment.value)) {
-                        this.target.queryError.error[1] = true;
-                        this.target.queryError.message[1] = 'Conflation duration must be a number.';
+                        //Test if its a variable
+                        var instVariables = this.templateSrv.getVariables();
+                        var namedVars = [];
+                        for (var i = 0; i < instVariables.length; i++) {
+                            namedVars = namedVars.concat('$' + instVariables[i].name);
+                        }
+                        namedVars = namedVars.concat(['$__interval', '$__interval_ms']);
+                        //If it is a variable, set target.conflationDuration to it
+                        if (namedVars.indexOf(this.conflationDurationSegment.value) !== -1) {
+                            this.target.conflationDuration = this.conflationDurationSegment.value;
+                        }
+                        else {
+                            // Otherwise error
+                            this.target.queryError.error[1] = true;
+                            this.target.queryError.message[1] = 'Conflation duration must be a number.';
+                        }
+                        ;
                     }
                     else
                         this.target.conflationDuration = this.conflationDurationSegment.value;
-                    if (this.target.conflationUnit == 's') {
-                        this.target.conflationDurationMS = this.target.conflationDuration * Math.pow(10, 9);
-                    }
-                    else if (this.target.conflationUnit == 'm') {
-                        this.target.conflationDurationMS = this.target.conflationDuration * 60 * Math.pow(10, 9);
-                    }
-                    else if (this.target.conflationUnit == 'h') {
-                        this.target.conflationDurationMS = this.target.conflationDuration * 3600 * Math.pow(10, 9);
-                    }
-                    else {
-                        this.target.queryError.error[1] = true;
-                        this.target.queryError.message[1] = 'Unhandled exception in conflation. Please post conflation settings on our GitHub page.';
-                    }
-                    ;
                     if (this.target.useConflation === false) {
-                        console.log(this.selectParts[0][1]);
                         this.selectParts.map(function (partGroup) {
-                            for (var i = 0; i < partGroup.length; i++) {
-                                if (partGroup[i].part.type == "aggregate")
-                                    partGroup.splice(i, 1);
+                            for (var i_1 = 0; i_1 < partGroup.length; i_1++) {
+                                if (partGroup[i_1].part.type == "aggregate")
+                                    partGroup.splice(i_1, 1);
                             }
                         });
-                        console.log(this.selectParts[0][1]);
                     }
                     ;
                     this.updatePersistedParts();
@@ -300,9 +300,24 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 KDBQueryCtrl.prototype.rowCountLimitChanged = function () {
                     //Row count limit errors are reported in queryError at index 2
                     if (isNaN(this.rowCountLimitSegment.value)) {
-                        this.target.rowCountLimit = kdb_request_config_1.defaultRowCountLimit;
-                        this.target.queryError.error[2] = true;
-                        this.target.queryError.message[2] = 'Row count must be a positive integer.';
+                        //Test if its a variable
+                        var instVariables = this.templateSrv.getVariables();
+                        var namedVars = [];
+                        for (var i = 0; i < instVariables.length; i++) {
+                            namedVars = namedVars.concat('$' + instVariables[i].name);
+                        }
+                        //If it is a variable, set target.rowCountLimit to it
+                        if (namedVars.indexOf(this.rowCountLimitSegment.value) !== -1) {
+                            this.target.rowCountLimit = this.rowCountLimitSegment.value;
+                            this.target.queryError.error[2] = false;
+                            return this.panelCtrl.refresh();
+                        }
+                        else {
+                            this.target.rowCountLimit = kdb_request_config_1.defaultRowCountLimit;
+                            this.target.queryError.error[2] = true;
+                            this.target.queryError.message[2] = 'Row count must be a positive integer.';
+                        }
+                        ;
                     }
                     else {
                         var numberRowCountLimit = Number(this.rowCountLimitSegment.value);

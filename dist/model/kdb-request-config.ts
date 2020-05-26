@@ -4,6 +4,12 @@
 export const defaultRowCountLimit : number = 10000;
 export var defaultTimeout : number = 5000;
 export const kdbEpoch : number = 946684800000
+export const durationMap = {
+    ms: Math.pow(10,6),
+    s: Math.pow(10,9),
+    m: 60 * Math.pow(10,9),
+    h: 3600 * Math.pow(10,9)
+}
 
 //Graph response type
 export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error! - ",x;0b)}]}{[dict] \n ' +
