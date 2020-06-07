@@ -21,6 +21,7 @@ export declare class KDBDatasource {
     maxRowCount: number;
     connectionStateCycles: number;
     timeoutLength: number;
+    debugMode: boolean;
     requestSentList: any[];
     requestSentIDList: any[];
     responseReceivedList: any[];

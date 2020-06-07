@@ -10,6 +10,7 @@ import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
 import { tabFunction,defaultTimeout,kdbEpoch } from './model/kdb-request-config';
+import { debugGraphFunction, debugTabFunction } from './model/debugFunctions';
 export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
@@ -26,6 +27,7 @@ export class KDBDatasource {
     maxRowCount: number;
     connectionStateCycles: number;
     timeoutLength: number;
+    debugMode: boolean;
 
     //WebSocket communication variables
     requestSentList: any[];
@@ -47,6 +49,7 @@ export class KDBDatasource {
         this.requestSentList = [];
         this.requestSentIDList = []
         this.responseReceivedList = [];
+        this.debugMode = instanceSettings.jsonData.debugMode;
 
         this.url = 'http://' + instanceSettings.jsonData.host;
         if (instanceSettings.jsonData.useAuthentication) {
@@ -128,9 +131,15 @@ export class KDBDatasource {
         kdbRequest.queryId = target.queryId;
         kdbRequest.version = target.version;
 
-        return [
-            ((target.format == 'time series') ? graphFunction : tabFunction),
-            Object.assign({}, kdbRequest)];
+        if (!this.debugMode) {
+            return [
+                ((target.format == 'time series') ? graphFunction : tabFunction),
+                Object.assign({}, kdbRequest)];
+        } else {
+            return [
+                ((target.format == 'time series') ? debugGraphFunction : debugTabFunction),
+                Object.assign({}, kdbRequest)];
+        }
     }
 
     //This function 
