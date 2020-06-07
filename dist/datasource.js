@@ -85,8 +85,16 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                         });
                         return Promise.race([timeout, response]);
                     };
+                    console.log('INSTANCE SETTINGS', instanceSettings);
+                    console.log('TEMPLATESRV', templateSrv);
+                    console.log('BACKENDSRV', backendSrv);
                     this.name = instanceSettings.name;
                     this.id = instanceSettings.id;
+                    this.version = instanceSettings.meta.info.version;
+                    this.releaseDate = instanceSettings.meta.info.updated;
+                    this.user = backendSrv.contextSrv.user.login;
+                    this.orgName = backendSrv.contextSrv.user.orgName;
+                    this.userEmail = backendSrv.contextSrv.user.email;
                     this.responseParser = new response_parser_1.default(this.$q);
                     this.queryModel = new kdb_query_1.default({});
                     this.interval = (instanceSettings.jsonData || {}).timeInterval;
@@ -151,13 +159,11 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                     else {
                         queryParam.grouping = [];
                     }
-                    kdbRequest.time = this.getTimeStamp(new Date());
                     kdbRequest.refId = target.refId;
                     kdbRequest.query = ''; //query;
                     kdbRequest.queryParam = Object.assign({}, queryParam);
                     kdbRequest.format = target.format;
                     kdbRequest.queryId = target.queryId;
-                    kdbRequest.version = target.version;
                     if (!this.debugMode) {
                         return [
                             ((target.format == 'time series') ? kdb_request_config_1.graphFunction : kdb_request_config_2.tabFunction),
@@ -469,8 +475,17 @@ System.register(['lodash', './response_parser', './kdb_query', './c', "./model/k
                     var _c = this.c;
                     var requestPromise = new Promise(function (resolve) {
                         var refIDn = Math.round(10000000 * Math.random());
-                        var wrappedRequest = { i: request, ID: refIDn };
-                        _this.ws.send(_c.serialize(wrappedRequest));
+                        var wrappedRequest = {
+                            time: _this.getTimeStamp(new Date()),
+                            version: _this.version,
+                            release: _this.releaseDate,
+                            user: _this.user,
+                            email: _this.userEmail,
+                            org: _this.orgName,
+                            i: request,
+                            ID: refIDn
+                        };
+                        _this.ws.send(_c.serialize({ GRAF_AQUAQ_KDB_DS: wrappedRequest }));
                         _this.requestSentIDList.push(refIDn);
                         requestResolve = resolve;
                     });

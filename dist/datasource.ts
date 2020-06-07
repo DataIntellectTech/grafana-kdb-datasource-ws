@@ -15,6 +15,11 @@ export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
     name: any;
+    version: string;
+    releaseDate: string;
+    user: string;
+    orgName: string;
+    userEmail:string;
     responseParser: ResponseParser;
     queryModel: KDBQuery;
     interval: string;
@@ -36,8 +41,16 @@ export class KDBDatasource {
 
     /** @ngInject */
     constructor(instanceSettings, private backendSrv, private $q, private templateSrv) {
+        console.log('INSTANCE SETTINGS', instanceSettings)
+        console.log('TEMPLATESRV', templateSrv)
+        console.log('BACKENDSRV',backendSrv)
         this.name = instanceSettings.name;
         this.id = instanceSettings.id;
+        this.version = instanceSettings.meta.info.version;
+        this.releaseDate = instanceSettings.meta.info.updated;
+        this.user = backendSrv.contextSrv.user.login;
+        this.orgName = backendSrv.contextSrv.user.orgName
+        this.userEmail = backendSrv.contextSrv.user.email
         this.responseParser = new ResponseParser(this.$q);
         this.queryModel = new KDBQuery({});
         this.interval = (instanceSettings.jsonData || {}).timeInterval;
@@ -123,13 +136,11 @@ export class KDBDatasource {
             queryParam.grouping = [];
         }
 
-        kdbRequest.time = this.getTimeStamp(new Date());
         kdbRequest.refId = target.refId;
         kdbRequest.query = ''//query;
         kdbRequest.queryParam = Object.assign({}, queryParam);
         kdbRequest.format = target.format;
         kdbRequest.queryId = target.queryId;
-        kdbRequest.version = target.version;
 
         if (!this.debugMode) {
             return [
@@ -449,8 +460,17 @@ export class KDBDatasource {
         let _c = this.c;
         var requestPromise = new Promise(resolve => {
             let refIDn = Math.round(10000000 * Math.random());
-            var wrappedRequest = {i:request, ID:refIDn};
-            this.ws.send(_c.serialize(wrappedRequest));
+            var wrappedRequest = {
+                time:this.getTimeStamp(new Date()),
+                version: this.version,
+                release: this.releaseDate,
+                user: this.user,
+                email: this.userEmail,
+                org: this.orgName,
+                i:request, 
+                ID:refIDn
+            };
+            this.ws.send(_c.serialize({GRAF_AQUAQ_KDB_DS: wrappedRequest}));
             this.requestSentIDList.push(refIDn);
             requestResolve = resolve;
         });

@@ -9,6 +9,11 @@ export declare class KDBDatasource {
     private templateSrv;
     id: any;
     name: any;
+    version: string;
+    releaseDate: string;
+    user: string;
+    orgName: string;
+    userEmail: string;
     responseParser: ResponseParser;
     queryModel: KDBQuery;
     interval: string;
