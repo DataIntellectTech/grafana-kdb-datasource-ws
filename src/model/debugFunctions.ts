@@ -1,26 +1,20 @@
 //Graph response type
-export const debugGraphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error! - ",x;0b)}]}{[dict] \n ' +
+export const debugGraphFunction: string =  '{[dict] \n ' +
 ' \n ' +
 ' \n ' +
-' conc:{ \n ' +
-` .[x;(y;z);{'\"Function:conc - Error:\",x}]}[{[d;raw] \n ` +
-' \n ' +
+' conc:{[d;raw] \n ' +
 ' c:(cols raw) except $[`unkeyed in key d;key d[`unkeyed];()],raze d[`grouping`temporal_field]; \n ' +
 ' ca:{$[x ~ ();last;value x]}d[`conflation;`agg]; \n ' +
 ' :c!ca,/:c,:(); \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' conb:{ \n ' +
-` @[x;(y);{'\"Function:conb - Error:\",x}]}[{[d] \n ` +
-' \n ' +
+' conb:{[d] \n ' +
 ' cv: value d[`conflation;`val];cf:d[`temporal_field]; \n ' +
 ' :((enlist cf)!enlist(xbar;cv;cf)), \n ' +
 ' $[`unkeyed in key d;d[`unkeyed];()]; \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' wbuild:{ \n ' +
-` @[x;(y);{'\"Function:wbuild - Error:\",x}]}[{[d] \n ` +
-' \n ' +
+' wbuild:{[d] \n ' +
 ' wObjs:()!(); \n ' +
 ' wObjs[`tr]:enlist (\"within\";d[`temporal_field];enlist d[`temporal_range]); \n ' +
 ' wObjs[`wc]:wObjs[`tr],{[x]$[0=type first x;x;enlist x]}d[`where]; \n ' +
@@ -31,11 +25,9 @@ export const debugGraphFunction: string =  '{@[x;y;{`payload`error`success!(();"
 ' x[2]]]];x[3])} each wObjs[`wc]; \n ' +
 ' :{$[enlist["x"]~x[3]; \n ' +
 ' (not;x[0 1 2]);x[0 1 2]]}each wObjs[`p]; \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' cbuild:{ \n ' +
-` .[x;(y;z);{'\"Function:cbuild - Error:\",x}]}[{[d;end] \n ` +
-' \n ' +
+' cbuild:{[d;end] \n ' +
 ' t:d[`temporal_field];c:d[`column]; \n ' +
 ' if[not t in cols d[`table]; \n ' +
 ` :{'x}"Time column selected (",string[t], \n ` +
@@ -44,23 +36,19 @@ export const debugGraphFunction: string =  '{@[x;y;{`payload`error`success!(();"
 ' c:$[0h<>first type each c;enlist c;c]; \n ' +
 ' :t,c:{x[;1]!x}raze each{[s;x] \n ' +
 ' enlist[x 1]!enlist(value $[s~0b;\"::\";x 0];x 1)}[end;]each c; \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' bbuild:{ \n ' +
-` .[x;(y;z);{'\"Function:bbuild - Error:\",x}]}[{[d;end] \n ` +
-' \n ' +
+' bbuild:{[d;end] \n ' +
 ' g:d[`grouping]; \n ' +
 ' :$[99h=type g;$[end;g;{x!x}value g];{$[x~();0b;x!x]}distinct g]; \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' format:{ \n ' +
-` .[x;(y;z);{'\"Function:format - Error:\",x}]}[{[x;gfid] \n ` +
-' \n ' +
+' format:{[x;gfid] \n ' +
 ' t:$[99h=type x; \n ' +
 ' key[x]!([]data:flip each value x); \n ' +
 ' ([id:1#`x]data:`#enlist x)]; \n ' +
 ' :`payload`id`error`success!(t;gfid;$[(99h=type t)and(0<count x);\"OK\";\"NOT OK - Final table fault\"];1b); \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
 ' end:0b; \n ' +
 ' control:`rowlimit`gfid! \n ' +
@@ -73,7 +61,6 @@ export const debugGraphFunction: string =  '{@[x;y;{`payload`error`success!(();"
 ' gr:enlist[`CAST]!enlist("CAST";"AS";"MIXED LIST"); \n ' +
 ' funcparts[`b]:bbuild[d;end]; \n ' +
 ' funcparts[`w]:wbuild[d]; \n ' +
-' \n ' +
 ' \n ' +
 ' if[qt=`select; \n ' +
 ' t:d[`table]; \n ' +
@@ -173,27 +160,24 @@ export const debugGraphFunction: string =  '{@[x;y;{`payload`error`success!(();"
 ' }';
 
 //Table response type
-export const debugTabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! - ",x;0b)}]}{[dict] \n ' +
+export const debugTabFunction: string = '{[dict] \n ' +
 ' \n ' +
 ' \n ' +
-' conc:{ \n ' +
-` .[x;(y;z);{'\"Function:conc - Error Type:\",x}]}[{[d;raw] \n ` +
+' conc:{[d;raw] \n ' +
 ' \n ' +
 ' c:(cols raw) except $[`unkeyed in key d;key d[`unkeyed];()],raze d[`grouping`temporal_field]; \n ' +
 ' ca:{$[x ~ ();last;value x]}d[`conflation;`agg]; \n ' +
 ' :c!ca,/:c,:(); \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' conb:{ \n ' +
-` @[x;(y);{'\"Function:conb - Error Type:\",x}]}[{[d] \n ` +
+' conb:{[d] \n ' +
 ' \n ' +
 ' cv: value d[`conflation;`val];cf:d[`temporal_field]; \n ' +
 ' :((enlist cf)!enlist(xbar;cv;cf)), \n ' +
 ' $[`unkeyed in key d;d[`unkeyed];()]; \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' wbuild:{ \n ' +
-` @[x;(y);{'\"Function:wbuild - Error Type:\",x}]}[{[d] \n ` +
+' wbuild:{[d] \n ' +
 ' \n ' +
 ' wObjs:()!(); \n ' +
 ' wObjs[`wc]:$[not d[`where]~(); \n ' +
@@ -208,10 +192,9 @@ export const debugTabFunction: string = '{@[x;y;{`payload`error`success!(();"Err
 ' x[2]]]];x[3])} each wObjs[`wc],wObjs[`tr]; \n ' +
 ' :{$[enlist["x"]~x[3]; \n ' +
 ' (not;x[0 1 2]);x[0 1 2]]}each wObjs[`p]; \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' cbuild:{ \n ' +
-` .[x;(y;z);{'\"Function:cbuild - Error Type:\",x}]}[{[d;end] \n ` +
+' cbuild:{[d;end] \n ' +
 ' \n ' +
 ' t:$[not ()~d`temporal_field; \n ' +
 ' {enlist[x]!enlist[x]}[d`temporal_field];()]; \n ' +
@@ -219,24 +202,22 @@ export const debugTabFunction: string = '{@[x;y;{`payload`error`success!(();"Err
 ' c:$[0h<>first type each c;enlist c;c]; \n ' +
 ' :t,c:{x[;1]!x}raze each{[s;x] \n ' +
 ' enlist[x 1]!enlist(value $[s~0b;\"::\";x 0];x 1)}[end;]each c; \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' bbuild:{ \n ' +
-` .[x;(y;z);{'\"Function:bbuild - Error Type:\",x}]}[{[d;end] \n ` +
+' bbuild:{[d;end] \n ' +
 ' \n ' +
 ' g:d[`grouping]; \n ' +
 ' :$[99h=type g;$[end;g;{x!x}value g];{$[x~();0b;x!x]}distinct g]; \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
-' format:{ \n ' +
-` .[x;(y;z);{'\"Function:format - Error Type:\",x}]}[{[x;gfid] \n ` +
+' format:{[x;gfid] \n ' +
 ' \n ' +
 ' t:0!x; \n ' +
 ' rows:enlist{value x}each t; \n ' +
 ' columns:enlist ([]text:key flip t); \n ' +
 ' r:`columns`rows!(columns;rows); \n ' +
 ' :`payload`id`error`success!(r;gfid;$[0<count x;\"OK\";\"NOT OK - Final table fault\"];1b); \n ' +
-' }]; \n ' +
+' }; \n ' +
 ' \n ' +
 ' end:0b; \n ' +
 ' control:`rowlimit`gfid! \n ' +
