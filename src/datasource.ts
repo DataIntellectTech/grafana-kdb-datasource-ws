@@ -95,8 +95,11 @@ export class KDBDatasource {
         // These if(key x in keys[target]){replace x} chunks need to be generalised or ideally look into a better way
         // Could build an individual fieldInjectVariables function:
         // private fieldInjectVariables(target:any, field:string, search:string, replace:any) {
-        //    return target[field].replace(search, replace)
-        //}
+        //    if (field in Object.keys(target)) {
+        //      target[field].replace(search, replace)
+        //    };
+        //    return target
+        // };
         // something like that maybe
         if ('timeColumn' in Object.keys(target)) {
             target.timeColumn = target.timeColumn.replace(search, replace);
