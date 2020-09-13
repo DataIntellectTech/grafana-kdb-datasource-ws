@@ -96,6 +96,8 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     ;
                 }
                 KDBDatasource.prototype.variablesReplace = function (target, search, replace) {
+                    // This code is an unmaintainable mess. 
+                    console.log('VARIABLESREPLACE TARGET: ', target);
                     if (Array.isArray(replace)) {
                         target.kdbFunction = target.kdbFunction.replace(search, '(' + replace.join(';') + ')');
                     }
@@ -103,7 +105,10 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                         target.kdbFunction = target.kdbFunction.replace(search, replace);
                     }
                     ;
-                    target.table = target.table.replace(search, replace);
+                    if ('table' in Object.keys(target)) {
+                        target.table = target.table.replace(search, replace);
+                    }
+                    ;
                     for (var i = 0; i < target.select[0].length; i++) {
                         for (var y = 0; y < target.select[0][i].params.length; y++) {
                             target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
@@ -127,9 +132,20 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                         ;
                     }
                     ;
-                    target.timeColumn = target.timeColumn.replace(search, replace);
+                    // These if(key x in keys[target]){replace x} chunks need to be generalised or ideally look into a better way
+                    // Could build an individual fieldInjectVariables function:
+                    // private fieldInjectVariables(target:any, field:string, search:string, replace:any) {
+                    //    return target[field].replace(search, replace)
+                    //}
+                    // something like that maybe
+                    if ('timeColumn' in Object.keys(target)) {
+                        target.timeColumn = target.timeColumn.replace(search, replace);
+                    }
                     target.funcTimeCol = target.funcTimeCol.replace(search, replace);
-                    target.groupingField = target.groupingField.replace(search, replace);
+                    if ('groupingField' in Object.keys(target)) {
+                        target.groupingField = target.groupingField.replace(search, replace);
+                    }
+                    ;
                     target.funcGroupCol = target.funcGroupCol.replace(search, replace);
                     if ("string" == typeof target.rowCountLimit) {
                         if (target.rowCountLimit === search) {
@@ -158,6 +174,8 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                 };
                 KDBDatasource.prototype.injectVariables = function (target, scoped, range) {
                     var instVariables = this.templateSrv.getVariables();
+                    console.log('TEMPLATESRV:', this.templateSrv);
+                    console.log('VARIABLES: ', instVariables);
                     var scopedVarArray = Object.keys(scoped);
                     var scopedValueArray = [];
                     //scoped variables inject
@@ -182,6 +200,9 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     scopedVarArray.push('$__to');
                     scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.to._d) + ')');
                     //Replace variables
+                    console.log('TARGET: ', target);
+                    console.log('SCOPEDVARARRAY:', scopedVarArray);
+                    console.log('SCOPEDVALUEARRAY:', scopedValueArray);
                     for (var kv = 0; kv < scopedVarArray.length; kv++) {
                         this.variablesReplace(target, scopedVarArray[kv], scopedValueArray[kv]);
                     }

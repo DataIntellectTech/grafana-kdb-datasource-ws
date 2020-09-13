@@ -66,12 +66,16 @@ export class KDBDatasource {
     }
 
     private variablesReplace(target:any, search: string, replace:any) {
+        // This code is an unmaintainable mess. 
+        console.log('VARIABLESREPLACE TARGET: ', target)
         if (Array.isArray(replace)) {
             target.kdbFunction = target.kdbFunction.replace(search, '(' + replace.join(';') + ')')
         } else {
             target.kdbFunction = target.kdbFunction.replace(search, replace)
         };
-        target.table = target.table.replace(search, replace);
+        if ('table' in Object.keys(target)) {
+            target.table = target.table.replace(search, replace);
+        };
         for(let i = 0; i < target.select[0].length; i++) {
             for(let y = 0; y < target.select[0][i].params.length; y++) {
                 target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
@@ -88,9 +92,19 @@ export class KDBDatasource {
                 };
             };
         };
-        target.timeColumn = target.timeColumn.replace(search, replace);
+        // These if(key x in keys[target]){replace x} chunks need to be generalised or ideally look into a better way
+        // Could build an individual fieldInjectVariables function:
+        // private fieldInjectVariables(target:any, field:string, search:string, replace:any) {
+        //    return target[field].replace(search, replace)
+        //}
+        // something like that maybe
+        if ('timeColumn' in Object.keys(target)) {
+            target.timeColumn = target.timeColumn.replace(search, replace);
+        }
         target.funcTimeCol = target.funcTimeCol.replace(search, replace);
-        target.groupingField = target.groupingField.replace(search, replace);
+        if ('groupingField' in Object.keys(target)) {
+            target.groupingField = target.groupingField.replace(search, replace);
+        };
         target.funcGroupCol = target.funcGroupCol.replace(search, replace);
 
         if("string" == typeof target.rowCountLimit) {
@@ -117,6 +131,8 @@ export class KDBDatasource {
     }
     private injectVariables(target, scoped, range) {
         let instVariables = this.templateSrv.getVariables();
+        console.log('TEMPLATESRV:', this.templateSrv);
+        console.log('VARIABLES: ', instVariables);
         let scopedVarArray = Object.keys(scoped);
         let scopedValueArray = [];
         //scoped variables inject
@@ -138,6 +154,9 @@ export class KDBDatasource {
         scopedVarArray.push('$__to');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.to._d) + ')');
         //Replace variables
+        console.log('TARGET: ',target);
+        console.log('SCOPEDVARARRAY:', scopedVarArray);
+        console.log('SCOPEDVALUEARRAY:', scopedValueArray);
         for(let kv = 0; kv < scopedVarArray.length; kv++) {
             this.variablesReplace(target, scopedVarArray[kv], scopedValueArray[kv]);
         }

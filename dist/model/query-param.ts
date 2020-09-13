@@ -1,5 +1,12 @@
 import {QueryDictionary} from "./queryDictionary";
 
+class WhereObject {
+    type: string;
+    datatype: string;
+    name: string
+    params: string[] | string[][]
+}
+
 export class QueryParam {
 
     table: string;
