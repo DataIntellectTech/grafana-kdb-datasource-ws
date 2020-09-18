@@ -4,6 +4,12 @@
 export const defaultRowCountLimit : number = 10000;
 export var defaultTimeout : number = 5000;
 export const kdbEpoch : number = 946684800000
+export const durationMap = {
+    ms: Math.pow(10,6),
+    s: Math.pow(10,9),
+    m: 60 * Math.pow(10,9),
+    h: 3600 * Math.pow(10,9)
+}
 
 //Graph response type
 export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error! - ",x;0b)}]}{[dict] \n ' +
@@ -148,7 +154,7 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' " not present in selection"}]; \n ' +
 ' end:0b; \n ' +
 ' if[qt=`select; \n ' +
-' raw:(cols[key raw],cc:{`$x}each count[cols value raw]#.Q.a)xcol raw]; \n ' +
+' raw:(cols[key raw],cc:{`$x}each count[cols value raw]#cols value raw)xcol raw]; \n ' +
 ' ]; \n ' +
 ' \n ' +
 ' \n ' +
@@ -172,10 +178,6 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' funcparts[`c]:{x!x}cols[raw]except d`grouping \n ' +
 ' ]; \n ' +
 ' final:?[raw;();funcparts[`b];funcparts[`c]]; \n ' +
-' if[qt=`select; \n ' +
-' final:{[t]((cols t)[0],{`$x}each count[1_cols t]#.Q.a)xcol t}final]; \n ' +
-' final \n ' +
-' ; \n ' +
 ' :format[final;control`gfid]; \n ' +
 ' }';
 

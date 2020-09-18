@@ -14,6 +14,7 @@ export declare class KDBDatasource {
     user: string;
     orgName: string;
     userEmail: string;
+    variables: any;
     responseParser: ResponseParser;
     queryModel: KDBQuery;
     interval: string;
@@ -32,9 +33,12 @@ export declare class KDBDatasource {
     responseReceivedList: any[];
     /** @ngInject */
     constructor(instanceSettings: any, backendSrv: any, $q: any, templateSrv: any);
-    interpolateVariable: (value: any, variable: any) => any;
+    private variablesReplace(target, search, replace);
+    private injectVariables(target, scoped, range);
+    private newGetVariables(templatesrv);
     private buildKdbRequest(target);
     private buildTemporalField(queryDetails);
+    private buildConflation(queryDetails);
     private buildKdbTimestamp(date);
     private buildTemporalRange(range);
     private buildWhereParams(queryWhereList);

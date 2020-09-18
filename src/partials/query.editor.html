@@ -132,10 +132,10 @@
     <div ng-if="ctrl.target.queryType=='functionQuery'"> <!--</div>"!ctrl.target.useQueryBuilder"-->
 
     <!--Declare the function used-->
-    <div class="gf-form-inline">
-      <div class="gf-form">
-          <span class="gf-form-label query-keyword width-10">Function</span>
-          <input type="text" class="gf-form-input width-20" ng-model='ctrl.target.kdbFunction' placeholder="Enter function" ng-change="ctrl.functionChanged()"></input>
+    <div class="gf-form-inline" >
+      <div class="gf-form" style="height:111px ">
+          <span class="gf-form-label query-keyword width-10" style="height:111px">Function</span>
+          <textarea type="text" class="gf-form-textarea width-30" rows="5" style="background-color:#0b0c0e" ng-model='ctrl.target.kdbFunction' placeholder="Enter function" ng-change="ctrl.functionChanged()"></textarea>
       </div>
       
       <!--
@@ -144,8 +144,8 @@
         <metric-segment segment="ctrl.functionSegment" on-change="ctrl.functionChanged()"></metric-segment>
       </div>
     -->
-      <div class="gf-form gf-form--grow">
-          <div class="gf-form-label gf-form-label--grow"></div>
+      <div class="gf-form gf-form--grow" style="height:111px">
+          <div class="gf-form-label gf-form-label--grow" style="height:111px"></div>
       </div>
     </div>
     
