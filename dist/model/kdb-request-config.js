@@ -157,7 +157,7 @@ System.register([], function(exports_1) {
                 ' " not present in selection"}]; \n ' +
                 ' end:0b; \n ' +
                 ' if[qt=`select; \n ' +
-                ' raw:(cols[key raw],cc:{`$x}each count[cols value raw]#.Q.a)xcol raw]; \n ' +
+                ' raw:(cols[key raw],cc:{`$x}each count[cols value raw]#cols value raw)xcol raw]; \n ' +
                 ' ]; \n ' +
                 ' \n ' +
                 ' \n ' +
@@ -181,10 +181,6 @@ System.register([], function(exports_1) {
                 ' funcparts[`c]:{x!x}cols[raw]except d`grouping \n ' +
                 ' ]; \n ' +
                 ' final:?[raw;();funcparts[`b];funcparts[`c]]; \n ' +
-                ' if[qt=`select; \n ' +
-                ' final:{[t]((cols t)[0],{`$x}each count[1_cols t]#.Q.a)xcol t}final]; \n ' +
-                ' final \n ' +
-                ' ; \n ' +
                 ' :format[final;control`gfid]; \n ' +
                 ' }');
             //Table response type

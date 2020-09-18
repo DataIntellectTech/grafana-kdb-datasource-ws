@@ -133,7 +133,7 @@ export class KDBDatasource {
         };
     }
     private injectVariables(target, scoped, range) {
-        let instVariables = this.templateSrv.getVariables();
+        let instVariables = this.newGetVariables(this.templateSrv)
         console.log('TEMPLATESRV:', this.templateSrv);
         console.log('VARIABLES: ', instVariables);
         let scopedVarArray = Object.keys(scoped);
@@ -146,11 +146,13 @@ export class KDBDatasource {
         //local variables inject (user variables)
         for(let i = 0; i < instVariables.length; i++) {
             let varname = '$' + instVariables[i].name
+            console.log('vname:',varname)
             if(scopedVarArray.indexOf(varname) == -1) {
                 scopedVarArray.push(varname);
                 scopedValueArray.push(instVariables[i].current.value)
             };
         };
+        console.log('scopedval',scopedValueArray)
         //$__from & $__to inject
         scopedVarArray.push('$__from');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.from._d) + ')');
@@ -165,6 +167,14 @@ export class KDBDatasource {
         }
 
     };
+
+    private newGetVariables(templatesrv){
+        let instVariables = [];
+        for(let i=0;i< this.templateSrv.variables.length;i++){
+            instVariables.push(this.templateSrv.variables[i]);
+        }
+        return instVariables
+    }
 
     //Websocket per request?
     private buildKdbRequest(target) {

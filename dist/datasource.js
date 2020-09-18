@@ -135,8 +135,11 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     // These if(key x in keys[target]){replace x} chunks need to be generalised or ideally look into a better way
                     // Could build an individual fieldInjectVariables function:
                     // private fieldInjectVariables(target:any, field:string, search:string, replace:any) {
-                    //    return target[field].replace(search, replace)
-                    //}
+                    //    if (field in Object.keys(target)) {
+                    //      target[field].replace(search, replace)
+                    //    };
+                    //    return target
+                    // };
                     // something like that maybe
                     if ('timeColumn' in Object.keys(target)) {
                         target.timeColumn = target.timeColumn.replace(search, replace);
@@ -173,7 +176,7 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     ;
                 };
                 KDBDatasource.prototype.injectVariables = function (target, scoped, range) {
-                    var instVariables = this.templateSrv.getVariables();
+                    var instVariables = this.newGetVariables(this.templateSrv);
                     console.log('TEMPLATESRV:', this.templateSrv);
                     console.log('VARIABLES: ', instVariables);
                     var scopedVarArray = Object.keys(scoped);
@@ -187,6 +190,7 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     //local variables inject (user variables)
                     for (var i = 0; i < instVariables.length; i++) {
                         var varname = '$' + instVariables[i].name;
+                        console.log('vname:', varname);
                         if (scopedVarArray.indexOf(varname) == -1) {
                             scopedVarArray.push(varname);
                             scopedValueArray.push(instVariables[i].current.value);
@@ -194,6 +198,7 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                         ;
                     }
                     ;
+                    console.log('scopedval', scopedValueArray);
                     //$__from & $__to inject
                     scopedVarArray.push('$__from');
                     scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.from._d) + ')');
@@ -208,6 +213,13 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     }
                 };
                 ;
+                KDBDatasource.prototype.newGetVariables = function (templatesrv) {
+                    var instVariables = [];
+                    for (var i = 0; i < this.templateSrv.variables.length; i++) {
+                        instVariables.push(this.templateSrv.variables[i]);
+                    }
+                    return instVariables;
+                };
                 //Websocket per request?
                 KDBDatasource.prototype.buildKdbRequest = function (target) {
                     var queryParam = new query_param_1.QueryParam();

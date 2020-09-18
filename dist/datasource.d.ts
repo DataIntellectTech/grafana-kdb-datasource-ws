@@ -29,6 +29,7 @@ export declare class KDBDatasource {
     constructor(instanceSettings: any, backendSrv: any, $q: any, templateSrv: any);
     private variablesReplace(target, search, replace);
     private injectVariables(target, scoped, range);
+    private newGetVariables(templatesrv);
     private buildKdbRequest(target);
     private buildTemporalField(queryDetails);
     private buildConflation(queryDetails);
