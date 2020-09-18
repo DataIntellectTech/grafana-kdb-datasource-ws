@@ -9,6 +9,11 @@ export declare class KDBDatasource {
     private templateSrv;
     id: any;
     name: any;
+    version: string;
+    releaseDate: string;
+    user: string;
+    orgName: string;
+    userEmail: string;
     variables: any;
     responseParser: ResponseParser;
     queryModel: KDBQuery;
@@ -22,6 +27,7 @@ export declare class KDBDatasource {
     maxRowCount: number;
     connectionStateCycles: number;
     timeoutLength: number;
+    debugMode: boolean;
     requestSentList: any[];
     requestSentIDList: any[];
     responseReceivedList: any[];

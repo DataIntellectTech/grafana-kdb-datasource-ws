@@ -1,5 +1,5 @@
-System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request", "./model/query-param", "./model/queryDictionary", "./model/conflationParams", './model/kdb-request-config', './query_ctrl'], function(exports_1) {
-    var response_parser_1, kdb_query_1, c_1, kdb_request_1, query_param_1, queryDictionary_1, conflationParams_1, kdb_request_config_1, query_ctrl_1, kdb_request_config_2;
+System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request", "./model/query-param", "./model/queryDictionary", "./model/conflationParams", './model/kdb-request-config', './model/debugFunctions', './query_ctrl'], function(exports_1) {
+    var response_parser_1, kdb_query_1, c_1, kdb_request_1, query_param_1, queryDictionary_1, conflationParams_1, kdb_request_config_1, kdb_request_config_2, debugFunctions_1, query_ctrl_1;
     var KDBDatasource;
     return {
         setters:[
@@ -27,6 +27,9 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
             function (kdb_request_config_1_1) {
                 kdb_request_config_1 = kdb_request_config_1_1;
                 kdb_request_config_2 = kdb_request_config_1_1;
+            },
+            function (debugFunctions_1_1) {
+                debugFunctions_1 = debugFunctions_1_1;
             },
             function (query_ctrl_1_1) {
                 query_ctrl_1 = query_ctrl_1_1;
@@ -65,9 +68,17 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                         });
                         return Promise.race([timeout, response]);
                     };
+                    console.log('INSTANCE SETTINGS', instanceSettings);
+                    console.log('TEMPLATESRV', templateSrv);
+                    console.log('BACKENDSRV', backendSrv);
                     this.templateSrv = templateSrv;
                     this.name = instanceSettings.name;
                     this.id = instanceSettings.id;
+                    this.version = instanceSettings.meta.info.version;
+                    this.releaseDate = instanceSettings.meta.info.updated;
+                    this.user = backendSrv.contextSrv.user.login;
+                    this.orgName = backendSrv.contextSrv.user.orgName;
+                    this.userEmail = backendSrv.contextSrv.user.email;
                     this.responseParser = new response_parser_1.default(this.$q);
                     this.queryModel = new kdb_query_1.default({});
                     this.interval = (instanceSettings.jsonData || {}).timeInterval;
@@ -81,6 +92,7 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     this.requestSentList = [];
                     this.requestSentIDList = [];
                     this.responseReceivedList = [];
+                    this.debugMode = instanceSettings.jsonData.debugMode;
                     this.url = 'http://' + instanceSettings.jsonData.host;
                     if (instanceSettings.jsonData.useAuthentication) {
                         if (instanceSettings.jsonData.useTLS === true) {
@@ -257,16 +269,21 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     else {
                         queryParam.grouping = [];
                     }
-                    kdbRequest.time = this.getTimeStamp(new Date());
                     kdbRequest.refId = target.refId;
                     kdbRequest.query = ''; //query;
                     kdbRequest.queryParam = Object.assign({}, queryParam);
                     kdbRequest.format = target.format;
                     kdbRequest.queryId = target.queryId;
-                    kdbRequest.version = target.version;
-                    return [
-                        ((target.format == 'time series') ? kdb_request_config_1.graphFunction : kdb_request_config_2.tabFunction),
-                        Object.assign({}, kdbRequest)];
+                    if (!this.debugMode) {
+                        return [
+                            ((target.format == 'time series') ? kdb_request_config_1.graphFunction : kdb_request_config_2.tabFunction),
+                            Object.assign({}, kdbRequest)];
+                    }
+                    else {
+                        return [
+                            ((target.format == 'time series') ? debugFunctions_1.debugGraphFunction : debugFunctions_1.debugTabFunction),
+                            Object.assign({}, kdbRequest)];
+                    }
                 };
                 //This function 
                 KDBDatasource.prototype.buildTemporalField = function (queryDetails) {
@@ -600,8 +617,17 @@ System.register(['./response_parser', './kdb_query', './c', "./model/kdb-request
                     var _c = this.c;
                     var requestPromise = new Promise(function (resolve) {
                         var refIDn = Math.round(10000000 * Math.random());
-                        var wrappedRequest = { i: request, ID: refIDn };
-                        _this.ws.send(_c.serialize(wrappedRequest));
+                        var wrappedRequest = {
+                            time: _this.getTimeStamp(new Date()),
+                            version: _this.version,
+                            release: _this.releaseDate,
+                            user: _this.user,
+                            email: _this.userEmail,
+                            org: _this.orgName,
+                            i: request,
+                            ID: refIDn
+                        };
+                        _this.ws.send(_c.serialize({ GRAF_AQUAQ_KDB_DS: wrappedRequest }));
                         _this.requestSentIDList.push(refIDn);
                         requestResolve = resolve;
                     });

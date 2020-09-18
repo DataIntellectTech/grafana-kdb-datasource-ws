@@ -9,12 +9,19 @@ import { QueryParam } from "./model/query-param";
 import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
-import { conflationDurationDefault, conflationUnitDefault } from './query_ctrl';
 import { tabFunction,defaultTimeout,kdbEpoch,durationMap } from './model/kdb-request-config';
+import { debugGraphFunction, debugTabFunction } from './model/debugFunctions';
+import { conflationDurationDefault, conflationUnitDefault } from './query_ctrl';
+
 export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
     name: any;
+    version: string;
+    releaseDate: string;
+    user: string;
+    orgName: string;
+    userEmail:string;
     variables: any;
     responseParser: ResponseParser;
     queryModel: KDBQuery;
@@ -28,6 +35,7 @@ export class KDBDatasource {
     maxRowCount: number;
     connectionStateCycles: number;
     timeoutLength: number;
+    debugMode: boolean;
 
     //WebSocket communication variables
     requestSentList: any[];
@@ -36,9 +44,17 @@ export class KDBDatasource {
 
     /** @ngInject */
     constructor(instanceSettings, private backendSrv, private $q, private templateSrv) {
+        console.log('INSTANCE SETTINGS', instanceSettings)
+        console.log('TEMPLATESRV', templateSrv)
+        console.log('BACKENDSRV',backendSrv)
         this.templateSrv = templateSrv
         this.name = instanceSettings.name;
         this.id = instanceSettings.id;
+        this.version = instanceSettings.meta.info.version;
+        this.releaseDate = instanceSettings.meta.info.updated;
+        this.user = backendSrv.contextSrv.user.login;
+        this.orgName = backendSrv.contextSrv.user.orgName
+        this.userEmail = backendSrv.contextSrv.user.email
         this.responseParser = new ResponseParser(this.$q);
         this.queryModel = new KDBQuery({});
         this.interval = (instanceSettings.jsonData || {}).timeInterval;
@@ -50,6 +66,7 @@ export class KDBDatasource {
         this.requestSentList = [];
         this.requestSentIDList = []
         this.responseReceivedList = [];
+        this.debugMode = instanceSettings.jsonData.debugMode;
 
         this.url = 'http://' + instanceSettings.jsonData.host;
         if (instanceSettings.jsonData.useAuthentication) {
@@ -217,17 +234,21 @@ export class KDBDatasource {
             queryParam.grouping = [];
         }
 
-        kdbRequest.time = this.getTimeStamp(new Date());
         kdbRequest.refId = target.refId;
         kdbRequest.query = ''//query;
         kdbRequest.queryParam = Object.assign({}, queryParam);
         kdbRequest.format = target.format;
         kdbRequest.queryId = target.queryId;
-        kdbRequest.version = target.version;
 
-        return [
-            ((target.format == 'time series') ? graphFunction : tabFunction),
-            Object.assign({}, kdbRequest)];
+        if (!this.debugMode) {
+            return [
+                ((target.format == 'time series') ? graphFunction : tabFunction),
+                Object.assign({}, kdbRequest)];
+        } else {
+            return [
+                ((target.format == 'time series') ? debugGraphFunction : debugTabFunction),
+                Object.assign({}, kdbRequest)];
+        }
     }
 
     //This function 
@@ -571,8 +592,17 @@ export class KDBDatasource {
         let _c = this.c;
         var requestPromise = new Promise(resolve => {
             let refIDn = Math.round(10000000 * Math.random());
-            var wrappedRequest = {i:request, ID:refIDn};
-            this.ws.send(_c.serialize(wrappedRequest));
+            var wrappedRequest = {
+                time:this.getTimeStamp(new Date()),
+                version: this.version,
+                release: this.releaseDate,
+                user: this.user,
+                email: this.userEmail,
+                org: this.orgName,
+                i:request, 
+                ID:refIDn
+            };
+            this.ws.send(_c.serialize({GRAF_AQUAQ_KDB_DS: wrappedRequest}));
             this.requestSentIDList.push(refIDn);
             requestResolve = resolve;
         });
