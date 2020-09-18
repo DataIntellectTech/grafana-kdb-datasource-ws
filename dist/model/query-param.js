@@ -1,11 +1,17 @@
 System.register([], function(exports_1) {
-    var QueryParam;
+    var WhereObject, QueryParam;
     return {
         setters:[],
         execute: function() {
+            WhereObject = (function () {
+                function WhereObject() {
+                }
+                return WhereObject;
+            })();
             QueryParam = (function () {
                 function QueryParam() {
                     this.column = [];
+                    //where: WhereObject;
                     this.where = [];
                     this.temporal_range = [];
                     this.grouping = [];

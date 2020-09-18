@@ -1,3 +1,5 @@
+![AquaQ Analytics](/images/aquaq_bubbles_grafana.png)
+
 # Grafana and KDB+ Plugin Installation Instructions
 
 ## Quick Install Guide
@@ -6,7 +8,7 @@
  - If Grafana is not already installed, install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the [installation guide](https://grafana.com/docs/grafana/latest/installation/) for the relevant operating system.
 
 #### Installing kdb+ datasource plugin:
- - Download the [latest release](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases/tag/v1.0.0).
+ - Download the [latest release](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases/tag/v1.0.1).
  - Extract the entire *grafana-kdb-datasource-ws* folder to *{Grafana Install Directory}/grafana/data/plugins/*.
  - Start/restart the Grafana service (see **Grafana Service** below).
  
@@ -46,6 +48,9 @@ however there are known bugs with lesser used browsers:
 - Using authentication with Microsoft Edge is not supported.
 
 We recommend using the latest version of either Google Chrome or Mozilla Firefox.
+
+#### Time Zones:
+Grafana time ranges have support for UTC time, local browser time or Grafana server time. As kdb+ does not have native time-zone support **all timestamps/datetimes in kdb+ are interpreted as UTC+0**. We recommend dashboards are set to UTC time to avoid confusion.
 
 #### Grafana Service:
 On **Windows** grafana will by default install itself as a service. To view running services, run:
