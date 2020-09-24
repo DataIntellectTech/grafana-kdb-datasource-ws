@@ -1,3 +1,7 @@
+## DEV ONLY:
+## NEW .Z.WS HANDLER:
+`` .z.ws:{ds:-9!x;q:ds[`GRAF_AQUAQ_KDB_DS];neg[.z.w] -8! `o`ID!(@[value;q[`i];{`$"'",x}];q[`ID])} ``
+
 ![AquaQ Analytics](/images/aquaq_bubbles_grafana.png)
 
 # Grafana and KDB+ Plugin Installation Instructions
