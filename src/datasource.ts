@@ -132,6 +132,7 @@ export class KDBDatasource {
             }
         };
     }
+
     private injectVariables(target, scoped, range) {
         let instVariables = this.newGetVariables(this.templateSrv)
         console.log('TEMPLATESRV:', this.templateSrv);
@@ -149,7 +150,14 @@ export class KDBDatasource {
             console.log('vname:',varname)
             if(scopedVarArray.indexOf(varname) == -1) {
                 scopedVarArray.push(varname);
-                scopedValueArray.push(instVariables[i].current.value)
+                if(instVariables[i].current.text[0] === 'All'){
+                    console.log('trig1')
+                    scopedValueArray.push(instVariables[i].allValue)
+                }
+                else {
+                    console.log('trig2') 
+                    scopedValueArray.push(instVariables[i].current.value)
+                }
             };
         };
         console.log('scopedval',scopedValueArray)
@@ -168,9 +176,18 @@ export class KDBDatasource {
 
     };
 
-    private newGetVariables(templatesrv){
+    //Change templateSrv object to be handled as variables
+    private newGetVariables(templatesrv) {
         let instVariables = [];
-        for(let i=0;i< this.templateSrv.variables.length;i++){
+        for (let i=0;i< this.templateSrv.variables.length;i++) {
+            //Set the 'all' value if the option is enabled
+            if ( templatesrv.variables[i].options[0].text === 'All') {
+                let valueArray = [];
+                for (let j=1;j<this.templateSrv.variables[i].options.length;j++) {
+                    valueArray.push(this.templateSrv.variables[i].options[j].value);
+                }    
+                templatesrv.variables[i].allValue = valueArray;
+            } 
             instVariables.push(this.templateSrv.variables[i]);
         }
         return instVariables
