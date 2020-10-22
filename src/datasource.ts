@@ -65,22 +65,24 @@ export class KDBDatasource {
 
     }
 
+    //Replace variables with their values
     private variablesReplace(target:any, search: string, replace:any) {
-        // This code is an unmaintainable mess. 
+        //Format Options as array or scalar
         console.log('VARIABLESREPLACE TARGET: ', target)
         if (Array.isArray(replace)) {
             target.kdbFunction = target.kdbFunction.replace(search, '(' + replace.join(';') + ')')
         } else {
             target.kdbFunction = target.kdbFunction.replace(search, replace)
         };
-        if ('table' in Object.keys(target)) {
-            target.table = target.table.replace(search, replace);
-        };
+        //Replace Table Variables
+        target.table = this.fieldInjectVariables(target.table,search,replace)
+        //Replace select clause variables
         for(let i = 0; i < target.select[0].length; i++) {
             for(let y = 0; y < target.select[0][i].params.length; y++) {
                 target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
             };
         }; 
+        //Replace where clause variables
         if(target.where !== []) {
             for(let i = 0; i < target.where.length; i++) {
                 for(let y = 0; y < target.where[i].params.length; y++) {
@@ -92,24 +94,11 @@ export class KDBDatasource {
                 };
             };
         };
-        // These if(key x in keys[target]){replace x} chunks need to be generalised or ideally look into a better way
-        // Could build an individual fieldInjectVariables function:
-        // private fieldInjectVariables(target:any, field:string, search:string, replace:any) {
-        //    if (field in Object.keys(target)) {
-        //      target[field].replace(search, replace)
-        //    };
-        //    return target
-        // };
-        // something like that maybe
-        if ('timeColumn' in Object.keys(target)) {
-            target.timeColumn = target.timeColumn.replace(search, replace);
-        }
-        target.funcTimeCol = target.funcTimeCol.replace(search, replace);
-        if ('groupingField' in Object.keys(target)) {
-            target.groupingField = target.groupingField.replace(search, replace);
-        };
-        target.funcGroupCol = target.funcGroupCol.replace(search, replace);
-
+        //Replace time, grouping and funcGroup columns if required
+        target.timeColumn = this.fieldInjectVariables(target.timeColumn,search,replace)
+        target.groupingField = this.fieldInjectVariables(target.groupingField,search,replace)
+        target.funcGroupCol = this.fieldInjectVariables(target.funcGroupCol,search,replace)
+        //Check row count is formatted correctly
         if("string" == typeof target.rowCountLimit) {
             if(target.rowCountLimit === search) {
                 if (Number.isInteger(Number(replace)) && Number(replace) > 0) {
@@ -120,7 +109,7 @@ export class KDBDatasource {
                 }
             }    
         };
-
+        //Check conflation params are formatted correctly
         if("string" == typeof target.conflationDuration) {
             if(target.conflationDuration === search) {
                 if (isNaN(Number(replace))) {
@@ -131,6 +120,21 @@ export class KDBDatasource {
                 }
             }
         };
+    }
+
+    //Check if attribute needs replacing, then replace if so
+    private fieldInjectVariables(attrib:any, search:string, replace:any) {
+        console.log('s',search)
+        console.log('r',replace)
+        if (attrib) {
+            attrib = attrib.replace(search,replace);
+            console.log('a1',attrib)
+            return attrib
+        }
+        else {
+            console.log('a2',attrib)
+            return attrib
+        }
     }
 
     private injectVariables(target, scoped, range) {
