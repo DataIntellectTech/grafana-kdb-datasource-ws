@@ -70,7 +70,7 @@ export class KDBDatasource {
         //Format Options as array or scalar
         console.log('VARIABLESREPLACE TARGET: ', target)
         if (Array.isArray(replace)) {
-            target.kdbFunction = target.kdbFunction.replace(search, '(' + replace.join(';') + ')')
+            target.kdbFunction = target.kdbFunction.replace(search, replace.join(','))
         } else {
             target.kdbFunction = target.kdbFunction.replace(search, replace)
         };
@@ -141,16 +141,18 @@ export class KDBDatasource {
         let instVariables = this.newGetVariables(this.templateSrv)
         console.log('TEMPLATESRV:', this.templateSrv);
         console.log('VARIABLES: ', instVariables);
+        console.log('scp',scoped)
         let scopedVarArray = Object.keys(scoped);
         let scopedValueArray = [];
         //scoped variables inject
         for(let k = 0; k < scopedVarArray.length; k++) {
             scopedValueArray.push(scoped[scopedVarArray[k]].value);
-            scopedVarArray[k] = "$" + scopedVarArray[k];
+            scopedVarArray[k] = "$" + '{' + scopedVarArray[k] + '}';
         };
         //local variables inject (user variables)
         for(let i = 0; i < instVariables.length; i++) {
-            let varname = '$' + instVariables[i].name
+            let varname = '$' + '{' + instVariables[i].name + '}'
+            console.log(varname.length)
             console.log('vname:',varname)
             if(scopedVarArray.indexOf(varname) == -1) {
                 scopedVarArray.push(varname);
@@ -166,9 +168,9 @@ export class KDBDatasource {
         };
         console.log('scopedval',scopedValueArray)
         //$__from & $__to inject
-        scopedVarArray.push('$__from');
+        scopedVarArray.push('${__from}');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.from._d) + ')');
-        scopedVarArray.push('$__to');
+        scopedVarArray.push('${__to}');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.to._d) + ')');
         //Replace variables
         console.log('TARGET: ',target);
@@ -457,6 +459,18 @@ export class KDBDatasource {
                         errorMessage: options.targets[i].queryError.message[options.targets[i].queryError.error.indexOf(true)]
                     });
                 } else validRequestList.push(options.targets[i])
+            //Check time column is in the correct part of the query
+            let noSpaceFunc = options.targets[i].kdbFunction.replace(/\s/g,'');
+            let selectPartEnd = noSpaceFunc.indexOf('select')+6
+            let timePartStart = noSpaceFunc.indexOf(options.targets[i].funcTimeCol)
+            console.log('1',Math.abs(selectPartEnd-timePartStart))
+            if (Math.abs(selectPartEnd-timePartStart) > 0) {
+                let newKdbFunc = options.targets[i].kdbFunction.slice(0,options.targets[i].kdbFunction.indexOf('select')+6) + ' ' 
+                newKdbFunc = newKdbFunc + options.targets[i].funcTimeCol + ',' + options.targets[i].kdbFunction.slice(options.targets[i].kdbFunction.indexOf('select')+6,options.targets[i].kdbFunction.indexOf(options.targets[i].funcTimeCol)-2)
+                newKdbFunc = newKdbFunc + options.targets[i].kdbFunction.slice(options.targets[i].kdbFunction.indexOf(options.targets[i].funcTimeCol)+options.targets[i].funcTimeCol.length) 
+                console.log(newKdbFunc)
+                options.targets[i].kdbFunction = newKdbFunc
+                }
         };
 
         var nrBlankRequests = blankRefIDs.length
@@ -626,9 +640,34 @@ export class KDBDatasource {
         }
     }
 
+    //To be called for dynamic query variables
     metricFindQuery(kdbRequest: KdbRequest) {
+        console.log('met',kdbRequest)
         return new Promise((resolve, reject) => {
             resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                const values = []
+                var properties = [];
+                for(var key in result[0]) {
+                if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
+                    properties.push(key);
+                    }
+                }
+                for(let i=0;i < result.length;i++) {
+                    values.push({text:'`'.concat(result[i][properties[0]])})
+                }
+                console.log('props',properties)
+                return values;
+            }));
+        });
+
+    }
+
+    //To be called in cases other that dynamic query variables
+    metricFindQueryDefault(kdbRequest: KdbRequest) {
+        console.log('met',kdbRequest)
+        return new Promise((resolve, reject) => {
+            resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                console.log('res',result)
                 return result;
             }));
         });
