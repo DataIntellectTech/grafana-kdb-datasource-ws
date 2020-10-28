@@ -11,6 +11,7 @@ import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
 import { conflationDurationDefault, conflationUnitDefault } from './query_ctrl';
 import { tabFunction,defaultTimeout,kdbEpoch,durationMap } from './model/kdb-request-config';
+import { result } from 'lodash';
 export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
@@ -643,10 +644,12 @@ export class KDBDatasource {
     //To be called for dynamic query variables
     metricFindQuery(kdbRequest: KdbRequest) {
         console.log('met',kdbRequest)
+        
         return new Promise((resolve, reject) => {
             resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
                 const values = []
                 var properties = [];
+                console.log('r',typeof(result[0]))
                 for(var key in result[0]) {
                 if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
                     properties.push(key);
