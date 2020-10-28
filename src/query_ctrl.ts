@@ -418,7 +418,7 @@ export class KDBQueryCtrl extends QueryCtrl {
         console.log('dataList',dataList)
         this.lastQueryMeta = null;   
         const anySeriesFromQuery = _.find(dataList, {refId: this.target.refId});
-       if(anySeriesFromQuery.meta.errorReceived){
+       if(anySeriesFromQuery && anySeriesFromQuery.meta.errorReceived){
            this.target.errorFound = true;
            this.target.lastQueryError = anySeriesFromQuery.meta.errorMessage;
        } else {
