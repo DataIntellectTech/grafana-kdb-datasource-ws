@@ -459,20 +459,6 @@ export class KDBDatasource {
                         errorMessage: options.targets[i].queryError.message[options.targets[i].queryError.error.indexOf(true)]
                     });
                 } else validRequestList.push(options.targets[i])
-            //Check time column is in the correct part of the query
-            let noSpaceFunc = options.targets[i].kdbFunction.replace(/\s/g,'');
-            let selectPartEnd = noSpaceFunc.indexOf('select')+6
-            let timePartStart = noSpaceFunc.indexOf(options.targets[i].funcTimeCol)
-            console.log('1',Math.abs(selectPartEnd-timePartStart))
-            if (Math.abs(selectPartEnd-timePartStart) > 0) {
-                let newKdbFunc = options.targets[i].kdbFunction.slice(0,options.targets[i].kdbFunction.indexOf('select')+6) + ' ' 
-                newKdbFunc = newKdbFunc + options.targets[i].funcTimeCol + ',' + options.targets[i].kdbFunction.slice(options.targets[i].kdbFunction.indexOf('select')+6,options.targets[i].kdbFunction.indexOf(options.targets[i].funcTimeCol)-2)
-                newKdbFunc = newKdbFunc + options.targets[i].kdbFunction.slice(options.targets[i].kdbFunction.indexOf(options.targets[i].funcTimeCol)+options.targets[i].funcTimeCol.length) 
-                console.log(newKdbFunc)
-                options.targets[i].kdbFunction = newKdbFunc
-                }
-        };
-
         var nrBlankRequests = blankRefIDs.length
         var requestList = validRequestList.map(target => {
             return this.buildKdbRequest(target);

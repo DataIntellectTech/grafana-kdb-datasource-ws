@@ -101,6 +101,10 @@ export default class ResponseParser {
         let targetName: string = 'x'
         var colKeys = Object.keys(response.payload[1][0].data[0]);
         var grpKeys = Object.keys(response.payload[0][0]);
+
+        let timeCol = colKeys[colKeys.indexOf(req[1].queryParam.temporal_field.slice(1))];
+        colKeys[colKeys.indexOf(req[1].queryParam.temporal_field.slice(1))] = colKeys[0];
+        colKeys[0] = timeCol;
         
         //looop for each grouping(sym)*************
         for (let g = 0; g < response.payload[0].length; g++) {
