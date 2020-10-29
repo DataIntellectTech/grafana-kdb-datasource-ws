@@ -459,6 +459,8 @@ export class KDBDatasource {
                         errorMessage: options.targets[i].queryError.message[options.targets[i].queryError.error.indexOf(true)]
                     });
                 } else validRequestList.push(options.targets[i])
+        };
+
         var nrBlankRequests = blankRefIDs.length
         var requestList = validRequestList.map(target => {
             return this.buildKdbRequest(target);
