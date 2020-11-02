@@ -329,7 +329,7 @@ export class KDBQueryCtrl extends QueryCtrl {
             let instVariables = this.templateSrv.getVariables();
             let namedVars: string[] = [];
             for(var i = 0; i < instVariables.length; i++) {
-                namedVars = namedVars.concat('$' + instVariables[i].name);
+                namedVars = namedVars.concat('${' + instVariables[i].name + '}');
             }
             namedVars = namedVars.concat(['$__interval', '$__interval_ms'])
             //If it is a variable, set target.conflationDuration to it
@@ -360,7 +360,7 @@ export class KDBQueryCtrl extends QueryCtrl {
             let instVariables = this.templateSrv.getVariables();
             let namedVars: string[] = [];
             for(var i = 0; i < instVariables.length; i++) {
-                namedVars = namedVars.concat('$' + instVariables[i].name);
+                namedVars = namedVars.concat('${' + instVariables[i].name + '}');
             }
             //If it is a variable, set target.rowCountLimit to it
             if(namedVars.indexOf(this.rowCountLimitSegment.value) !== -1) {

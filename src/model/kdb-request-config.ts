@@ -154,7 +154,7 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' " not present in selection"}]; \n ' +
 ' end:0b; \n ' +
 ' if[qt=`select; \n ' +
-' raw:(cols[key raw],cc:{`$x}each count[cols value raw]#cols value raw)xcol raw]; \n ' +
+' raw:(cols[key raw],cc:{`$x}each count[cols value raw]#.Q.a)xcol raw]; \n ' +
 ' ]; \n ' +
 ' \n ' +
 ' \n ' +
