@@ -615,6 +615,7 @@ export class KDBQueryCtrl extends QueryCtrl {
 
 
     handleWherePartEvent(whereParts, part, evt, index) {
+        console.log('part',part)
         switch (evt.name) {
             case 'get-param-options': {
                 switch (evt.param.name) {
@@ -627,7 +628,13 @@ export class KDBQueryCtrl extends QueryCtrl {
                         if (['b', 'g', 'x', 'h', 'i', 'j', 'e', 'f', 'p','z','n','u', 'v','t'].indexOf(part.datatype) > -1) {
                             // don't do value lookups for numerical fields
                             return this.$q.when([]);
-                        } else {
+                        } else if(['s'].indexOf(part.datatype) > -1) {
+                            return this.datasource
+                                .metricFindQuerySym(this.metaBuilder.buildValueQuery(part.params[0], this.panelCtrl.range, this.target.timeColumn, this.target.timeColumnType))
+                                .then(this.transformToSegments({}))
+                                .catch(this.handleQueryError.bind(this));
+                        }
+                        else {
                             return this.datasource
                                 .metricFindQueryDefault(this.metaBuilder.buildValueQuery(part.params[0], this.panelCtrl.range, this.target.timeColumn, this.target.timeColumnType))
                                 .then(this.transformToSegments({}))

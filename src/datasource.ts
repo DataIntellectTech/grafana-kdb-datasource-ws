@@ -628,7 +628,7 @@ export class KDBDatasource {
         }
     }
 
-    //To be called for dynamic query variables
+    //Called for query variables
     metricFindQuery(kdbRequest: KdbRequest) {
         console.log('met',kdbRequest)
         return new Promise((resolve, reject) => {
@@ -658,12 +658,32 @@ export class KDBDatasource {
         });
     }
 
-    //To be called in cases other that dynamic query variables
     metricFindQueryDefault(kdbRequest: KdbRequest) {
         console.log('met',kdbRequest)
         return new Promise((resolve, reject) => {
             resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
                 console.log('res',result)
+                return result;
+            }));
+        });
+    }
+
+    //Called for dropdowns of type s
+    metricFindQuerySym(kdbRequest: KdbRequest) {
+        console.log('met',kdbRequest)
+        return new Promise((resolve, reject) => {
+            resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                console.log('res',result)
+                let properties = [];
+                for(var key in result[0]) {
+                    if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
+                        properties.push(key);
+                        }
+                    }
+                for (let i=0;i < result.length;i++) {
+                    result[i][properties[0]] = '`' + result[i][properties[0]]
+                }
+
                 return result;
             }));
         });
