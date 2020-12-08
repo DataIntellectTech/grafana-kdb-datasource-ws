@@ -70,7 +70,6 @@ export class KDBQueryCtrl extends QueryCtrl {
             this.datasource.connectWS();
         };
 
-        //console.log(this.panelCtrl)
         this.templateSrv = templateSrv;
         this.queryModel = new KDBQuery(this.target, templateSrv, this.panel.scopedVars);
         this.metaBuilder = new KDBMetaQuery(this.target, this.queryModel);
@@ -396,7 +395,6 @@ export class KDBQueryCtrl extends QueryCtrl {
     }
 
     groupingChanged() {
-        //console.log(this.selectParts);
         this.target.groupingField = this.groupingSegment.value;
         this.panelCtrl.refresh();
     }
@@ -415,7 +413,6 @@ export class KDBQueryCtrl extends QueryCtrl {
     }
 
     onDataReceived(dataList) {
-        //console.log('dataList',dataList)
         this.lastQueryMeta = null;   
         const anySeriesFromQuery = _.find(dataList, {refId: this.target.refId});
        if(anySeriesFromQuery && anySeriesFromQuery.meta.errorReceived){
@@ -615,7 +612,6 @@ export class KDBQueryCtrl extends QueryCtrl {
 
 
     handleWherePartEvent(whereParts, part, evt, index) {
-        //console.log('part',part)
         switch (evt.name) {
             case 'get-param-options': {
                 switch (evt.param.name) {

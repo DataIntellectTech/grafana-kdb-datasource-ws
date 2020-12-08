@@ -68,7 +68,6 @@ export class KDBDatasource {
     //Replace variables with their values
     private variablesReplace(target:any, search: string, replace:any) {
         //Format Options as array or scalar
-        //console.log('VARIABLESREPLACE TARGET: ', target)
         if (Array.isArray(replace)) {
             target.kdbFunction = target.kdbFunction.replace(search, replace.join(','))
         } else {
@@ -124,24 +123,17 @@ export class KDBDatasource {
 
     //Check if attribute needs replacing, then replace if so
     private fieldInjectVariables(attrib:any, search:string, replace:any) {
-        //console.log('s',search)
-        //console.log('r',replace)
         if (attrib) {
             attrib = attrib.replace(search,replace);
-            //console.log('a1',attrib)
             return attrib
         }
         else {
-            //console.log('a2',attrib)
             return attrib
         }
     }
 
     private injectVariables(target, scoped, range) {
         let instVariables = this.newGetVariables(this.templateSrv)
-        //console.log('TEMPLATESRV:', this.templateSrv);
-        //console.log('VARIABLES: ', instVariables);
-        //console.log('scp',scoped)
         let scopedVarArray = Object.keys(scoped);
         let scopedValueArray = [];
         //scoped variables inject
@@ -152,30 +144,22 @@ export class KDBDatasource {
         //local variables inject (user variables)
         for(let i = 0; i < instVariables.length; i++) {
             let varname = '$' + '{' + instVariables[i].name + '}'
-            //console.log(varname.length)
-            //console.log('vname:',varname)
             if(scopedVarArray.indexOf(varname) == -1) {
                 scopedVarArray.push(varname);
                 if(instVariables[i].current.text[0] === 'All'){
-                    //console.log('trig1')
                     scopedValueArray.push(instVariables[i].allValue)
                 }
                 else {
-                    //console.log('trig2') 
                     scopedValueArray.push(instVariables[i].current.value)
                 }
             };
         };
-        //console.log('scopedval',scopedValueArray)
         //$__from & $__to inject
         scopedVarArray.push('${__from}');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.from._d) + ')');
         scopedVarArray.push('${__to}');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.to._d) + ')');
         //Replace variables
-        //console.log('TARGET: ',target);
-        //console.log('SCOPEDVARARRAY:', scopedVarArray);
-        //console.log('SCOPEDVALUEARRAY:', scopedValueArray);
         for(let kv = 0; kv < scopedVarArray.length; kv++) {
             this.variablesReplace(target, scopedVarArray[kv], scopedValueArray[kv]);
         }
@@ -342,7 +326,6 @@ export class KDBDatasource {
 //                        } else whereClause.push(clause.params[2]);
 //                    }
                     if (notStatement === true) {
-                        //console.log('WHERECLAUSE', whereClause)
                         whereClause.push("x")
                     } else whereClause.push("o") 
                     whereArray.push(whereClause);
@@ -427,9 +410,7 @@ export class KDBDatasource {
     };
 
     query(options) {
-        //console.log('options', options)
         var prefilterResultCount = options.targets.length;
-
         if (prefilterResultCount == 0) {
             return new Promise(resolve => {
               resolve({data: []})
@@ -487,7 +468,6 @@ export class KDBDatasource {
             return new Promise(resolve => {
                 
                 this.ProcessData(curRequest,nrRequests,resultList,requestList).then(() => {
-                    
                     for(var i = 0; i < nrBlankRequests; i++){
                         resultList.push(this.showEmpty(blankRefIDs[i]))
                     };
@@ -535,10 +515,9 @@ export class KDBDatasource {
                             resultList.push(result[i]);
                         }
                     }
-
                     if (curRequest == (nrRequests - 1)) {
                         let returnVal = resultList;
-                        resolve(returnVal);
+                        const resolved = resolve(returnVal);
                     }
                     else {
                         curRequest++;
@@ -630,19 +609,16 @@ export class KDBDatasource {
 
     //Called for query variables
     metricFindQuery(kdbRequest: KdbRequest) {
-        //console.log('met',kdbRequest)
         return new Promise((resolve, reject) => {
             resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
                 const values = []
                 var properties = [];
-                //console.log('r',typeof(result[0]))
                 if (typeof(result[0]) === 'string'){
                     for (let i=0;i<result.length;i++) {
                         values.push({text:result[i]})
                     }
                 }
                 else if (typeof(result[0]) === 'object') {
-                    //console.log('res',result)
                     for(var key in result[0]) {
                     if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
                         properties.push(key);
@@ -652,17 +628,14 @@ export class KDBDatasource {
                         values.push({text:result[i][properties[0]]})
                     }
                 }
-                //console.log('props',properties)
                 return values;
             }));
         });
     }
 
     metricFindQueryDefault(kdbRequest: KdbRequest) {
-        //console.log('met',kdbRequest)
         return new Promise((resolve, reject) => {
             resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
-                //console.log('res',result)
                 return result;
             }));
         });
@@ -670,10 +643,8 @@ export class KDBDatasource {
 
     //Called for dropdowns of type s
     metricFindQuerySym(kdbRequest: KdbRequest) {
-        //console.log('met',kdbRequest)
         return new Promise((resolve, reject) => {
             resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
-                //console.log('res',result)
                 let properties = [];
                 for(var key in result[0]) {
                     if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
