@@ -64,7 +64,7 @@ export default class ResponseParser {
             for (let col = 0; col < res.payload.columns[0].length; col++) {
                 table.columns.push(res.payload.columns[0][col])
                 if (temporalFieldInc) {
-                    if (col === 0) {
+                    if (req[1].queryParam.temporal_field === req[1].queryParam.column[col][1]) {
                         table.columns[col].text = 'Time'
                         table.columns[col].alias = req[1].queryParam.temporal_field.replace( '`', '');
                     } else {
@@ -80,7 +80,7 @@ export default class ResponseParser {
         res.payload.rows[0].forEach(function (rowLoop) {
             let curRow = [];
             for (let col = 0; col < res.payload.columns[0].length; col ++) {
-                if (temporalFieldInc || col == 0){
+                if (req[1].queryParam.temporal_field === req[1].queryParam.column[col][1]){
                     curRow.push(rowLoop[col].valueOf());
                 }
                 else {
