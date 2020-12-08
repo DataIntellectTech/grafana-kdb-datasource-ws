@@ -68,11 +68,11 @@ export default class ResponseParser {
                         table.columns[col].text = 'Time'
                         table.columns[col].alias = req[1].queryParam.temporal_field.replace( '`', '');
                     } else {
-                        table.columns[col].text = req[1].queryParam.column[col - 1][2] == '::' ? req[1].queryParam.column[col - 1][1] :req[1].queryParam.column[col - 1][2];
+                        table.columns[col].text = req[1].queryParam.column[col][2] == '::' ? req[1].queryParam.column[col][1].replace('`','') :req[1].queryParam.column[col][2];
                     }
 
                 } else {
-                    table.columns[col].text = req[1].queryParam.column[col][2] == '::' ? req[1].queryParam.column[col][1] :req[1].queryParam.column[col][2];  
+                    table.columns[col].text = req[1].queryParam.column[col][2] == '::' ? req[1].queryParam.column[col][1].replace('`','') :req[1].queryParam.column[col][2];  
                 }
             }
         }
@@ -107,7 +107,7 @@ export default class ResponseParser {
             var curCol = 2;
             //looping through columns if multiple have been selected
             for (curCol = 2; curCol <= colKeys.length; curCol++) {
-                var fieldName = (req[1].queryParam.query.type == "`select") ? req[1].queryParam.column[curCol - 2][1] : colKeys[curCol - 1];
+                var fieldName = (req[1].queryParam.query.type == "`select") ? req[1].queryParam.column[curCol - 2][1].replace('`','') : colKeys[curCol - 1];
 
                 if(req[1].queryParam.query.type == "`select" && req[1].queryParam.column[curCol - 2][2] !== '::') {
                    fieldName = req[1].queryParam.column[curCol - 2][2]
