@@ -34,6 +34,7 @@ Default Timeout is how long in ms each query will wait for a response (will defa
 The plugin supports Basic authentication over insecure connections (not recommended) or secure WebSockets (recommended).
 Insecure connections send all data (including user:password pairs) unencrypted.
 Secure WebSockets require the kdb+ instance to be in [TLS mode](https://code.kx.com/q/kb/ssl/).
+Note that some datasources will not work on Safari of IOS devices as unsecure authentication is being used
 
 #### Security:
 We **strongly** recommend running dedicated kdb+ instances only for grafana connections; no other services should operate from these instances.
