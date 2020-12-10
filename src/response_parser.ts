@@ -112,7 +112,7 @@ export default class ResponseParser {
             //looping through columns if multiple have been selected
             for (curCol = 2; curCol <= colKeys.length; curCol++) {
                 var fieldName = (req[1].queryParam.query.type == "`select") ? req[1].queryParam.column[curCol - 2][1].replace('`','') : colKeys[curCol - 1];
-
+                console.log('r', req[1].queryParam.column.length);
                 if(req[1].queryParam.query.type == "`select" && req[1].queryParam.column[curCol - 2][2] !== '::') {
                    fieldName = req[1].queryParam.column[curCol - 2][2]
                 }
@@ -121,7 +121,11 @@ export default class ResponseParser {
                     targetName = fieldName;
                 }
                 else {
-                    targetName = response.payload[0][g][grpKeys[0]].toString() + ' - ' + fieldName;
+                    if ( req[1].queryParam.column.length > 1) {
+                        targetName = response.payload[0][g][grpKeys[0]].toString() + ' - ' + fieldName;
+                    } else {
+                        targetName = response.payload[0][g][grpKeys[0]].toString();
+                    }
                 }
 
                 let dataObj = {
