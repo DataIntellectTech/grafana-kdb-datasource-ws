@@ -1,0 +1,714 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 4,
+  "iteration": 1608204606011,
+  "links": [],
+  "panels": [
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "`price"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "${targetsym}"
+              }
+            ]
+          }
+        ]
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 2,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "col_meta": [],
+          "conflationDefaultAggType": "dev",
+          "conflationDuration": "${buckets}",
+          "conflationDurationMS": 300000000000,
+          "conflationUnit": "m",
+          "errorFound": false,
+          "format": "time series",
+          "funcGroupCol": "",
+          "funcTimeCol": "",
+          "groupingField": "sym",
+          "kdbFunction": "",
+          "kdbSideFunction": "Select Function",
+          "lastQueryError": "",
+          "limit": 0,
+          "panelType": "graph",
+          "queryError": {
+            "error": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "message": [
+              "",
+              "",
+              "",
+              ""
+            ]
+          },
+          "queryId": "4DIySmxB",
+          "queryType": "selectQuery",
+          "refId": "A",
+          "rowCountLimit": 10000,
+          "select": [
+            [
+              {
+                "datatype": "f",
+                "params": [
+                  "price"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "statictab",
+          "timeColumn": "time",
+          "timeColumnType": "p",
+          "useConflation": true,
+          "useGrouping": false,
+          "useTemporalField": true,
+          "version": "1.0.1",
+          "where": [
+            {
+              "datatype": "s",
+              "name": "",
+              "params": [
+                "sym",
+                "=",
+                "`${targetsym}"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Sym Volatility - ${targetsym}",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:222",
+          "decimals": null,
+          "format": "short",
+          "label": "Volatility",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:223",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cards": {
+        "cardPadding": null,
+        "cardRound": null
+      },
+      "color": {
+        "cardColor": "#b4ff00",
+        "colorScale": "sqrt",
+        "colorScheme": "interpolateOranges",
+        "exponent": 0.5,
+        "mode": "spectrum"
+      },
+      "dataFormat": "timeseries",
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "calculation": "mean",
+            "colorPalette": "interpolateRdYlGn",
+            "colorSpace": "rgb",
+            "filterable": false,
+            "groupBy": 60,
+            "invertPalette": true,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "dark-green",
+                  "value": null
+                },
+                {
+                  "color": "#EAB839",
+                  "value": 120
+                },
+                {
+                  "color": "semi-dark-blue",
+                  "value": 124
+                },
+                {
+                  "color": "#EF843C",
+                  "value": 128
+                }
+              ]
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "heatmap": {},
+      "hideZeroBuckets": false,
+      "highlightCards": true,
+      "id": 6,
+      "legend": {
+        "show": false
+      },
+      "pluginVersion": "7.2.1",
+      "reverseYBuckets": false,
+      "targets": [
+        {
+          "col_meta": [],
+          "conflationDefaultAggType": "avg",
+          "conflationDuration": "${buckets}",
+          "conflationDurationMS": 300000000000,
+          "conflationUnit": "m",
+          "errorFound": false,
+          "format": "table",
+          "funcGroupCol": "",
+          "funcTimeCol": "",
+          "groupingField": "sym",
+          "kdbFunction": "",
+          "kdbSideFunction": "Select Function",
+          "lastQueryError": "",
+          "limit": 0,
+          "panelType": "marcusolsson-hourly-heatmap-panel",
+          "queryError": {
+            "error": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "message": [
+              "",
+              "",
+              "",
+              ""
+            ]
+          },
+          "queryId": "4e1fBpvH",
+          "queryType": "selectQuery",
+          "refId": "A",
+          "rowCountLimit": 10000,
+          "select": [
+            [
+              {
+                "datatype": "f",
+                "params": [
+                  "${columns}"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "statictab",
+          "timeColumn": "time",
+          "timeColumnType": "p",
+          "useConflation": true,
+          "useGrouping": false,
+          "useTemporalField": true,
+          "version": "1.0.1",
+          "where": [
+            {
+              "datatype": "s",
+              "name": "",
+              "params": [
+                "sym",
+                "=",
+                "`${targetsym}"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Average ${columns} - ${targetsym}",
+      "tooltip": {
+        "show": true,
+        "showHistogram": false
+      },
+      "type": "heatmap",
+      "xAxis": {
+        "show": true
+      },
+      "xBucketNumber": null,
+      "xBucketSize": null,
+      "yAxis": {
+        "decimals": null,
+        "format": "short",
+        "logBase": 1,
+        "max": null,
+        "min": null,
+        "show": true,
+        "splitFactor": null
+      },
+      "yBucketBound": "auto",
+      "yBucketNumber": null,
+      "yBucketSize": null
+    },
+    {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 161
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bid"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 138
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ask"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "position"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 137
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "side"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 145
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 8,
+      "options": {
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "col_meta": [],
+          "conflationDefaultAggType": "avg",
+          "conflationDuration": "5",
+          "conflationDurationMS": 300000000000,
+          "conflationUnit": "m",
+          "errorFound": false,
+          "format": "table",
+          "funcGroupCol": "",
+          "funcTimeCol": "time",
+          "kdbFunction": "select time, price, bid, ask, side, position, pnl, tot_pnl:sums pnl from pnl where sym=`${targetsym}",
+          "kdbSideFunction": "Select Function",
+          "lastQueryError": "",
+          "limit": 0,
+          "panelType": "table",
+          "queryError": {
+            "error": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "message": [
+              "",
+              "",
+              "",
+              ""
+            ]
+          },
+          "queryId": "taI512e4",
+          "queryType": "functionQuery",
+          "refId": "A",
+          "rowCountLimit": 10000,
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "useConflation": false,
+          "useGrouping": false,
+          "useTemporalField": true,
+          "version": "1.0.1",
+          "where": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Profit and Loss - ${targetsym}",
+      "type": "table"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 26,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "AAPL",
+          "value": "AAPL"
+        },
+        "datasource": "kdb+",
+        "definition": "exec distinct sym from statictab",
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "targetsym",
+        "options": [
+          {
+            "selected": false,
+            "text": "AAPL",
+            "value": "AAPL"
+          },
+          {
+            "selected": false,
+            "text": "VOD",
+            "value": "VOD"
+          },
+          {
+            "selected": false,
+            "text": "MSFT",
+            "value": "MSFT"
+          },
+          {
+            "selected": true,
+            "text": "GOOG",
+            "value": "GOOG"
+          }
+        ],
+        "query": "exec distinct sym from statictab",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "price",
+          "value": "price"
+        },
+        "datasource": "kdb+",
+        "definition": "cols statictab",
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "columns",
+        "options": [
+          {
+            "selected": false,
+            "text": "time",
+            "value": "time"
+          },
+          {
+            "selected": false,
+            "text": "sym",
+            "value": "sym"
+          },
+          {
+            "selected": false,
+            "text": "price",
+            "value": "price"
+          },
+          {
+            "selected": false,
+            "text": "bid",
+            "value": "bid"
+          },
+          {
+            "selected": false,
+            "text": "ask",
+            "value": "ask"
+          },
+          {
+            "selected": true,
+            "text": "size",
+            "value": "size"
+          },
+          {
+            "selected": false,
+            "text": "side",
+            "value": "side"
+          }
+        ],
+        "query": "cols statictab",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "60",
+          "value": "60"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "buckets",
+        "options": [
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "selected": false,
+            "text": "2",
+            "value": "2"
+          },
+          {
+            "selected": false,
+            "text": "5",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "10",
+            "value": "10"
+          },
+          {
+            "selected": false,
+            "text": "20",
+            "value": "20"
+          },
+          {
+            "selected": true,
+            "text": "30",
+            "value": "30"
+          },
+          {
+            "selected": false,
+            "text": "60",
+            "value": "60"
+          }
+        ],
+        "query": "1,2,5,10,20,30,60",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "2020-12-10T00:00:00.000Z",
+    "to": "2020-12-16T23:59:00.000Z"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Kdb+ Plugin Demo",
+  "uid": "A1puEGAMz",
+  "version": 16
+}
