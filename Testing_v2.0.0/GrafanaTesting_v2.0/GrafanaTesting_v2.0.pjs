@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root signature="{24B6FA0B-0143-461A-9758-AEB9E9A9428B}" version="14.0" key="{4FA121C2-6089-42C5-89F7-1699CEA291FE}">
+	<children>
+		<child name="GrafanaTesting_v2.0" key="{DC09FE3F-2DA6-4F3D-BE96-82DEFEFE0D0B}" path="GrafanaTesting_v2.0\GrafanaTesting_v2.0.mds" />
+	</children>
+	<testItems key="{9FF0F40E-E8C0-4550-9A90-CEB5AE319767}">
+		<children>
+			<testItem key="{DC09FE3F-2DA6-4F3D-BE96-82DEFEFE0D0B}" enabled="True" timeout="0" stopOnError="True" description="" />
+		</children>
+	</testItems>
+	<variables key="{7389F9F9-8744-44C9-B4D6-20BF31671F70}" />
+	<analysis key="{D08AF106-42BD-4EFB-898C-4D2472CE53D7}" />
+	<scc key="{00000000-0000-0000-0000-000000000000}" name="">
+		<data />
+	</scc>
+	<extender key="{1A3FC97E-9A66-4716-B166-35D10B4146E0}">
+		<CrossBrowserTesting Enable="False" />
+	</extender>
+</Root>
