@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root signature="{B9D9273E-7266-43E0-BF02-97F168593604}" version="14.0">
+	<TestData Description="" Key="{565EA6B9-A86D-4B92-ACB5-3B1B72FED877}" Type="{79147B28-EE20-4294-B773-1D3787FBF37B}">
+		<Data>
+			<Extenders>
+				<NodeBitmaps>
+					<Bitmap Name="Aliases.browser.pageHomeGrafana" Data="61717A697000000001000000360400007801AD936B48935118C77F5696585126AB08C3881A569429BA8BCB3916B8CDE987F443372ABA18254650CD22EC4276F91C7D8988402BA26C5DF0926196152311AD4D5DAFDD5C739B662B33243398BEBDBDE64488BED481FF79CE79CEF93DCFE19CE718735493909B4AEA1324CDFCAD08164823A9FD5E1F998CF4A228F23F25F8DBD879710BC9C58B5872663331173CCC3ED7449E5DA0E543FF5F739DBA7B9C94334968CFEB30DBCD586FA8897BD44A6CC310D3EEFA8829755354EFFD638CD39527509D4DC57CC78AA5DA8AA9268BCC7B46D26EE632B14524DA2512D33848B4BD83030EDFB81842B720B12ACC15D9986BAC18AB4D682A33B0BD28E6E0D34214D74E429BC8949610D39FFF20EAD67B5C9FBF87631494EF4277351D4B4DB6CC6E75EC96D77C0FAEE1AFBB8218FAC672773FB886896A1D22A2FE139627DD615E7D5E2DB32629B7A64A2FFB6F6C53509E3F4B522CB7B7CF947D3845264B67889234B1DA1FE63597B458EEE790596B66877D3F03CE0A1E1E50E238A193B48A473625A186320C5E9109AE119EBA9E30AFBDACC3529B4DE64303395B4A09BDA9E259899EE6736B792EA9A1C480D85C3E9EAF0F8EF157D2B03E369354B49148DCB25FB8908B50BA9DF6B27CBCD7F7312CD519D23B44B60DC977C0E331BEB0AE107DD54A162EAB242EB61363460F43C3525DF63620F635CA6C4A532F531D4166B8BE426310637B5F38FFAB2F02CAFC7C16CFED6169820FA5D2CBBCF93ED66FEEC59417648EDEC3C2740FCAF40E16EB3C28125EE0F40C84F95FF56F2BE8233EFE25A95A3F1A7D803463008DA10BB5BE0B8DAE0B55AA9FA4153EE2144E0EEDE91CC78EFE9F6325DD24AA05D4ABDF62591BC4BAE113599235E57E2439FD0D4B12DD1C391AF8233B1AA3FDF5207B0F0730ADEB206B9317CB460FC635EF28B0F9105E8DD5DCE8FE7FB53F01928C17B6" />
+					<Bitmap Name="Aliases.explorer" Data="61717A697000000001000000360900007801E594BD4A03411485C7328D585A8A958560232BA6112C6C44110222088208A204EC2C040B2D44D0C21F8885201679060B7D00B55889AB66A39898F8042BF800C7B99A6B0E42DC1FD84607BED9B37BEF7C3B03CB8E4E3819F3391C3BF759BA9B74981E9BEC68D6BF6EFEEE7CB93D08A6DD49B94772BBBEFE8B2018B8021477D701A3CF7F5EB94732D7C5A9EF1B7101C6DB1B02C335CEDC23996B92D53F5E0298CAE13018AE71E61EC95C93ACFEC95B80A916B260B8C6997B24734DB2FAA73C80A91D6591047648567FEE0E6092B8650D3B24AB7FFA1E60EA2763B1F72F6BD82159FD333633EEF90E5E8BB958C81A764856FFEC039006EA9F2B0369A0FE791F4803F52F54803450FFA2F5A781FAD76B4018CB8F405CD46F0E7CFC466FF1054BD76F58B3FBC83F4563F5B9F57D9AE32AA2B072F38EAD06B0510F67DF6FFD9FCD690391D83C2B994C67D7F7B9A386821784FA93BAA3EEE19FF67D0092526DB0" />
+					<Bitmap Name="Aliases.explorer.wndShell_TrayWnd" Data="61717A697000000001000000360400007801C591CD4B024118C69FA03FA03FA163C7E8E0A14BD42528A2637436BC4404753028A420F42044501991111925E42582923A4474F250418720A8285A5357F37B77DD8F59B7D955635D45EAE40CCF30C3F0FCE699F71D1AB375C21836BAF6507555D5816EBAA3A37A5F3954560DED9FE1C006A6466CFF9239B5EE57B81C94620672210D39978294652165E290D2319412EF109867706F8FE05E1E8C77AC7E22145A32C4148352EC15FCC753737F89430323FF4DB324698E8491A3C6D0FF6A7D5F1579902A83F0799A250B45FF4B1386D57F75E4832A8B50250144E70845B46258FD37213FCA44FE1B83D6D5EA8F9C1DA2AC92168CFADE58FD771741689AD6C030D7C4DC5FAB3F79E2852E36E801BBBF88F8F62C626B767CB927C0B846C13807F139DFFFAB88BDB7AEFEBA57BB0D40BDF6835CFAA09CAF433EF5420AAD420CBA200416C0EFCD81DF994671CB817B475F83BF962179EC067BB08CC4AE13F1CD994A0ECF24A22BE3882E0DD32C03460E73FFDBB9FF01EBA33263" />
+					<Bitmap Name="Aliases.explorer.wndShell_TrayWnd.ReBarWindow32" Data="61717A697000000001000000360400007801AD924B4B02511886DFA01FD04F68D92FF007B40C82A0562D5A4910EDDAB48A0ABA407659489B6A11512B8B36454582250CD8852CB58B76C12EE6E4781967C6716E6A73460D472D233AC377CE0CC3F39C77BE39ED9D966618C3A2CF6D7AB594AA09ADFA9D3E4AEF8B0FC5B980FFBBAC1D1634AA9F76DB5BB323E0BBC495F71C671E0A94DB0597731F1BAB4B989F1E33DC8DF8D0DD0D6EAFFD350EE7C16E4DB66A17D93FFCF488C7FB508DC3ED3A3478F12D08E1C957370BE13FE8285E5F9E4D8E8BB3137828B7C148CC2BC4C8C3B73C717C57A4B772220A8979ABCB97BF87F03945822665A0893CD44C1A2A9F84928E434EC52027A38D794DA97128C4C1E90E3666E2ABFF39D95FA6C39022F7C88603C83E7821064F91B9A620F88F21F88E4CBC915716A16505687AD6F8E61CF81D3BB8AD19B0EB23482D0F2161EF47DCD60B66AA07B1892EDCDAAC5F2797F0795546AEE4601CB3486E2F20E9B021B13E0E666518B1C541D0B37DA027BB111DED40C43E60E20B39CDE42039543E05954B406119BD67B4DEFB7753EECA7E17F279543A7246EF39A8026B72905E95B9F24AF2FFB6EAF165CF5FD64FAED21512" />
+					<Bitmap Name="Aliases.explorer.wndShell_TrayWnd.ReBarWindow32.MSTaskSwWClass" Data="61717A697000000001000000360400007801AD924B4B02511886DFA01FD04F68D92FF007B40C82A0562D5A4910EDDAB48A0ABA407659489B6A11512B8B36454582250CD8852CB58B76C12EE6E4781967C6716E6A73460D472D233AC377CE0CC3F39C77BE39ED9D966618C3A2CF6D7AB594AA09ADFA9D3E4AEF8B0FC5B980FFBBAC1D1634AA9F76DB5BB323E0BBC495F71C671E0A94DB0597731F1BAB4B989F1E33DC8DF8D0DD0D6EAFFD350EE7C16E4DB66A17D93FFCF488C7FB508DC3ED3A3478F12D08E1C957370BE13FE8285E5F9E4D8E8BB3137828B7C148CC2BC4C8C3B73C717C57A4B772220A8979ABCB97BF87F03945822665A0893CD44C1A2A9F84928E434EC52027A38D794DA97128C4C1E90E3666E2ABFF39D95FA6C39022F7C88603C83E7821064F91B9A620F88F21F88E4CBC915716A16505687AD6F8E61CF81D3BB8AD19B0EB23482D0F2161EF47DCD60B66AA07B1892EDCDAAC5F2797F0795546AEE4601CB3486E2F20E9B021B13E0E666518B1C541D0B37DA027BB111DED40C43E60E20B39CDE42039543E05954B406119BD67B4DEFB7753EECA7E17F279543A7246EF39A8026B72905E95B9F24AF2FFB6EAF165CF5FD64FAED21512" />
+					<Bitmap Name="Aliases.q" Data="61717A697000000001000000360400007801BD914D4B024118C7FF411FA08FD0B12F90272F76F05641511B24D10B09BDB89A118250414865A5951525451DB6172B3CB410BA84A0D145B0D8100C2AC94B084694E0C1DBB633B6B65AE921688667E6199EF93DFFE799696AD6D4820E8DBC36C856F76935A8973D797CC60B87C22AA1F2E45F24102353ED57A6BEEECF19BAB1D4C550767D73151B6DEDC57CEA1C46A3116A53B4165A5B70D66F8445ABA52CD9955839CFF33C0441A0F12DA603D37A3DC2EC302EFA7A703E68C0BDC58CAB81012C9A86606AD494D441B4D5FCE3DC2CC2133690DDD9C9C0C51D8077CE53FE4C3E1353DE85D4A1E62391088DC56536B5ECC2984E078F780B6FF812D72CFB8D2DE749DEE48A1BCFFB8778F7F97032C2C2C63058E8EDC5E5A889F2D5EA7F088570E759C35B3088D7631F92CE5924266D940F5BAD0859C7ABD64FEA783A3AC1C3DE2EC49929DC4CD921982D9453F75E5E3FE93F1A8DD27BC99D6DC44F7DD427BCA24BDEEBB7FF537851148B5AE974BAE84B52E1BDD5BCDD6E87C3E180DBED86D7EB05C771F0FBFD08040220F962B11812890452A91432990C72B95C893EE149BC129FCD66299FCFE77FE4FFA2AFEEE53FFD0F0C13FF0C" />
+				</NodeBitmaps>
+			</Extenders>
+		</Data>
+		<Children>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; object." Action="Click">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="ClientX" DefVarType="3" DefValueType="1" DefValueValue="-1" VarType="3" ValueType="1" ValueValue="640" />
+						<Parameter Name="ClientY" DefVarType="3" DefValueType="1" DefValueValue="-1" VarType="3" ValueType="1" ValueValue="29" />
+						<Parameter Name="Shift" DefVarType="12" DefValueType="1" DefValueValue="0" VarType="3" ValueType="1" ValueValue="0">
+							<Values IsEnum="True">
+								<Value Type="1" Value="0" Text="skNoShift" />
+								<Value Type="1" Value="8192" Text="skShift" />
+								<Value Type="1" Value="32768" Text="skAlt" />
+								<Value Type="1" Value="16384" Text="skCtrl" />
+							</Values>
+						</Parameter>
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.explorer.wndShell_TrayWnd.ReBarWindow32.MSTaskSwWClass.MSTaskListWClass;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Enters %p1 in the &apos;%n&apos; object." Action="Keys">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Keys" DefVarType="8" VarType="8" ValueType="6" ValueValue="[Enter]\p 60000[Enter]" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.q.wndConsoleWindowClass;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; object." Action="Click">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="ClientX" DefVarType="3" DefValueType="1" DefValueValue="-1" VarType="3" ValueType="1" ValueValue="9" />
+						<Parameter Name="ClientY" DefVarType="3" DefValueType="1" DefValueValue="-1" VarType="3" ValueType="1" ValueValue="31" />
+						<Parameter Name="Shift" DefVarType="12" DefValueType="1" DefValueValue="0" VarType="3" ValueType="1" ValueValue="0">
+							<Values IsEnum="True">
+								<Value Type="1" Value="0" Text="skNoShift" />
+								<Value Type="1" Value="8192" Text="skShift" />
+								<Value Type="1" Value="32768" Text="skAlt" />
+								<Value Type="1" Value="16384" Text="skCtrl" />
+							</Values>
+						</Parameter>
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.panel;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; button." Action="ClickButton">
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.buttonSaveTest;" />
+				</Data>
+			</Operation>
+			<Operation Type="{2F0A05A2-4ECD-47CE-A12B-9843A308F2DC}">
+				<Data Description="Checks whether the %p2 property of the %p1 object %p3 %p4.">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Object" DefVarType="12" ParamType="{FC0DF733-E97F-46DD-8307-EA4DFF891298}" Expression="Aliases.browser.pageHomeGrafana.form.panel22" />
+						<Parameter Name="Property" DefVarType="8" VarType="8" ValueType="6" ValueValue="contentText" />
+						<Parameter Name="Condition" DefVarType="3" VarType="3" ValueType="1" ValueValue="0" />
+						<Parameter Name="Value" DefVarType="12" VarType="8" ValueType="6" ValueValue="Data source cannot be connected, if using authentication/TLS check settings as above." />
+						<Parameter Name="CaseSensitive" DefVarType="11" DefValueType="7" DefValueValue="True" VarType="11" ValueType="7" ValueValue="True" />
+					</Parameters>
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; object." Action="Click" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="3" ValueType="1" ValueValue="112" />
+						<Parameter Name="Param2" DefVarType="0" VarType="3" ValueType="1" ValueValue="15" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.textbox;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Sets the text %p1 in the &apos;%n&apos; text editor." Action="SetText" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="8" ValueType="6" ValueValue="localhost:60000" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.textbox;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; button." Action="ClickButton" InvokeKind="-1" Initialized="True">
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.buttonSaveTest;" />
+				</Data>
+			</Operation>
+			<Operation Type="{2F0A05A2-4ECD-47CE-A12B-9843A308F2DC}">
+				<Data Description="Checks whether the %p2 property of the %p1 object %p3 %p4.">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Object" DefVarType="12" ParamType="{FC0DF733-E97F-46DD-8307-EA4DFF891298}" Expression="Aliases.browser.pageHomeGrafana.form.panel22" />
+						<Parameter Name="Property" DefVarType="8" VarType="8" ValueType="6" ValueValue="contentText" />
+						<Parameter Name="Condition" DefVarType="3" VarType="3" ValueType="1" ValueValue="0" />
+						<Parameter Name="Value" DefVarType="12" VarType="8" ValueType="6" ValueValue="Data source successfully connected!" />
+						<Parameter Name="CaseSensitive" DefVarType="11" DefValueType="7" DefValueValue="True" VarType="11" ValueType="7" ValueValue="True" />
+					</Parameters>
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; object." Action="Click" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="3" ValueType="1" ValueValue="651" />
+						<Parameter Name="Param2" DefVarType="0" VarType="3" ValueType="1" ValueValue="33" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.explorer.wndShell_TrayWnd.ReBarWindow32.MSTaskSwWClass.MSTaskListWClass;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Enters %p1 in the &apos;%n&apos; object." Action="Keys" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="8" ValueType="6" ValueValue="[Enter].z.ws:()[Enter]" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.q.wndConsoleWindowClass;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; object." Action="Click" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="3" ValueType="1" ValueValue="909" />
+						<Parameter Name="Param2" DefVarType="0" VarType="3" ValueType="1" ValueValue="9" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.panel22;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; button." Action="ClickButton" InvokeKind="-1" Initialized="True">
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.buttonSaveTest;" />
+				</Data>
+			</Operation>
+			<Operation Type="{2F0A05A2-4ECD-47CE-A12B-9843A308F2DC}">
+				<Data Description="Checks whether the %p2 property of the %p1 object %p3 %p4.">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Object" DefVarType="12" ParamType="{FC0DF733-E97F-46DD-8307-EA4DFF891298}" Expression="Aliases.browser.pageHomeGrafana.form.panel22" />
+						<Parameter Name="Property" DefVarType="8" VarType="8" ValueType="6" ValueValue="contentText" />
+						<Parameter Name="Condition" DefVarType="3" VarType="3" ValueType="1" ValueValue="0" />
+						<Parameter Name="Value" DefVarType="12" VarType="8" ValueType="6" ValueValue="Web socket connections aren&apos;t configured correctly for Grafana on your kdb+ instance. Please speak to your system administrator." />
+						<Parameter Name="CaseSensitive" DefVarType="11" DefValueType="7" DefValueValue="True" VarType="11" ValueType="7" ValueValue="True" />
+					</Parameters>
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; object." Action="Click" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="3" ValueType="1" ValueValue="643" />
+						<Parameter Name="Param2" DefVarType="0" VarType="3" ValueType="1" ValueValue="36" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.explorer.wndShell_TrayWnd.ReBarWindow32.MSTaskSwWClass.MSTaskListWClass;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Enters %p1 in the &apos;%n&apos; object." Action="Keys">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Keys" DefVarType="8" VarType="8" ValueType="6" ValueValue="[Enter].z.ws:{ds:-9!!x;neg[[.z.w] -8!! `o`ID!!(@[value;ds[[`i];{`$&quot;&apos;&quot;,x}];ds[[`ID])}[Enter]" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.q.wndConsoleWindowClass;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Enters %p1 in the &apos;%n&apos; object." Action="Keys" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="8" ValueType="6" ValueValue="[Enter]\p 5001[Enter]" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.q.wndConsoleWindowClass;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; object." Action="Click" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="3" ValueType="1" ValueValue="911" />
+						<Parameter Name="Param2" DefVarType="0" VarType="3" ValueType="1" ValueValue="3" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.panel.nav.panel;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; object." Action="Click" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="3" ValueType="1" ValueValue="123" />
+						<Parameter Name="Param2" DefVarType="0" VarType="3" ValueType="1" ValueValue="15" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.textbox;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Sets the text %p1 in the &apos;%n&apos; text editor." Action="SetText" InvokeKind="-1" Initialized="True">
+					<Parameters LangId="{90F89436-9452-4F95-9882-6B5210079F13}">
+						<Parameter Name="Param1" DefVarType="0" VarType="8" ValueType="6" ValueValue="localhost:5001" />
+					</Parameters>
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.textbox;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Clicks the &apos;%n&apos; button." Action="ClickButton" InvokeKind="-1" Initialized="True">
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana.buttonSaveTest;" />
+				</Data>
+			</Operation>
+			<Operation Type="{575D0372-CCEB-4D0F-AFE8-D2004F108913}">
+				<Data Description="Closes the browser page." Action="Close" InvokeKind="-1" Initialized="True">
+					<ObjectSyntax LangId="{90F89436-9452-4F95-9882-6B5210079F13}" Code="Aliases.browser.pageHomeGrafana;" />
+				</Data>
+			</Operation>
+		</Children>
+	</TestData>
+	<Parameters Key="{60376F92-4D1C-473C-B9CD-068B628CAE19}" />
+</Root>

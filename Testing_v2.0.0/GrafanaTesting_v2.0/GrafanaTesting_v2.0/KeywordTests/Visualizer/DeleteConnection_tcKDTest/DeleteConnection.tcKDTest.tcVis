@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root signature="{42D2222C-ACA2-405F-8E67-05D5C42EB839}" version="2">
+	<data key="{59A45779-161C-4E52-B63E-289458C5AFAF}">
+		<item typeId="{87B03792-E854-4F5D-9F33-165F1F874209}" version="2" lineNo="1" kind="0" dateTime="44140.7038657407" objectName="Aliases.browser.pageHomeGrafana.link3.vg" objectLeft="29" objectTop="594" objectRight="65" objectBottom="630" clickPointX="52" clickPointY="613" imageFileName="tcvi42939301551682.png" storageFileName="" needUpdate="False" rectColor="255" />
+		<item typeId="{87B03792-E854-4F5D-9F33-165F1F874209}" version="2" lineNo="3" kind="0" dateTime="44140.703900463" objectName="Aliases.browser.pageHomeGrafana.panel32" objectLeft="342" objectTop="535" objectRight="1223" objectBottom="593" clickPointX="655" clickPointY="563" imageFileName="tcvi42939656251683.png" storageFileName="" needUpdate="False" rectColor="255" />
+		<item typeId="{87B03792-E854-4F5D-9F33-165F1F874209}" version="2" lineNo="5" kind="0" dateTime="44140.7039583333" objectName="Aliases.browser.pageHomeGrafana.form.buttonDelete" objectLeft="500" objectTop="828" objectRight="608" objectBottom="876" clickPointX="553" clickPointY="843" imageFileName="tcvi42940142151686.png" storageFileName="" needUpdate="False" rectColor="255" />
+		<item typeId="{87B03792-E854-4F5D-9F33-165F1F874209}" version="2" lineNo="6" kind="0" dateTime="44140.7039930556" objectName="Aliases.browser.pageHomeGrafana.buttonDelete" objectLeft="835" objectTop="417" objectRight="943" objectBottom="465" clickPointX="876" clickPointY="433" imageFileName="tcvi42940420351687.png" storageFileName="" needUpdate="False" rectColor="255" />
+		<item typeId="{87B03792-E854-4F5D-9F33-165F1F874209}" version="2" lineNo="8" kind="0" dateTime="44140.7040509259" objectName="Aliases.browser.BrowserWindow" objectLeft="-11" objectTop="-11" objectRight="1931" objectBottom="1031" clickPointX="347" clickPointY="25" imageFileName="tcvi42940968751689.png" storageFileName="" needUpdate="False" rectColor="255" />
+	</data>
+</Root>

@@ -65,22 +65,24 @@ export class KDBDatasource {
 
     }
 
+    //Replace variables with their values
     private variablesReplace(target:any, search: string, replace:any) {
-        // This code is an unmaintainable mess. 
-        console.log('VARIABLESREPLACE TARGET: ', target)
+        //Format Options as array or scalar
+        // console.log('VARIABLESREPLACE TARGET: ', target)
         if (Array.isArray(replace)) {
-            target.kdbFunction = target.kdbFunction.replace(search, '(' + replace.join(';') + ')')
+            target.kdbFunction = target.kdbFunction.replace(search, replace.join(','))
         } else {
             target.kdbFunction = target.kdbFunction.replace(search, replace)
         };
-        if ('table' in Object.keys(target)) {
-            target.table = target.table.replace(search, replace);
-        };
+        //Replace Table Variables
+        target.table = this.fieldInjectVariables(target.table,search,replace)
+        //Replace select clause variables
         for(let i = 0; i < target.select[0].length; i++) {
             for(let y = 0; y < target.select[0][i].params.length; y++) {
                 target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
             };
         }; 
+        //Replace where clause variables
         if(target.where !== []) {
             for(let i = 0; i < target.where.length; i++) {
                 for(let y = 0; y < target.where[i].params.length; y++) {
@@ -92,24 +94,11 @@ export class KDBDatasource {
                 };
             };
         };
-        // These if(key x in keys[target]){replace x} chunks need to be generalised or ideally look into a better way
-        // Could build an individual fieldInjectVariables function:
-        // private fieldInjectVariables(target:any, field:string, search:string, replace:any) {
-        //    if (field in Object.keys(target)) {
-        //      target[field].replace(search, replace)
-        //    };
-        //    return target
-        // };
-        // something like that maybe
-        if ('timeColumn' in Object.keys(target)) {
-            target.timeColumn = target.timeColumn.replace(search, replace);
-        }
-        target.funcTimeCol = target.funcTimeCol.replace(search, replace);
-        if ('groupingField' in Object.keys(target)) {
-            target.groupingField = target.groupingField.replace(search, replace);
-        };
-        target.funcGroupCol = target.funcGroupCol.replace(search, replace);
-
+        //Replace time, grouping and funcGroup columns if required
+        target.timeColumn = this.fieldInjectVariables(target.timeColumn,search,replace)
+        target.groupingField = this.fieldInjectVariables(target.groupingField,search,replace)
+        target.funcGroupCol = this.fieldInjectVariables(target.funcGroupCol,search,replace)
+        //Check row count is formatted correctly
         if("string" == typeof target.rowCountLimit) {
             if(target.rowCountLimit === search) {
                 if (Number.isInteger(Number(replace)) && Number(replace) > 0) {
@@ -120,7 +109,7 @@ export class KDBDatasource {
                 }
             }    
         };
-
+        //Check conflation params are formatted correctly
         if("string" == typeof target.conflationDuration) {
             if(target.conflationDuration === search) {
                 if (isNaN(Number(replace))) {
@@ -132,45 +121,81 @@ export class KDBDatasource {
             }
         };
     }
+
+    //Check if attribute needs replacing, then replace if so
+    private fieldInjectVariables(attrib:any, search:string, replace:any) {
+        // console.log('s',search)
+        // console.log('r',replace)
+        if (attrib) {
+            attrib = attrib.replace(search,replace);
+            // console.log('a1',attrib)
+            return attrib
+        }
+        else {
+            // console.log('a2',attrib)
+            return attrib
+        }
+    }
+
     private injectVariables(target, scoped, range) {
         let instVariables = this.newGetVariables(this.templateSrv)
-        console.log('TEMPLATESRV:', this.templateSrv);
-        console.log('VARIABLES: ', instVariables);
+        // console.log('TEMPLATESRV:', this.templateSrv);
+        // console.log('VARIABLES: ', instVariables);
+        // console.log('scp',scoped)
         let scopedVarArray = Object.keys(scoped);
         let scopedValueArray = [];
         //scoped variables inject
         for(let k = 0; k < scopedVarArray.length; k++) {
             scopedValueArray.push(scoped[scopedVarArray[k]].value);
-            scopedVarArray[k] = "$" + scopedVarArray[k];
+            scopedVarArray[k] = "${" + scopedVarArray[k] + '}';
+
         };
         //local variables inject (user variables)
         for(let i = 0; i < instVariables.length; i++) {
-            let varname = '$' + instVariables[i].name
-            console.log('vname:',varname)
+            let varname = '${' + instVariables[i].name + '}'
+
+            // console.log(varname.length)
+            // console.log('vname:',varname)
             if(scopedVarArray.indexOf(varname) == -1) {
                 scopedVarArray.push(varname);
-                scopedValueArray.push(instVariables[i].current.value)
+                if(instVariables[i].current.text[0] === 'All'){
+                    // console.log('trig1')
+                    scopedValueArray.push(instVariables[i].allValue)
+                }
+                else {
+                    // console.log('trig2') 
+                    scopedValueArray.push(instVariables[i].current.value)
+                }
             };
         };
-        console.log('scopedval',scopedValueArray)
+        // console.log('scopedval',scopedValueArray)
         //$__from & $__to inject
-        scopedVarArray.push('$__from');
+        scopedVarArray.push('${__from}');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.from._d) + ')');
-        scopedVarArray.push('$__to');
+        scopedVarArray.push('${__to}');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.to._d) + ')');
         //Replace variables
-        console.log('TARGET: ',target);
-        console.log('SCOPEDVARARRAY:', scopedVarArray);
-        console.log('SCOPEDVALUEARRAY:', scopedValueArray);
+        // console.log('TARGET: ',target);
+        // console.log('SCOPEDVARARRAY:', scopedVarArray);
+        // console.log('SCOPEDVALUEARRAY:', scopedValueArray);
         for(let kv = 0; kv < scopedVarArray.length; kv++) {
             this.variablesReplace(target, scopedVarArray[kv], scopedValueArray[kv]);
         }
 
     };
 
-    private newGetVariables(templatesrv){
+    //Change templateSrv object to be handled as variables
+    private newGetVariables(templatesrv) {
         let instVariables = [];
-        for(let i=0;i< this.templateSrv.variables.length;i++){
+        for (let i=0;i< this.templateSrv.variables.length;i++) {
+            //Set the 'all' value if the option is enabled
+            if ( templatesrv.variables[i].options[0].text === 'All') {
+                let valueArray = [];
+                for (let j=1;j<this.templateSrv.variables[i].options.length;j++) {
+                    valueArray.push(this.templateSrv.variables[i].options[j].value);
+                }    
+                templatesrv.variables[i].allValue = valueArray;
+            } 
             instVariables.push(this.templateSrv.variables[i]);
         }
         return instVariables
@@ -319,7 +344,7 @@ export class KDBDatasource {
 //                        } else whereClause.push(clause.params[2]);
 //                    }
                     if (notStatement === true) {
-                        console.log('WHERECLAUSE', whereClause)
+                        // console.log('WHERECLAUSE', whereClause)
                         whereClause.push("x")
                     } else whereClause.push("o") 
                     whereArray.push(whereClause);
@@ -404,7 +429,7 @@ export class KDBDatasource {
     };
 
     query(options) {
-        console.log('options', options)
+        // console.log('options', options)
         var prefilterResultCount = options.targets.length;
 
         if (prefilterResultCount == 0) {
@@ -532,8 +557,8 @@ export class KDBDatasource {
         let malformedResError = "Malformed response. Check KDB+ WebSocket handler is correctly configured."
         let response = new Promise(resolve => {
             this.executeAsyncQuery(curRequest).then((result) => {
-                if (Object.keys(result).indexOf("payload") === -1) {return resolve([this.showEmpty(curRequest[1].refId, malformedResError)])} else
                 {const processedResult = this.responseParser.processQueryResult(result, curRequest);
+                if (Object.keys(result).indexOf("payload") === -1) {return resolve([this.showEmpty(curRequest[1].refId, malformedResError)])} else
                 return resolve(processedResult);}
             });
         });
@@ -596,18 +621,75 @@ export class KDBDatasource {
         let _c = this.c;
         let deserializedResult = _c.deserialize(responseObj.data);
         if (!deserializedResult.ID) {
-            return console.log('received malformed data')
+            // return console.log('received malformed data')
         } else if (this.requestSentIDList.indexOf(deserializedResult.ID) === -1) {
-            return console.log('received unrequested data');
+            // return console.log('received unrequested data');
         } else {
             var requestNum = this.requestSentIDList.indexOf(deserializedResult.ID);
             this.requestSentList[requestNum].resolve(deserializedResult.o);
         }
     }
 
+    //Called for query variables
     metricFindQuery(kdbRequest: KdbRequest) {
         return new Promise((resolve, reject) => {
             resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                const values = []
+                var properties = [];
+                if (Array.isArray(result)){
+                    if(typeof(result[0]) === 'string'){
+                        for (let i=0;i<result.length;i++) {
+                            values.push({text:result[i]})
+                        }
+                    } else if (typeof(result[0]) === 'object') {
+                        if (Object.keys(result[0]).length  > 1){ //checking that multiple rows for multiple columns don't come back as the preview tab only shows single values (not objects)
+                            const errorResponse = 'Can only select single values. Attempted to return an object of key-value pairs. Unsafe query'
+                            throw new Error(errorResponse)
+                        } 
+                        for(var key in result[0]) {
+                            if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
+                                properties.push(key);
+                            }
+                        }
+                        for(let i=0;i < result.length;i++) {
+                            values.push({text:result[i][properties[0]]})
+                        }
+                    }
+                } else if (typeof(result)=== 'string'){
+                    const errorResponse = `Check Query. Syntax error with: [ ${result} ]`;
+                    throw new Error(errorResponse);
+                } 
+                return values;
+            }));
+        });
+    }
+
+    metricFindQueryDefault(kdbRequest: KdbRequest) {
+        // console.log('met',kdbRequest)
+        return new Promise((resolve, reject) => {
+            resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                // console.log('res',result)
+                return result;
+            }));
+        });
+    }
+
+    //Called for dropdowns of type s
+    metricFindQuerySym(kdbRequest: KdbRequest) {
+        // console.log('met',kdbRequest)
+        return new Promise((resolve, reject) => {
+            resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                // console.log('res',result)
+                let properties = [];
+                for(var key in result[0]) {
+                    if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
+                        properties.push(key);
+                        }
+                    }
+                for (let i=0;i < result.length;i++) {
+                    result[i][properties[0]] = '`' + result[i][properties[0]]
+                }
+
                 return result;
             }));
         });

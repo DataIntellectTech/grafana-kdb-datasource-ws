@@ -70,7 +70,7 @@ export class KDBQueryCtrl extends QueryCtrl {
             this.datasource.connectWS();
         };
 
-        console.log(this.panelCtrl)
+        // console.log(this.panelCtrl)
         this.templateSrv = templateSrv;
         this.queryModel = new KDBQuery(this.target, templateSrv, this.panel.scopedVars);
         this.metaBuilder = new KDBMetaQuery(this.target, this.queryModel);
@@ -278,7 +278,7 @@ export class KDBQueryCtrl extends QueryCtrl {
     
     getTableSegments() {
         return this.datasource
-            .metricFindQuery(this.metaBuilder.buildTableQuery())
+            .metricFindQueryDefault(this.metaBuilder.buildTableQuery())
             .then(this.transformToSegments({}))
             .catch(this.handleQueryError.bind(this));
     }
@@ -304,14 +304,14 @@ export class KDBQueryCtrl extends QueryCtrl {
 
     getTimeColumnSegments() {
         return this.datasource
-            .metricFindQuery(this.metaBuilder.buildColumnQuery('time'))
+            .metricFindQueryDefault(this.metaBuilder.buildColumnQuery('time'))
             .then(this.transformToSegments({}))
             .catch(this.handleQueryError.bind(this));
     }
 
     timeColumnChanged() {
         this.target.timeColumn = this.timeColumnSegment.value;
-        this.datasource.metricFindQuery(this.metaBuilder.buildDatatypeQuery(this.target.timeColumn)).then(result => {
+        this.datasource.metricFindQueryDefault(this.metaBuilder.buildDatatypeQuery(this.target.timeColumn)).then(result => {
             if (Array.isArray(result)) {
                 if (typeof result[0].t == 'string') {
                     this.target.timeColumnType = result[0].t;
@@ -329,7 +329,7 @@ export class KDBQueryCtrl extends QueryCtrl {
             let instVariables = this.templateSrv.getVariables();
             let namedVars: string[] = [];
             for(var i = 0; i < instVariables.length; i++) {
-                namedVars = namedVars.concat('$' + instVariables[i].name);
+                namedVars = namedVars.concat('${' + instVariables[i].name + '}');
             }
             namedVars = namedVars.concat(['$__interval', '$__interval_ms'])
             //If it is a variable, set target.conflationDuration to it
@@ -360,7 +360,7 @@ export class KDBQueryCtrl extends QueryCtrl {
             let instVariables = this.templateSrv.getVariables();
             let namedVars: string[] = [];
             for(var i = 0; i < instVariables.length; i++) {
-                namedVars = namedVars.concat('$' + instVariables[i].name);
+                namedVars = namedVars.concat('${' + instVariables[i].name + '}');
             }
             //If it is a variable, set target.rowCountLimit to it
             if(namedVars.indexOf(this.rowCountLimitSegment.value) !== -1) {
@@ -390,13 +390,13 @@ export class KDBQueryCtrl extends QueryCtrl {
 
     getGroupingSegments() {
         return this.datasource
-        .metricFindQuery(this.metaBuilder.buildColumnQuery('grouping'))
+        .metricFindQueryDefault(this.metaBuilder.buildColumnQuery('grouping'))
         .then(this.transformToSegments({}))
         .catch(this.handleQueryError.bind(this));
     }
 
     groupingChanged() {
-        console.log(this.selectParts);
+        // console.log(this.selectParts);
         this.target.groupingField = this.groupingSegment.value;
         this.panelCtrl.refresh();
     }
@@ -409,16 +409,16 @@ export class KDBQueryCtrl extends QueryCtrl {
     getKdbServerFunctions() {
         //kdbFuncs will be an array of strings
         return this.datasource
-        .metricFindQuery(this.metaBuilder.buildServerFunctionsQuery())
+        .metricFindQueryDefault(this.metaBuilder.buildServerFunctionsQuery())
         .then(this.transformToSegments({}))
         .catch(this.handleQueryError.bind(this));
     }
 
     onDataReceived(dataList) {
-        console.log('dataList',dataList)
+        // console.log('dataList',dataList)
         this.lastQueryMeta = null;   
         const anySeriesFromQuery = _.find(dataList, {refId: this.target.refId});
-       if(anySeriesFromQuery.meta.errorReceived){
+       if(anySeriesFromQuery && anySeriesFromQuery.meta.errorReceived){
            this.target.errorFound = true;
            this.target.lastQueryError = anySeriesFromQuery.meta.errorMessage;
        } else {
@@ -590,7 +590,7 @@ export class KDBQueryCtrl extends QueryCtrl {
         switch (evt.name) {
             case 'get-param-options': {
                 return this.datasource
-                    .metricFindQuery(this.metaBuilder.buildColumnQuery((this.target.format == 'time series')?'value':'tableValue'))
+                    .metricFindQueryDefault(this.metaBuilder.buildColumnQuery((this.target.format == 'time series')?'value':'tableValue'))
                     .then(this.transformToSegments({}))
                     .catch(this.handleQueryError.bind(this));
             }
@@ -615,21 +615,28 @@ export class KDBQueryCtrl extends QueryCtrl {
 
 
     handleWherePartEvent(whereParts, part, evt, index) {
+        // console.log('part',part)
         switch (evt.name) {
             case 'get-param-options': {
                 switch (evt.param.name) {
                     case 'left':
                         return this.datasource
-                            .metricFindQuery(this.metaBuilder.buildColumnQuery('where'))
+                            .metricFindQueryDefault(this.metaBuilder.buildColumnQuery('where'))
                             .then(this.transformToSegments({}))
                             .catch(this.handleQueryError.bind(this));
                     case 'right':
                         if (['b', 'g', 'x', 'h', 'i', 'j', 'e', 'f', 'p','z','n','u', 'v','t'].indexOf(part.datatype) > -1) {
                             // don't do value lookups for numerical fields
                             return this.$q.when([]);
-                        } else {
+                        } else if(['s'].indexOf(part.datatype) > -1) {
                             return this.datasource
-                                .metricFindQuery(this.metaBuilder.buildValueQuery(part.params[0], this.panelCtrl.range, this.target.timeColumn, this.target.timeColumnType))
+                                .metricFindQuerySym(this.metaBuilder.buildValueQuery(part.params[0], this.panelCtrl.range, this.target.timeColumn, this.target.timeColumnType))
+                                .then(this.transformToSegments({}))
+                                .catch(this.handleQueryError.bind(this));
+                        }
+                        else {
+                            return this.datasource
+                                .metricFindQueryDefault(this.metaBuilder.buildValueQuery(part.params[0], this.panelCtrl.range, this.target.timeColumn, this.target.timeColumnType))
                                 .then(this.transformToSegments({}))
                                 .catch(this.handleQueryError.bind(this));
                         }
@@ -649,7 +656,7 @@ export class KDBQueryCtrl extends QueryCtrl {
                     this.panelCtrl.refresh();
                     break;
                 } else {
-                this.datasource.metricFindQuery(this.metaBuilder.buildDatatypeQuery(part.params[0])).then((d: any) => {
+                this.datasource.metricFindQueryDefault(this.metaBuilder.buildDatatypeQuery(part.params[0])).then((d: any) => {
                     if (d.length === 1) {
                         part.datatype = d[0].t;
                         this.panelCtrl.refresh();
@@ -692,7 +699,7 @@ export class KDBQueryCtrl extends QueryCtrl {
 
     updateColumnMeta(part) {
         return new Promise(resolve => {
-            this.datasource.metricFindQuery(this.metaBuilder.getColumnDataType(part.params[0]))
+            this.datasource.metricFindQueryDefault(this.metaBuilder.getColumnDataType(part.params[0]))
                 .then(result => {
                     resolve(result);
                 })

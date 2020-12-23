@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root signature="{9576DAFD-0ADD-41A8-9897-C72F150AF6BB}" version="14.0">
+	<children>
+		<child name="MakeVariables" key="{4E8A8655-F092-47C7-BA89-674237FBA984}" path="MakeVariables.tcKDTest" />
+		<child name="UseVariables" key="{CC6E8A41-981F-4748-8901-AF4EB0471DA7}" path="UseVariables.tcKDTest" />
+	</children>
+</Root>
