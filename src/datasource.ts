@@ -151,7 +151,8 @@ export class KDBDatasource {
         };
         //local variables inject (user variables)
         for(let i = 0; i < instVariables.length; i++) {
-            let varname = '$' + '{' + instVariables[i].name + '}'
+            let varname = '${' + instVariables[i].name + '}'
+
             // console.log(varname.length)
             // console.log('vname:',varname)
             if(scopedVarArray.indexOf(varname) == -1) {
