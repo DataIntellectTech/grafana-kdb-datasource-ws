@@ -98,7 +98,7 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 - Ensure the kdb+ process you wish to connect to [has an open port](https://code.kx.com/q/basics/listening-port/).
 - Set the WebSocket message handler on this process (.z.ws) as shown below:
 
-``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$"'",x}];ds[`ID])}``
+``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{`$"'",x}];ds[`ID])}``
 
 - That's it! This kdb+ process should now be accessible to grafana. If the kdb+ process is on a different network to the network you are connecting from, you will need to setup port forwarding to the kdb+ process.
 
