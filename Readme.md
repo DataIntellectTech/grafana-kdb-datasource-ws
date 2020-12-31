@@ -112,7 +112,7 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 - At the end of the line `set KDBBASEPORT=`, change the number to the same port as the last file. Remember this number.
 - Close notepad. Then double-click `start_torq_demo.bat`.
 - Start a q session and into the prompt, type ``h:hopen `::<KDBBASEPORT+2>`` where `KDBBASEPORT+2` is the base port you set in start_torq_demo.bat plus 2 (for our example this would be 6002), then press *enter*. This will open a handle between this current q session and our TorQs stack RDB.
-- Into the prompt, type ``h".z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$\"'\",x}];ds[`ID])}"``, then close the window and repeat the previous step and this step but using KDBBASEPORT + 3 instead; this will be your HDB. Note these two ports down:
+- Into the prompt, type ``h".z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{`$\"'\",x}];ds[`ID])}"``, then close the window and repeat the previous step and this step but using KDBBASEPORT + 3 instead; this will be your HDB. Note these two ports down:
   - RDB: `<KDBBASEPORT>`+2 (E.g. `6002`)
   - HDB: `<KDBBASEPORT>`+3 (E.g. `6003`)
 - To connect these processes to grafana, add a data-source as explained in **Initial Setup** with the 'Host' being `localhost:KDBBASEPORT+2` where `KDBBASEPORT+2` is the port the RDB is running on.
