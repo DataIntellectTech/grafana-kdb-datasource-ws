@@ -28,8 +28,8 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
             }],
         execute: function() {
             //Declaring default constants
-            conflationUnitDefault = 'm';
-            conflationDurationDefault = "5";
+            exports_1("conflationUnitDefault", conflationUnitDefault = 'm');
+            exports_1("conflationDurationDefault", conflationDurationDefault = "5");
             KDBQueryCtrl = (function (_super) {
                 __extends(KDBQueryCtrl, _super);
                 /** @ngInject */
@@ -45,7 +45,8 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                         this.datasource.connectWS();
                     }
                     ;
-                    //this.target = this.target;98
+                    // console.log(this.panelCtrl)
+                    this.templateSrv = templateSrv;
                     this.queryModel = new kdb_query_1.default(this.target, templateSrv, this.panel.scopedVars);
                     this.metaBuilder = new meta_query_1.KDBMetaQuery(this.target, this.queryModel);
                     this.updateProjection();
@@ -83,6 +84,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                         { text: 'Variance', value: 'var' }];
                     this.durationUnits = [
                         //NOTE: The text -> value conversion here doesnt work; segment.value is still the 'text' value.
+                        { text: 'Miliseconds', value: 'ms' },
                         { text: 'Seconds', value: 's' },
                         { text: 'Minutes', value: 'm' },
                         { text: 'Hours', value: 'h' }];
@@ -99,7 +101,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     if (!this.target.useConflation) {
                         this.target.conflationUnit = conflationUnitDefault;
                         this.target.conflationDuration = conflationDurationDefault;
-                        this.target.conflationDurationMS = Number(conflationDurationDefault) * (conflationUnitDefault == 'Seconds' ? Math.pow(10, 9) : (conflationUnitDefault == 'Minutes' ? 60 * Math.pow(10, 9) : 3600 * Math.pow(10, 9)));
+                        this.target.conflationDurationMS = Number(conflationDurationDefault) * kdb_request_config_1.durationMap[conflationUnitDefault];
                     }
                     if (!this.target.kdbSideFunction) {
                         this.target.kdbSideFunction = 'Select Function';
@@ -222,7 +224,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 };
                 KDBQueryCtrl.prototype.getTableSegments = function () {
                     return this.datasource
-                        .metricFindQuery(this.metaBuilder.buildTableQuery())
+                        .metricFindQueryDefault(this.metaBuilder.buildTableQuery())
                         .then(this.transformToSegments({}))
                         .catch(this.handleQueryError.bind(this));
                 };
@@ -244,14 +246,14 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 };
                 KDBQueryCtrl.prototype.getTimeColumnSegments = function () {
                     return this.datasource
-                        .metricFindQuery(this.metaBuilder.buildColumnQuery('time'))
+                        .metricFindQueryDefault(this.metaBuilder.buildColumnQuery('time'))
                         .then(this.transformToSegments({}))
                         .catch(this.handleQueryError.bind(this));
                 };
                 KDBQueryCtrl.prototype.timeColumnChanged = function () {
                     var _this = this;
                     this.target.timeColumn = this.timeColumnSegment.value;
-                    this.datasource.metricFindQuery(this.metaBuilder.buildDatatypeQuery(this.target.timeColumn)).then(function (result) {
+                    this.datasource.metricFindQueryDefault(this.metaBuilder.buildDatatypeQuery(this.target.timeColumn)).then(function (result) {
                         if (Array.isArray(result)) {
                             if (typeof result[0].t == 'string') {
                                 _this.target.timeColumnType = result[0].t;
@@ -264,34 +266,33 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     //Conflation errors are reported in queryError at index 1
                     this.target.queryError.error[1] = false;
                     if (isNaN(this.conflationDurationSegment.value)) {
-                        this.target.queryError.error[1] = true;
-                        this.target.queryError.message[1] = 'Conflation duration must be a number.';
+                        //Test if its a variable
+                        var instVariables = this.templateSrv.getVariables();
+                        var namedVars = [];
+                        for (var i = 0; i < instVariables.length; i++) {
+                            namedVars = namedVars.concat('${' + instVariables[i].name + '}');
+                        }
+                        namedVars = namedVars.concat(['$__interval', '$__interval_ms']);
+                        //If it is a variable, set target.conflationDuration to it
+                        if (namedVars.indexOf(this.conflationDurationSegment.value) !== -1) {
+                            this.target.conflationDuration = this.conflationDurationSegment.value;
+                        }
+                        else {
+                            // Otherwise error
+                            this.target.queryError.error[1] = true;
+                            this.target.queryError.message[1] = 'Conflation duration must be a number.';
+                        }
+                        ;
                     }
                     else
                         this.target.conflationDuration = this.conflationDurationSegment.value;
-                    if (this.target.conflationUnit == 's') {
-                        this.target.conflationDurationMS = this.target.conflationDuration * Math.pow(10, 9);
-                    }
-                    else if (this.target.conflationUnit == 'm') {
-                        this.target.conflationDurationMS = this.target.conflationDuration * 60 * Math.pow(10, 9);
-                    }
-                    else if (this.target.conflationUnit == 'h') {
-                        this.target.conflationDurationMS = this.target.conflationDuration * 3600 * Math.pow(10, 9);
-                    }
-                    else {
-                        this.target.queryError.error[1] = true;
-                        this.target.queryError.message[1] = 'Unhandled exception in conflation. Please post conflation settings on our GitHub page.';
-                    }
-                    ;
                     if (this.target.useConflation === false) {
-                        console.log(this.selectParts[0][1]);
                         this.selectParts.map(function (partGroup) {
-                            for (var i = 0; i < partGroup.length; i++) {
-                                if (partGroup[i].part.type == "aggregate")
-                                    partGroup.splice(i, 1);
+                            for (var i_1 = 0; i_1 < partGroup.length; i_1++) {
+                                if (partGroup[i_1].part.type == "aggregate")
+                                    partGroup.splice(i_1, 1);
                             }
                         });
-                        console.log(this.selectParts[0][1]);
                     }
                     ;
                     this.updatePersistedParts();
@@ -300,9 +301,24 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 KDBQueryCtrl.prototype.rowCountLimitChanged = function () {
                     //Row count limit errors are reported in queryError at index 2
                     if (isNaN(this.rowCountLimitSegment.value)) {
-                        this.target.rowCountLimit = kdb_request_config_1.defaultRowCountLimit;
-                        this.target.queryError.error[2] = true;
-                        this.target.queryError.message[2] = 'Row count must be a positive integer.';
+                        //Test if its a variable
+                        var instVariables = this.templateSrv.getVariables();
+                        var namedVars = [];
+                        for (var i = 0; i < instVariables.length; i++) {
+                            namedVars = namedVars.concat('${' + instVariables[i].name + '}');
+                        }
+                        //If it is a variable, set target.rowCountLimit to it
+                        if (namedVars.indexOf(this.rowCountLimitSegment.value) !== -1) {
+                            this.target.rowCountLimit = this.rowCountLimitSegment.value;
+                            this.target.queryError.error[2] = false;
+                            return this.panelCtrl.refresh();
+                        }
+                        else {
+                            this.target.rowCountLimit = kdb_request_config_1.defaultRowCountLimit;
+                            this.target.queryError.error[2] = true;
+                            this.target.queryError.message[2] = 'Row count must be a positive integer.';
+                        }
+                        ;
                     }
                     else {
                         var numberRowCountLimit = Number(this.rowCountLimitSegment.value);
@@ -321,12 +337,12 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 };
                 KDBQueryCtrl.prototype.getGroupingSegments = function () {
                     return this.datasource
-                        .metricFindQuery(this.metaBuilder.buildColumnQuery('grouping'))
+                        .metricFindQueryDefault(this.metaBuilder.buildColumnQuery('grouping'))
                         .then(this.transformToSegments({}))
                         .catch(this.handleQueryError.bind(this));
                 };
                 KDBQueryCtrl.prototype.groupingChanged = function () {
-                    console.log(this.selectParts);
+                    // console.log(this.selectParts);
                     this.target.groupingField = this.groupingSegment.value;
                     this.panelCtrl.refresh();
                 };
@@ -338,14 +354,15 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 KDBQueryCtrl.prototype.getKdbServerFunctions = function () {
                     //kdbFuncs will be an array of strings
                     return this.datasource
-                        .metricFindQuery(this.metaBuilder.buildServerFunctionsQuery())
+                        .metricFindQueryDefault(this.metaBuilder.buildServerFunctionsQuery())
                         .then(this.transformToSegments({}))
                         .catch(this.handleQueryError.bind(this));
                 };
                 KDBQueryCtrl.prototype.onDataReceived = function (dataList) {
+                    // console.log('dataList',dataList)
                     this.lastQueryMeta = null;
                     var anySeriesFromQuery = lodash_1.default.find(dataList, { refId: this.target.refId });
-                    if (anySeriesFromQuery.meta.errorReceived) {
+                    if (anySeriesFromQuery && anySeriesFromQuery.meta.errorReceived) {
                         this.target.errorFound = true;
                         this.target.lastQueryError = anySeriesFromQuery.meta.errorMessage;
                     }
@@ -506,7 +523,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                     switch (evt.name) {
                         case 'get-param-options': {
                             return this.datasource
-                                .metricFindQuery(this.metaBuilder.buildColumnQuery((this.target.format == 'time series') ? 'value' : 'tableValue'))
+                                .metricFindQueryDefault(this.metaBuilder.buildColumnQuery((this.target.format == 'time series') ? 'value' : 'tableValue'))
                                 .then(this.transformToSegments({}))
                                 .catch(this.handleQueryError.bind(this));
                         }
@@ -530,12 +547,13 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 };
                 KDBQueryCtrl.prototype.handleWherePartEvent = function (whereParts, part, evt, index) {
                     var _this = this;
+                    // console.log('part',part)
                     switch (evt.name) {
                         case 'get-param-options': {
                             switch (evt.param.name) {
                                 case 'left':
                                     return this.datasource
-                                        .metricFindQuery(this.metaBuilder.buildColumnQuery('where'))
+                                        .metricFindQueryDefault(this.metaBuilder.buildColumnQuery('where'))
                                         .then(this.transformToSegments({}))
                                         .catch(this.handleQueryError.bind(this));
                                 case 'right':
@@ -543,9 +561,15 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                                         // don't do value lookups for numerical fields
                                         return this.$q.when([]);
                                     }
+                                    else if (['s'].indexOf(part.datatype) > -1) {
+                                        return this.datasource
+                                            .metricFindQuerySym(this.metaBuilder.buildValueQuery(part.params[0], this.panelCtrl.range, this.target.timeColumn, this.target.timeColumnType))
+                                            .then(this.transformToSegments({}))
+                                            .catch(this.handleQueryError.bind(this));
+                                    }
                                     else {
                                         return this.datasource
-                                            .metricFindQuery(this.metaBuilder.buildValueQuery(part.params[0], this.panelCtrl.range, this.target.timeColumn, this.target.timeColumnType))
+                                            .metricFindQueryDefault(this.metaBuilder.buildValueQuery(part.params[0], this.panelCtrl.range, this.target.timeColumn, this.target.timeColumnType))
                                             .then(this.transformToSegments({}))
                                             .catch(this.handleQueryError.bind(this));
                                     }
@@ -566,7 +590,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                                 break;
                             }
                             else {
-                                this.datasource.metricFindQuery(this.metaBuilder.buildDatatypeQuery(part.params[0])).then(function (d) {
+                                this.datasource.metricFindQueryDefault(this.metaBuilder.buildDatatypeQuery(part.params[0])).then(function (d) {
                                     if (d.length === 1) {
                                         part.datatype = d[0].t;
                                         _this.panelCtrl.refresh();
@@ -605,7 +629,7 @@ System.register(['lodash', './meta_query', 'app/plugins/sdk', './kdb_query', './
                 KDBQueryCtrl.prototype.updateColumnMeta = function (part) {
                     var _this = this;
                     return new Promise(function (resolve) {
-                        _this.datasource.metricFindQuery(_this.metaBuilder.getColumnDataType(part.params[0]))
+                        _this.datasource.metricFindQueryDefault(_this.metaBuilder.getColumnDataType(part.params[0]))
                             .then(function (result) {
                             resolve(result);
                         });

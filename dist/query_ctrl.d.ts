@@ -3,6 +3,8 @@ import { KDBMetaQuery } from './meta_query';
 import { QueryCtrl } from 'app/plugins/sdk';
 import { SqlPart } from './sql_part/sql_part';
 import KDBQuery from './kdb_query';
+export declare const conflationUnitDefault: string;
+export declare const conflationDurationDefault: string;
 export interface QueryMeta {
     sql: string;
 }
@@ -56,7 +58,7 @@ export declare class KDBQueryCtrl extends QueryCtrl {
     getTimeColumnSegments(): any;
     timeColumnChanged(): void;
     conflationSettingsChanged(): void;
-    rowCountLimitChanged(): void;
+    rowCountLimitChanged(): any;
     getGroupingSegments(): any;
     groupingChanged(): void;
     kdbSideFunctionChanged(): void;
