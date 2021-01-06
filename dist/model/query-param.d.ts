@@ -8,5 +8,5 @@ export declare class QueryParam {
     grouping: string[];
     conflation: any;
     query: QueryDictionary;
-    maxRowCount: number;
+    maxRowCount: number | string;
 }

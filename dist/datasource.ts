@@ -9,11 +9,13 @@ import { QueryParam } from "./model/query-param";
 import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
-import { tabFunction,defaultTimeout,kdbEpoch } from './model/kdb-request-config';
+import { conflationDurationDefault, conflationUnitDefault } from './query_ctrl';
+import { tabFunction,defaultTimeout,kdbEpoch,durationMap } from './model/kdb-request-config';
 export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
     name: any;
+    variables: any;
     responseParser: ResponseParser;
     queryModel: KDBQuery;
     interval: string;
@@ -34,6 +36,7 @@ export class KDBDatasource {
 
     /** @ngInject */
     constructor(instanceSettings, private backendSrv, private $q, private templateSrv) {
+        this.templateSrv = templateSrv
         this.name = instanceSettings.name;
         this.id = instanceSettings.id;
         this.responseParser = new ResponseParser(this.$q);
@@ -62,24 +65,142 @@ export class KDBDatasource {
 
     }
 
-    interpolateVariable = (value, variable) => {
-        if (typeof value === 'string') {
-            if (variable.multi || variable.includeAll) {
-                return this.queryModel.quoteLiteral(value);
-            } else {
-                return value;
+    //Replace variables with their values
+    private variablesReplace(target:any, search: string, replace:any) {
+        //Format Options as array or scalar
+        // console.log('VARIABLESREPLACE TARGET: ', target)
+        if (Array.isArray(replace)) {
+            target.kdbFunction = target.kdbFunction.replace(search, replace.join(','))
+        } else {
+            target.kdbFunction = target.kdbFunction.replace(search, replace)
+        };
+        //Replace Table Variables
+        target.table = this.fieldInjectVariables(target.table,search,replace)
+        //Replace select clause variables
+        for(let i = 0; i < target.select[0].length; i++) {
+            for(let y = 0; y < target.select[0][i].params.length; y++) {
+                target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
+            };
+        }; 
+        //Replace where clause variables
+        if(target.where !== []) {
+            for(let i = 0; i < target.where.length; i++) {
+                for(let y = 0; y < target.where[i].params.length; y++) {
+                    if (Array.isArray(replace) && replace.length > 1) {
+                        if(target.where[i].params[y] === search) target.where[i].params[y] = replace;
+                    } else if ("string" == typeof target.where[i].params[y]) {
+                        target.where[i].params[y] = target.where[i].params[y].replace(search, replace);
+                    }
+                };
+            };
+        };
+        //Replace time, grouping and funcGroup columns if required
+        target.timeColumn = this.fieldInjectVariables(target.timeColumn,search,replace)
+        target.groupingField = this.fieldInjectVariables(target.groupingField,search,replace)
+        target.funcGroupCol = this.fieldInjectVariables(target.funcGroupCol,search,replace)
+        //Check row count is formatted correctly
+        if("string" == typeof target.rowCountLimit) {
+            if(target.rowCountLimit === search) {
+                if (Number.isInteger(Number(replace)) && Number(replace) > 0) {
+                    target.rowCountLimit = Number(replace);
+                } else {
+                    target.queryError.error[2] = true;
+                    target.queryError.message[2] = 'Row count limit not a positive integer';
+                }
+            }    
+        };
+        //Check conflation params are formatted correctly
+        if("string" == typeof target.conflationDuration) {
+            if(target.conflationDuration === search) {
+                if (isNaN(Number(replace))) {
+                    target.queryError.error[1] = true;
+                    target.queryError.message[1] = 'Conflation duration not a number';
+                } else {
+                    target.conflationDuration = Number(replace);
+                }
             }
+        };
+    }
+
+    //Check if attribute needs replacing, then replace if so
+    private fieldInjectVariables(attrib:any, search:string, replace:any) {
+        // console.log('s',search)
+        // console.log('r',replace)
+        if (attrib) {
+            attrib = attrib.replace(search,replace);
+            // console.log('a1',attrib)
+            return attrib
+        }
+        else {
+            // console.log('a2',attrib)
+            return attrib
+        }
+    }
+
+    private injectVariables(target, scoped, range) {
+        let instVariables = this.newGetVariables(this.templateSrv)
+        // console.log('TEMPLATESRV:', this.templateSrv);
+        // console.log('VARIABLES: ', instVariables);
+        // console.log('scp',scoped)
+        let scopedVarArray = Object.keys(scoped);
+        let scopedValueArray = [];
+        //scoped variables inject
+        for(let k = 0; k < scopedVarArray.length; k++) {
+            scopedValueArray.push(scoped[scopedVarArray[k]].value);
+            scopedVarArray[k] = "${" + scopedVarArray[k] + '}';
+
+        };
+        //local variables inject (user variables)
+        for(let i = 0; i < instVariables.length; i++) {
+            let varname = '${' + instVariables[i].name + '}'
+
+            // console.log(varname.length)
+            // console.log('vname:',varname)
+            if(scopedVarArray.indexOf(varname) == -1) {
+                scopedVarArray.push(varname);
+                if(instVariables[i].current.text[0] === 'All'){
+                    // console.log('trig1')
+                    scopedValueArray.push(instVariables[i].allValue)
+                }
+                else {
+                    // console.log('trig2') 
+                    scopedValueArray.push(instVariables[i].current.value)
+                }
+            };
+        };
+        // console.log('scopedval',scopedValueArray)
+        //$__from & $__to inject
+        scopedVarArray.push('${__from}');
+        scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.from._d) + ')');
+        scopedVarArray.push('${__to}');
+        scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.to._d) + ')');
+        //Replace variables
+        // console.log('TARGET: ',target);
+        // console.log('SCOPEDVARARRAY:', scopedVarArray);
+        // console.log('SCOPEDVALUEARRAY:', scopedValueArray);
+        for(let kv = 0; kv < scopedVarArray.length; kv++) {
+            this.variablesReplace(target, scopedVarArray[kv], scopedValueArray[kv]);
         }
 
-        if (typeof value === 'number') {
-            return value;
-        }
-
-        const quotedValues = _.map(value, v => {
-            return this.queryModel.quoteLiteral(v);
-        });
-        return quotedValues.join(',');
     };
+
+    //Change templateSrv object to be handled as variables
+    private newGetVariables(templatesrv) {
+        let instVariables = [];
+        for (let i=0;i< this.templateSrv.variables.length;i++) {
+            //Set the 'all' value if the option is enabled
+            if ( templatesrv.variables[i].options[0].text === 'All') {
+                let valueArray = [];
+                for (let j=1;j<this.templateSrv.variables[i].options.length;j++) {
+                    valueArray.push(this.templateSrv.variables[i].options[j].value);
+                }    
+                templatesrv.variables[i].allValue = valueArray;
+            } 
+            instVariables.push(this.templateSrv.variables[i]);
+        }
+        return instVariables
+    }
+
     //Websocket per request?
     private buildKdbRequest(target) {
         let queryParam = new QueryParam();
@@ -100,6 +221,7 @@ export class KDBDatasource {
         if (target.queryType == 'selectQuery') queryParam.where = this.buildWhereParams(target.where);
         //conflation
         if (target.useConflation) {
+            this.buildConflation(target);
             conflationParams.val = target.conflationDurationMS.toString();
             conflationParams.agg = target.conflationDefaultAggType;
             queryParam.conflation = Object.assign({}, conflationParams);
@@ -146,9 +268,36 @@ export class KDBDatasource {
         };
     };
 
+    private buildConflation(queryDetails) {
+        if (["s","m","h","ms"].indexOf(queryDetails.conflationUnit) == -1) {
+            queryDetails.conflationUnit = conflationUnitDefault;
+            queryDetails.queryError.error[1] = true;
+            queryDetails.queryError.message[1] = 'Conflation unit not support. Please post conflation settings on our GitHub page.';
+        };
+        queryDetails.conflationDurationMS = queryDetails.conflationDuration * durationMap[queryDetails.conflationUnit]
+    }
+
     private buildKdbTimestamp(date : Date) {
         return 1000000 * (date.valueOf() - kdbEpoch);
     }
+
+    //Getting it to work via strings would require supporting timezones fully. Rabbit hole.
+    /* private ES2015padStart(obj: string, length: number, fill: string) {
+        //Effectively polyfill for String.padStart (fill length will only fill up to 10 missing characters)
+        let f = length - obj.length;
+        return f > 0 ? fill.repeat(10).substr(0,f) + obj : obj
+    }
+
+    private buildKdbTimestampString(date : Date) {
+        let dt = date.getFullYear().toString() + '.' + 
+            this.ES2015padStart((date.getMonth() + 1).toString(), 2, "0") + '.' + 
+            this.ES2015padStart(date.getDate().toString(), 2, "0");
+        let tm = this.ES2015padStart(date.getHours().toString(), 2, "0") + ':' + 
+            this.ES2015padStart(date.getMinutes().toString(), 2, "0") + ':' + 
+            this.ES2015padStart(date.getSeconds().toString(), 2, "0") + '.' + 
+            this.ES2015padStart(date.getMilliseconds().toString(), 3, "0");
+        return dt + 'D' + tm;
+    } */
 
     private buildTemporalRange(range) {
         let temporalRange: number[] = [];
@@ -174,23 +323,28 @@ export class KDBDatasource {
                         notStatement = true
                     } else whereClause.push(clause.params[1]);
                     whereClause.push('`' + clause.params[0]);
-                    if (clause.datatype == 's') {
-                        if (clause.params[1] == "in") {
-                            whereClause.push(clause.params[2].split(",").map(str => "`"+str.trim()))
+//                    if (clause.datatype == 's') {
+                        if (["in","within"].indexOf(clause.params[1]) != -1) {
+                            if("string" == typeof clause.params[2]) {
+                                whereClause.push(clause.params[2].split(",").map(str => str.trim()))
+                            } else {
+                                whereClause.push(clause.params[2])
+                            }
                         } else if (clause.params[1] == "like") {
                             whereClause.push('\"' + clause.params[2] + '\"');
                         } else
-                        whereClause.push('`' + clause.params[2]);
-                    }
-                    else if (clause.datatype == 'c') {
-                        whereClause.push('\"' + clause.params[2] + '\"');
-                    }
-                    else {
-                        if (clause.params[1] == "within") {
-                            whereClause.push(clause.params[2].split(",").map(str => str.trim()))
-                        } else whereClause.push(clause.params[2]);
-                    }
+                        whereClause.push(clause.params[2]);
+//                    }
+//                    else if (clause.datatype == 'c') {
+//                        whereClause.push('\"' + clause.params[2] + '\"');
+//                    }
+//                    else {
+//                        if (clause.params[1] == "within") {
+//                            whereClause.push(clause.params[2].split(",").map(str => str.trim()))
+//                        } else whereClause.push(clause.params[2]);
+//                    }
                     if (notStatement === true) {
+                        // console.log('WHERECLAUSE', whereClause)
                         whereClause.push("x")
                     } else whereClause.push("o") 
                     whereArray.push(whereClause);
@@ -275,13 +429,24 @@ export class KDBDatasource {
     };
 
     query(options) {
+        // console.log('options', options)
         var prefilterResultCount = options.targets.length;
+
+        if (prefilterResultCount == 0) {
+            return new Promise(resolve => {
+              resolve({data: []})
+              }
+            )};
+
+
         var allRefIDs = [];
         var blankRefIDs = [];
         var validRequestList = [];
         var errorList = [];
 
         for(var i = 0; i < prefilterResultCount; i++){
+            //Inject variables into target
+            this.injectVariables(options.targets[i], options.scopedVars, options.range)
             allRefIDs.push(options.targets[i].refId);
             options.targets[i].range = options.range;
             if ((!options.targets[i].table && options.targets[i].queryType === 'selectQuery') || 
@@ -392,8 +557,8 @@ export class KDBDatasource {
         let malformedResError = "Malformed response. Check KDB+ WebSocket handler is correctly configured."
         let response = new Promise(resolve => {
             this.executeAsyncQuery(curRequest).then((result) => {
-                if (Object.keys(result).indexOf("payload") === -1) {return resolve([this.showEmpty(curRequest[1].refId, malformedResError)])} else
                 {const processedResult = this.responseParser.processQueryResult(result, curRequest);
+                if (Object.keys(result).indexOf("payload") === -1) {return resolve([this.showEmpty(curRequest[1].refId, malformedResError)])} else
                 return resolve(processedResult);}
             });
         });
@@ -456,18 +621,75 @@ export class KDBDatasource {
         let _c = this.c;
         let deserializedResult = _c.deserialize(responseObj.data);
         if (!deserializedResult.ID) {
-            return console.log('received malformed data')
+            // return console.log('received malformed data')
         } else if (this.requestSentIDList.indexOf(deserializedResult.ID) === -1) {
-            return console.log('received unrequested data');
+            // return console.log('received unrequested data');
         } else {
             var requestNum = this.requestSentIDList.indexOf(deserializedResult.ID);
             this.requestSentList[requestNum].resolve(deserializedResult.o);
         }
     }
 
+    //Called for query variables
     metricFindQuery(kdbRequest: KdbRequest) {
         return new Promise((resolve, reject) => {
             resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                const values = []
+                var properties = [];
+                if (Array.isArray(result)){
+                    if(typeof(result[0]) === 'string'){
+                        for (let i=0;i<result.length;i++) {
+                            values.push({text:result[i]})
+                        }
+                    } else if (typeof(result[0]) === 'object') {
+                        if (Object.keys(result[0]).length  > 1){ //checking that multiple rows for multiple columns don't come back as the preview tab only shows single values (not objects)
+                            const errorResponse = 'Can only select single values. Attempted to return an object of key-value pairs. Unsafe query'
+                            throw new Error(errorResponse)
+                        } 
+                        for(var key in result[0]) {
+                            if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
+                                properties.push(key);
+                            }
+                        }
+                        for(let i=0;i < result.length;i++) {
+                            values.push({text:result[i][properties[0]]})
+                        }
+                    }
+                } else if (typeof(result)=== 'string'){
+                    const errorResponse = `Check Query. Syntax error with: [ ${result} ]`;
+                    throw new Error(errorResponse);
+                } 
+                return values;
+            }));
+        });
+    }
+
+    metricFindQueryDefault(kdbRequest: KdbRequest) {
+        // console.log('met',kdbRequest)
+        return new Promise((resolve, reject) => {
+            resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                // console.log('res',result)
+                return result;
+            }));
+        });
+    }
+
+    //Called for dropdowns of type s
+    metricFindQuerySym(kdbRequest: KdbRequest) {
+        // console.log('met',kdbRequest)
+        return new Promise((resolve, reject) => {
+            resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
+                // console.log('res',result)
+                let properties = [];
+                for(var key in result[0]) {
+                    if(result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
+                        properties.push(key);
+                        }
+                    }
+                for (let i=0;i < result.length;i++) {
+                    result[i][properties[0]] = '`' + result[i][properties[0]]
+                }
+
                 return result;
             }));
         });

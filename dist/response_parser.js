@@ -59,23 +59,23 @@ System.register([], function(exports_1) {
                         for (var col = 0; col < res.payload.columns[0].length; col++) {
                             table.columns.push(res.payload.columns[0][col]);
                             if (temporalFieldInc) {
-                                if (col === 0) {
+                                if (req[1].queryParam.temporal_field === req[1].queryParam.column[col][1]) {
                                     table.columns[col].text = 'Time';
                                     table.columns[col].alias = req[1].queryParam.temporal_field.replace('`', '');
                                 }
                                 else {
-                                    table.columns[col].text = req[1].queryParam.column[col - 1][2] == '::' ? req[1].queryParam.column[col - 1][1] : req[1].queryParam.column[col - 1][2];
+                                    table.columns[col].text = req[1].queryParam.column[col][2] == '::' ? req[1].queryParam.column[col][1].replace('`', '') : req[1].queryParam.column[col][2];
                                 }
                             }
                             else {
-                                table.columns[col].text = req[1].queryParam.column[col][2] == '::' ? req[1].queryParam.column[col][1] : req[1].queryParam.column[col][2];
+                                table.columns[col].text = req[1].queryParam.column[col][2] == '::' ? req[1].queryParam.column[col][1].replace('`', '') : req[1].queryParam.column[col][2];
                             }
                         }
                     }
                     res.payload.rows[0].forEach(function (rowLoop) {
                         var curRow = [];
                         for (var col = 0; col < res.payload.columns[0].length; col++) {
-                            if (temporalFieldInc || col == 0) {
+                            if (req[1].hasOwnProperty('temporal_field') && req[1].queryParam.temporal_field === req[1].queryParam.column[col][1]) {
                                 curRow.push(rowLoop[col].valueOf());
                             }
                             else {
@@ -94,12 +94,15 @@ System.register([], function(exports_1) {
                     var targetName = 'x';
                     var colKeys = Object.keys(response.payload[1][0].data[0]);
                     var grpKeys = Object.keys(response.payload[0][0]);
+                    var timeCol = colKeys[colKeys.indexOf(req[1].queryParam.temporal_field.slice(1))];
+                    colKeys[colKeys.indexOf(req[1].queryParam.temporal_field.slice(1))] = colKeys[0];
+                    colKeys[0] = timeCol;
                     //looop for each grouping(sym)*************
                     for (var g = 0; g < response.payload[0].length; g++) {
                         var curCol = 2;
                         //looping through columns if multiple have been selected
                         for (curCol = 2; curCol <= colKeys.length; curCol++) {
-                            var fieldName = (req[1].queryParam.query.type == "`select") ? req[1].queryParam.column[curCol - 2][1] : colKeys[curCol - 1];
+                            var fieldName = (req[1].queryParam.query.type == "`select") ? req[1].queryParam.column[curCol - 2][1].replace('`', '') : colKeys[curCol - 1];
                             if (req[1].queryParam.query.type == "`select" && req[1].queryParam.column[curCol - 2][2] !== '::') {
                                 fieldName = req[1].queryParam.column[curCol - 2][2];
                             }
@@ -107,7 +110,12 @@ System.register([], function(exports_1) {
                                 targetName = fieldName;
                             }
                             else {
-                                targetName = response.payload[0][g][grpKeys[0]].toString() + ' - ' + fieldName;
+                                if (req[1].queryParam.column.length > 1) {
+                                    targetName = response.payload[0][g][grpKeys[0]].toString() + ' - ' + fieldName;
+                                }
+                                else {
+                                    targetName = response.payload[0][g][grpKeys[0]].toString();
+                                }
                             }
                             var dataObj = {
                                 target: targetName,

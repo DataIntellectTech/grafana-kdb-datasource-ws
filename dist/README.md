@@ -1,3 +1,5 @@
+![AquaQ Analytics](/images/aquaq_bubbles_grafana.png)
+
 # Grafana and KDB+ Plugin Installation Instructions
 
 ## Quick Install Guide
@@ -6,7 +8,7 @@
  - If Grafana is not already installed, install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the [installation guide](https://grafana.com/docs/grafana/latest/installation/) for the relevant operating system.
 
 #### Installing kdb+ datasource plugin:
- - Download the [latest release](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases/tag/v1.0.0).
+ - Download the [latest release](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases/tag/v1.0.1).
  - Extract the entire *grafana-kdb-datasource-ws* folder to *{Grafana Install Directory}/grafana/data/plugins/*.
  - Start/restart the Grafana service (see **Grafana Service** below).
  
@@ -32,6 +34,7 @@ Default Timeout is how long in ms each query will wait for a response (will defa
 The plugin supports Basic authentication over insecure connections (not recommended) or secure WebSockets (recommended).
 Insecure connections send all data (including user:password pairs) unencrypted.
 Secure WebSockets require the kdb+ instance to be in [TLS mode](https://code.kx.com/q/kb/ssl/).
+Note that some datasources will not work on Safari of IOS devices as unsecure authentication is being used
 
 #### Security:
 We **strongly** recommend running dedicated kdb+ instances only for grafana connections; no other services should operate from these instances.
@@ -47,6 +50,9 @@ however there are known bugs with lesser used browsers:
 
 We recommend using the latest version of either Google Chrome or Mozilla Firefox.
 
+#### Time Zones:
+Grafana time ranges have support for UTC time, local browser time or Grafana server time. As kdb+ does not have native time-zone support **all timestamps/datetimes in kdb+ are interpreted as UTC+0**. We recommend dashboards are set to UTC time to avoid confusion.
+
 #### Grafana Service:
 On **Windows** grafana will by default install itself as a service. To view running services, run:
 
@@ -61,6 +67,8 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 `systemctl stop grafana-server`
 
 `systemctl restart grafana-server`
+
+
 
 ## Full Install/Setup Guide
 
@@ -93,9 +101,24 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 - Ensure the kdb+ process you wish to connect to [has an open port](https://code.kx.com/q/basics/listening-port/).
 - Set the WebSocket message handler on this process (.z.ws) as shown below:
 
-``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$"'",x}];ds[`ID])}``
+``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{`$"'",x}];ds[`ID])}``
 
 - That's it! This kdb+ process should now be accessible to grafana. If the kdb+ process is on a different network to the network you are connecting from, you will need to setup port forwarding to the kdb+ process.
+
+
+## New Features
+
+#### Grafana Variables 
+
+**Note: This feature is only supported on Grafana version 7.0.0 or later**
+
+Support has been added for the use of Grafana variables in queries. These are implemented in much the same way that variables would be used in other datasources. Currently, there is support for variable types **custom** and **textbox**. It is important to note that when defining the options for these variables, the syntax of the options must **exactly** match what would be passed into the kdb+ process. So symbols, would be defined as `sym, columns would be defined as col and so forth. To indicate where in the query the variable should be called, the naming convention **$var** is used. 
+
+Global Grafana variables may also be used within queries. There is currently support for `$__from`, `$__to` and `$__interval`.
+
+#### Panel Plugin Support
+
+The adaptor will be able to support all of Grafana 7's built in panel visualisations. In addition, external plugins that support Grafana 7 will also work with the adaptor. Panel plugins untested on Grafana 7 will potentially come with compatibillity issues if run on Grafana 7 or later - however they will work on the adaptor if an earlier compatible Grafana version is being used.   
 
 # Demo
 ### Setting up a demo TorQ Stack (Windows)
@@ -107,7 +130,7 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 - At the end of the line `set KDBBASEPORT=`, change the number to the same port as the last file. Remember this number.
 - Close notepad. Then double-click `start_torq_demo.bat`.
 - Start a q session and into the prompt, type ``h:hopen `::<KDBBASEPORT+2>`` where `KDBBASEPORT+2` is the base port you set in start_torq_demo.bat plus 2 (for our example this would be 6002), then press *enter*. This will open a handle between this current q session and our TorQs stack RDB.
-- Into the prompt, type ``h".z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{$\"'\",x}];ds[`ID])}"``, then close the window and repeat the previous step and this step but using KDBBASEPORT + 3 instead; this will be your HDB. Note these two ports down:
+- Into the prompt, type ``h".z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{`$\"'\",x}];ds[`ID])}"``, then close the window and repeat the previous step and this step but using KDBBASEPORT + 3 instead; this will be your HDB. Note these two ports down:
   - RDB: `<KDBBASEPORT>`+2 (E.g. `6002`)
   - HDB: `<KDBBASEPORT>`+3 (E.g. `6003`)
 - To connect these processes to grafana, add a data-source as explained in **Initial Setup** with the 'Host' being `localhost:KDBBASEPORT+2` where `KDBBASEPORT+2` is the port the RDB is running on.

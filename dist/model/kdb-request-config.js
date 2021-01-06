@@ -1,6 +1,6 @@
 //This is where the kdb Functions passed down to kdb+ to interpret a query are declared
 System.register([], function(exports_1) {
-    var defaultRowCountLimit, defaultTimeout, kdbEpoch, graphFunction, tabFunction, argCounter;
+    var defaultRowCountLimit, defaultTimeout, kdbEpoch, durationMap, graphFunction, tabFunction, argCounter;
     return {
         setters:[],
         execute: function() {
@@ -8,6 +8,12 @@ System.register([], function(exports_1) {
             exports_1("defaultRowCountLimit", defaultRowCountLimit = 10000);
             exports_1("defaultTimeout", defaultTimeout = 5000);
             exports_1("kdbEpoch", kdbEpoch = 946684800000);
+            exports_1("durationMap", durationMap = {
+                ms: Math.pow(10, 6),
+                s: Math.pow(10, 9),
+                m: 60 * Math.pow(10, 9),
+                h: 3600 * Math.pow(10, 9)
+            });
             //Graph response type
             exports_1("graphFunction", graphFunction = '{@[x;y;{`payload`error`success!(();"Error! - ",x;0b)}]}{[dict] \n ' +
                 ' \n ' +
@@ -175,10 +181,6 @@ System.register([], function(exports_1) {
                 ' funcparts[`c]:{x!x}cols[raw]except d`grouping \n ' +
                 ' ]; \n ' +
                 ' final:?[raw;();funcparts[`b];funcparts[`c]]; \n ' +
-                ' if[qt=`select; \n ' +
-                ' final:{[t]((cols t)[0],{`$x}each count[1_cols t]#.Q.a)xcol t}final]; \n ' +
-                ' final \n ' +
-                ' ; \n ' +
                 ' :format[final;control`gfid]; \n ' +
                 ' }');
             //Table response type

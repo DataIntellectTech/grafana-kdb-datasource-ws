@@ -9,6 +9,7 @@ export declare class KDBDatasource {
     private templateSrv;
     id: any;
     name: any;
+    variables: any;
     responseParser: ResponseParser;
     queryModel: KDBQuery;
     interval: string;
@@ -26,9 +27,13 @@ export declare class KDBDatasource {
     responseReceivedList: any[];
     /** @ngInject */
     constructor(instanceSettings: any, backendSrv: any, $q: any, templateSrv: any);
-    interpolateVariable: (value: any, variable: any) => any;
+    private variablesReplace(target, search, replace);
+    private fieldInjectVariables(attrib, search, replace);
+    private injectVariables(target, scoped, range);
+    private newGetVariables(templatesrv);
     private buildKdbRequest(target);
     private buildTemporalField(queryDetails);
+    private buildConflation(queryDetails);
     private buildKdbTimestamp(date);
     private buildTemporalRange(range);
     private buildWhereParams(queryWhereList);
@@ -60,6 +65,8 @@ export declare class KDBDatasource {
     executeAsyncQuery(request: any): any;
     executeAsyncReceive(responseObj: any): void;
     metricFindQuery(kdbRequest: KdbRequest): Promise<{}>;
+    metricFindQueryDefault(kdbRequest: KdbRequest): Promise<{}>;
+    metricFindQuerySym(kdbRequest: KdbRequest): Promise<{}>;
     testDatasource(): Promise<Object>;
     connect(): Promise<Object>;
     checkConnectionState(): Promise<Object>;

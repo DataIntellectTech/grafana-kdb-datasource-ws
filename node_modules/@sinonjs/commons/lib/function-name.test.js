@@ -6,6 +6,12 @@ var refute = require("@sinonjs/referee-sinon").refute;
 var functionName = require("./function-name");
 
 describe("function-name", function() {
+    it("should return empty string if func is falsy", function() {
+        jsc.assertForall("falsy", function(fn) {
+            return functionName(fn) === "";
+        });
+    });
+
     it("should use displayName by default", function() {
         jsc.assertForall("nestring", function(displayName) {
             var fn = { displayName: displayName };
