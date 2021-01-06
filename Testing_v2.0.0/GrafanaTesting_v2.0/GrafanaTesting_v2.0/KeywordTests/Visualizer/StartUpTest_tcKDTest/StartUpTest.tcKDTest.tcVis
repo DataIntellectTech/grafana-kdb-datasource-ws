@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Root signature="{42D2222C-ACA2-405F-8E67-05D5C42EB839}" version="2">
-	<data key="{740E34D9-5E3E-4936-83D5-DD04BF4132A0}">
-		<item typeId="{87B03792-E854-4F5D-9F33-165F1F874209}" version="2" lineNo="1" kind="0" dateTime="44138.3809143519" objectName="Aliases.explorer.wndShell_TrayWnd.ReBarWindow32.MSTaskSwWClass.MSTaskListWClass" objectLeft="-1" objectTop="-1" objectRight="-1" objectBottom="-1" clickPointX="-1" clickPointY="-1" imageFileName="tcvi22869981274760.png" storageFileName="" needUpdate="False" rectColor="255" />
-		<item typeId="{87B03792-E854-4F5D-9F33-165F1F874209}" version="2" lineNo="2" kind="0" dateTime="44138.3809490741" objectName="Aliases.explorer.wndTaskListThumbnailWnd" objectLeft="0" objectTop="0" objectRight="1920" objectBottom="301" clickPointX="1217" clickPointY="181" imageFileName="tcvi22870254674762.png" storageFileName="" needUpdate="False" rectColor="255" />
-		<item typeId="{87B03792-E854-4F5D-9F33-165F1F874209}" version="2" lineNo="3" kind="0" dateTime="44138.3809722222" objectName="Aliases.q.wndConsoleWindowClass" objectLeft="0" objectTop="0" objectRight="1368" objectBottom="776" clickPointX="-191" clickPointY="-191" imageFileName="tcvi22870507834080.png" storageFileName="" needUpdate="False" rectColor="255" />
-	</data>
-</Root>
