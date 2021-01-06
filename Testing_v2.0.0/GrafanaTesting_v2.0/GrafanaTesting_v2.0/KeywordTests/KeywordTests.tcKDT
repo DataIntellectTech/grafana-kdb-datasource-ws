@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root signature="{9576DAFD-0ADD-41A8-9897-C72F150AF6BB}" version="14.0">
+	<children>
+		<child name="MakeIntVariable" key="{FEABBCC5-54E7-449E-AA78-2F4ABC4FBEA4}" path="MakeIntVariable.tcKDTest" />
+		<child name="FreeformVariableSym" key="{6749903B-95BC-4FF4-8945-0BF83566094D}" path="FreeformVariableSym.tcKDTest" />
+		<child name="MakeConnectionTest" key="{E6B9AEC0-0409-4656-878F-FFE7FBA45C14}" path="MakeConnectionTest.tcKDTest" />
+		<child name="CheckConnection" key="{0DB480BB-50AA-4518-A471-C3E0B3ADEDC9}" path="CheckConnection.tcKDTest" />
+		<child name="StartUpTest" key="{740E34D9-5E3E-4936-83D5-DD04BF4132A0}" path="StartUpTest.tcKDTest" />
+		<child name="CheckConnectionErrors" key="{FDB7A8CB-D370-44B6-8466-A4B4E835D003}" path="CheckConnectionErrors.tcKDTest" />
+		<child name="PanelTest1" key="{DD6FF54E-EF80-4FD3-80EF-A137B86550D8}" path="PanelTest1.tcKDTest" />
+		<child name="MakeSymVariable" key="{0171044F-E348-401D-8F9A-035259FAD726}" path="MakeSymVariable.tcKDTest" />
+		<child name="DeleteConnection" key="{59A45779-161C-4E52-B63E-289458C5AFAF}" path="DeleteConnection.tcKDTest" />
+		<child name="QueryBuilder1" key="{FC502BFA-B62B-4FD3-B13F-17A40AAC2A21}" path="QueryBuilder1.tcKDTest" />
+	</children>
+</Root>

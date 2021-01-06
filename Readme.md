@@ -34,6 +34,7 @@ Default Timeout is how long in ms each query will wait for a response (will defa
 The plugin supports Basic authentication over insecure connections (not recommended) or secure WebSockets (recommended).
 Insecure connections send all data (including user:password pairs) unencrypted.
 Secure WebSockets require the kdb+ instance to be in [TLS mode](https://code.kx.com/q/kb/ssl/).
+Note that some datasources will not work on Safari of IOS devices as unsecure authentication is being used
 
 #### Security:
 We **strongly** recommend running dedicated kdb+ instances only for grafana connections; no other services should operate from these instances.
@@ -66,6 +67,8 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 `systemctl stop grafana-server`
 
 `systemctl restart grafana-server`
+
+
 
 ## Full Install/Setup Guide
 
@@ -101,6 +104,21 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 ``.z.ws:{ds:-9!x;neg[.z.w] -8! `o`ID!(@[value;ds[`i];{`$"'",x}];ds[`ID])}``
 
 - That's it! This kdb+ process should now be accessible to grafana. If the kdb+ process is on a different network to the network you are connecting from, you will need to setup port forwarding to the kdb+ process.
+
+
+## New Features
+
+#### Grafana Variables 
+
+**Note: This feature is only supported on Grafana version 7.0.0 or later**
+
+Support has been added for the use of Grafana variables in queries. These are implemented in much the same way that variables would be used in other datasources. Currently, there is support for variable types **custom** and **textbox**. It is important to note that when defining the options for these variables, the syntax of the options must **exactly** match what would be passed into the kdb+ process. So symbols, would be defined as `sym, columns would be defined as col and so forth. To indicate where in the query the variable should be called, the naming convention **$var** is used. 
+
+Global Grafana variables may also be used within queries. There is currently support for `$__from`, `$__to` and `$__interval`.
+
+#### Panel Plugin Support
+
+The adaptor will be able to support all of Grafana 7's built in panel visualisations. In addition, external plugins that support Grafana 7 will also work with the adaptor. Panel plugins untested on Grafana 7 will potentially come with compatibillity issues if run on Grafana 7 or later - however they will work on the adaptor if an earlier compatible Grafana version is being used.   
 
 # Demo
 ### Setting up a demo TorQ Stack (Windows)
