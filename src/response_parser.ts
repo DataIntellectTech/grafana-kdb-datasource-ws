@@ -112,7 +112,7 @@ export default class ResponseParser {
             //looping through columns if multiple have been selected
             for (curCol = 2; curCol <= colKeys.length; curCol++) {
                 var fieldName = (req[1].queryParam.query.type == "`select") ? req[1].queryParam.column[curCol - 2][1].replace('`','') : colKeys[curCol - 1];
-                console.log('r', req[1].queryParam.column.length);
+              
                 if(req[1].queryParam.query.type == "`select" && req[1].queryParam.column[curCol - 2][2] !== '::') {
                    fieldName = req[1].queryParam.column[curCol - 2][2]
                 }
