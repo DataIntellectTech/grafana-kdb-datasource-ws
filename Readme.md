@@ -112,9 +112,9 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 
 **Note: This feature is only supported on Grafana version 7.0.0 or later**
 
-Support has been added for the use of Grafana variables in queries. These are implemented in much the same way that variables would be used in other datasources. Currently, there is support for variable types **custom** and **textbox**. It is important to note that when defining the options for these variables, the syntax of the options must **exactly** match what would be passed into the kdb+ process. So symbols, would be defined as `sym, columns would be defined as col and so forth. To indicate where in the query the variable should be called, the naming convention **$var** is used. 
+Support has been added for the use of Grafana variables in queries. These are implemented in much the same way that variables would be used in other datasources. Currently, there is support for variable types **query**, **custom** and **textbox**. To use Grafana variables in queries the syntax ${varname} is used. Grafana variables can be used in both the query builder and within free-form queries. The substitution of variables is done client side and precedes execution. You can see an example of how to make and use Grafana variables in this [demo video](https://vimeo.com/489410176).
 
-Global Grafana variables may also be used within queries. There is currently support for `$__from`, `$__to` and `$__interval`.
+Global Grafana variables may also be used within queries. There is currently support for `${__from}`, `${__to}`, `${__interval}` and global url variables.
 
 #### Panel Plugin Support
 
