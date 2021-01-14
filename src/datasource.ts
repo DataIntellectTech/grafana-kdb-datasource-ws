@@ -719,7 +719,7 @@ export class KDBDatasource {
         })
     }
 
-    //This checks the kdb+ connection state for the 'test connection' funciton
+    //This checks the kdb+ connection state for the 'test connection' function
     checkConnectionState(): Promise<Object> {
         return new Promise(resolve => {
             return this.connectWS().then(connectStatus => {
@@ -733,7 +733,7 @@ export class KDBDatasource {
                         }, this.timeoutLength)
                     });
                     let response = new Promise(resolve => {
-                        this.executeAsyncQuery('.z.ws').then(res => {
+                        this.executeAsyncQuery('string .z.ws').then(res => {
                             if (typeof res !== 'string') {
                                 resolve(this.buildResponse('fail', 'Malformed response. Check KDB+ WebSocket handler is correctly configured.', 'Fail'));
                             } else if (res.replace(' ', '').includes('ds:-9!x;')) {
