@@ -1,4 +1,4 @@
-![AquaQ Analytics](/images/aquaq_bubbles_grafana.png)
+![](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/blob/master/images/aquaq_bubbles_grafana.png)
 
 # Grafana and KDB+ Plugin Installation Instructions
 
@@ -87,7 +87,7 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 
 - The Grafana server is now running. If using Windows the command-line window must remain operational to use Grafana. If it is closed and needs starting, repeat the previous step.
 - Setup the kdb+ instance you wish to query as per **kdb+ Setup** below.
-- Launch your browser (see **Supported Browsers**) then use the following URL to open Grafana: [localhost:8080/](localhost:8080/) and sign in using Usr:`admin` Pwd:`admin` (You will be prompted for changing password. *Skip*.)
+- Launch your browser (see **Supported Browsers**) then open Grafana by navigating to http://localhost:8080 and sign in using Usr:`admin` Pwd:`admin` (You will be prompted for changing password. *Skip*.)
 - Click on the *cog* configuration icon on the left tab of the webpage, then click on the green *Add data source* button.
 - Select *KDB+* under *Others* from the list.
 - In the textbox that follows ‘Host’, type in the IP address followed by a colon, followed by the port. E.g. `localhost:6040` or `192.168.1.5:6789`. 
