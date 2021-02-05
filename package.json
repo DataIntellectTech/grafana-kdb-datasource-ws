@@ -3,13 +3,15 @@
   "version": "1.0.1",
   "description": "Grafana plugin for visualisation of data from kdb+ servers.",
   "scripts": {
-    "build": "grunt",
-    "watch": "grunt watch",
-    "test": "./node_modules/karma/bin/karma start"
+    "build": "grafana-toolkit plugin:build",
+    "test": "grafana-toolkit plugin:test",
+    "dev": "grafana-toolkit plugin:dev",
+    "watch": "grafana-toolkit plugin:dev --watch"
   },
   "author": "AquaQ Analytics",
   "license": "Apache",
   "dependencies": {
+    "@grafana/toolkit": "^7.4.0",
     "ig": "0.0.5",
     "lodash": "^4.17.19",
     "moment": "^2.24.0",
