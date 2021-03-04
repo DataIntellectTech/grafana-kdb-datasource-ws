@@ -35,8 +35,9 @@ export class KDBDatasource {
     responseReceivedList: any[];
 
     /** @ngInject */
-    constructor(instanceSettings, private backendSrv, private $q, private templateSrv) {
+    constructor(instanceSettings, private backendSrv, private $q, private templateSrv, private contextSrv) {
         this.templateSrv = templateSrv
+        this.contextSrv = contextSrv
         this.name = instanceSettings.name;
         this.id = instanceSettings.id;
         this.responseParser = new ResponseParser(this.$q);
@@ -174,6 +175,13 @@ export class KDBDatasource {
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.from._d) + ')');
         scopedVarArray.push('${__to}');
         scopedValueArray.push('(`timestamp$' + this.buildKdbTimestamp(range.to._d) + ')');
+        //$__user variables inject
+        scopedVarArray.push('${__user.id}');
+        scopedValueArray.push(this.contextSrv.user.id);
+        scopedVarArray.push('${__user.login}');
+        scopedValueArray.push(this.contextSrv.user.login);
+        scopedVarArray.push('${__user.email}');
+        scopedValueArray.push(this.contextSrv.user.email);
         //Replace variables
         // console.log('TARGET: ',target);
         // console.log('SCOPEDVARARRAY:', scopedVarArray);
