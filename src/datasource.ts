@@ -147,7 +147,7 @@ export class KDBDatasource {
         //scoped variables inject
         for(let k = 0; k < scopedVarArray.length; k++) {
             scopedValueArray.push(scoped[scopedVarArray[k]].value);
-            scopedVarArray[k] = "${" + scopedVarArray[k] + '}';
+            scopedVarArray[k] = '$' + scopedVarArray[k] ;
 
         };
         //local variables inject (user variables)
