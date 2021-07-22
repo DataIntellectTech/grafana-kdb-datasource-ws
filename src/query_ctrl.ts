@@ -772,4 +772,8 @@ export class KDBQueryCtrl extends QueryCtrl {
         this.panelCtrl.refresh();
     }
 
+    asyncFieldChanged() {
+        this.panelCtrl.refresh();
+    }
+
 }

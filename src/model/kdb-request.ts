@@ -9,4 +9,8 @@ export class KdbRequest {
     queryParam: QueryParam;
     format: string;
     version: string;
+    useAsyncFunction: boolean;
+    useCustomPostback: boolean;
+    asyncProcTypes: string;
+    
 }
