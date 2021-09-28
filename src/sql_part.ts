@@ -1,4 +1,3 @@
-///<reference path="../node_modules/grafana-sdk-mocks/app/headers/common.d.ts" />
 import {SqlPartDef, SqlPart} from './sql_part/sql_part';
 
 const index = [];

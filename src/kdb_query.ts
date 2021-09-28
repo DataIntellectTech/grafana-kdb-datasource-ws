@@ -1,19 +1,18 @@
-///<reference path="../node_modules/grafana-sdk-mocks/app/headers/common.d.ts" />
 import _ from 'lodash';
 import { defaultRowCountLimit } from './model/kdb-request-config';
 
 export default class KDBQuery {
     target: any;
-    templateSrv: any;//TemplateSrv;
-    scopedVars: any;
+    // templateSrv: any;//TemplateSrv;
+    // scopedVars: any;
     range: any;
 
 
     /** @ngInject */
-    constructor(target, templateSrv?, scopedVars?, range?) {
+    constructor(target, /*templateSrv?, scopedVars?,*/ range?) {
         this.target = target;
-        this.templateSrv = templateSrv;
-        this.scopedVars = scopedVars;
+        // this.templateSrv = templateSrv;
+        // this.scopedVars = scopedVars;
         this.range = range;
 
         target.queryId = this.makeid(8);

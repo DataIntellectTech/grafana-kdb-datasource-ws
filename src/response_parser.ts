@@ -1,7 +1,4 @@
-///<reference path="../node_modules/grafana-sdk-mocks/app/headers/common.d.ts" />
 import _ from 'lodash';
-import angular from 'angular';
-import table_model from 'app/core/table_model';
 
 export default class ResponseParser {
     constructor(private $q) {
@@ -80,8 +77,7 @@ export default class ResponseParser {
         res.payload.rows[0].forEach(function (rowLoop) {
             let curRow = [];
             for (let col = 0; col < res.payload.columns[0].length; col ++) {
-
-                if (req[1].hasOwnProperty('temporal_field') && req[1].queryParam.temporal_field === req[1].queryParam.column[col][1]){
+                if (req[1].queryParam.temporal_field === req[1].queryParam.column[col][1]){
                     curRow.push(rowLoop[col].valueOf());
                 }
                 else {
