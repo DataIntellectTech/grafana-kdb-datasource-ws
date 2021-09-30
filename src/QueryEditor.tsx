@@ -40,6 +40,7 @@ type State = {
   selectOptions: SelectableValue<string>[];
   whereOptions: SelectableValue<string>[];
   whereSegments:  WhereSegment[];
+  selectSegments: SelectSegment[];
   firstWhere: boolean;
   whereOperators: SelectableValue<string>[];
 };
@@ -48,6 +49,10 @@ type WhereSegment = {
     expressionField: string
     operator: string
     value: string
+}
+
+type SelectSegment = {
+  value: string
 }
 
 export const conflationUnitDefault: string = 'm';
@@ -89,7 +94,8 @@ export class QueryEditor extends PureComponent<Props, State> {
       whereOptions: [],
       whereSegments: [],
       whereOperators: [],
-      firstWhere: true
+      firstWhere: true,
+      selectSegments: []
     }
     // run the default query immediately to get default look
     onRunQuery();
@@ -460,8 +466,21 @@ export class QueryEditor extends PureComponent<Props, State> {
   removeSegment(segment){
     const { onChange, query, onRunQuery } = this.props; 
     let segments = this.state.whereSegments.filter(obj => obj !== segment)
-    
-    onChange({...query, where: segments})
+  
+    let whereParams = []
+    for( const segment of segments) {
+      // Only add where if all segment fields are populated
+      // Otherwise the component will render with no data until all are populated
+      if(segment.expressionField && segment.operator && segment.value){
+        let values = []
+        Object.values(segment).map(function(value){
+          values.push(value)
+        });
+      whereParams.push({params: values})
+      }
+    }
+
+    onChange({...query, where: whereParams})
     onRunQuery();
     if(segments.length == 0)
     {
@@ -469,6 +488,54 @@ export class QueryEditor extends PureComponent<Props, State> {
     }else{
       this.setState({whereSegments: segments})  
     }     
+    this.forceUpdate() 
+  }
+
+  addNewSelectSegment(){
+    let newSegment: SelectSegment = {
+        value: ''
+    }
+    let tempSegments = this.state.selectSegments
+    tempSegments.push(newSegment)
+    this.setState({selectSegments: tempSegments}, () => {
+      console.log('testing')
+    });
+    this.forceUpdate()
+  }
+
+  setSelectSegment = (segment: SelectSegment) => {
+    
+    let segments = this.state.selectSegments
+    const { onChange, query, onRunQuery } = this.props;  
+    let index = segments.indexOf(segment)
+    segments[index] = segment
+
+    // let selectParams = []
+    let list_string_values = []
+    for( const segment of segments) {
+        list_string_values.push([{type: 'column', params: [segment.value]}])
+          // selectParams.push(segment.value)
+    }
+
+    onChange({...query, select: list_string_values})
+    onRunQuery();
+    this.setState({selectSegments: segments})
+  }
+
+  removeSelectSegment(segment){
+    const { onChange, query, onRunQuery } = this.props; 
+    let segments = this.state.selectSegments.filter(obj => obj !== segment)
+
+    let list_string_values = []
+    for( const segment of segments) {
+        list_string_values.push([{type: 'column', params: [segment.value]}])
+          // selectParams.push(segment.value)
+    }
+
+    onChange({...query, select: list_string_values})
+    onRunQuery();
+
+    this.setState({selectSegments: segments})  
     this.forceUpdate() 
   }
   
@@ -589,27 +656,62 @@ export class QueryEditor extends PureComponent<Props, State> {
                 </div>
               )}
               <div className="gf-form-inline">
-                <div className="gf-form">
-                  <InlineField
-                  label="Select"
-                  labelWidth={20}
-                  grow={true}
-                  >
-                  <MultiSelect 
-                    width={20}
-                    placeholder="Select Field"
-                    options={this.state.selectOptions}
-                    onChange={this.onMultiSelectChange}
-                    value={this.state.selectValues}
-                  />
-                    </InlineField>
+                { this.state.selectSegments.length == 0 && ( 
+                  <div className="gf-form-inline">
+                    <InlineFormLabel width={10}>Select</InlineFormLabel>
+                    <Button type="button" className="btn btn-primary" onClick={this.addNewSelectSegment.bind(this)} style={{ background: '#202226'}}>+</Button>
+                    <div className="gf-form gf-form--grow">
+                      <div className="gf-form-label gf-form-label--grow"></div>
+                    </div>
                   </div>
-                  <div className="gf-form gf-form--grow">
-                    <div className="gf-form-label gf-form-label--grow"></div>
-                  </div>
-                </div>
+                 )}
+                 </div>
+                 {(this.state.selectSegments.map((segment) => {
+                    return (
+                      <div className="gf-form-inline">
+                              
+                      { this.state.selectSegments.indexOf(segment) == 0 && (
+                        <div className="gf-form-inline">
+                        <InlineFormLabel width={10}>Select</InlineFormLabel>
+                      </div>
+                      )}
+
+                      {/* <div className="gf-form">   */}
+                        { this.state.selectSegments.indexOf(segment) > 0 && (
+                          <label className="gf-form-label query-keyword width-10"/>
+                        )}
+                        <div className="gf-form">
+                          <InlineSegmentGroup>
+                            <InlineLabel>                                
+                            <Segment
+                              value="Column"
+                              options={removeOption}
+                              onChange={() => this.removeSelectSegment(segment)}
+                            />
+                            <Segment
+                              onChange={(e: SelectableValue<string>) => {
+                                segment.value = e.value;
+                                this.setSelectSegment(segment)
+                              }
+                              }
+                              options={this.state.selectOptions}
+                              value={segment.value || ''}
+                              placeholder="Select field"
+                            />
+                          </InlineLabel>
+                        </InlineSegmentGroup>
+                      </div>
+                      { this.state.selectSegments.indexOf(segment) == (this.state.selectSegments.length - 1) && ( <div className="gf-form-inline"> <Button type="button" className="btn btn-primary" onClick={this.addNewSelectSegment.bind(this)} style={{ background: '#202226'}}>+</Button> </div>)}
+                      <div className="gf-form gf-form--grow">
+                        <div className="gf-form-label gf-form-label--grow"></div>
+                      </div>
+                    </div>
+                    )}
+                ))}
                 {/* <div className="gf-form-inline"> */}
                  {/* <div className="gf-form"> */}
+                 
+               <div className="gf-form-inline">
                  { this.state.whereSegments.length == 0 && ( 
                     <div className="gf-form-inline">
                       <InlineFormLabel               
@@ -623,6 +725,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                       </div>
                     </div>
                     )}
+                  </div>
                     {(this.state.whereSegments.map((segment) => {
                           return (
                             <div className="gf-form-inline">
@@ -669,7 +772,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                                       }
                                       options={this.state.whereOperators}
                                       value={segment.operator || ''}
-                                      placeholder="="
+                                      defaultValue={'='}
                                     />
                                     <SegmentInput
                                       onChange={(e:string) =>  {
@@ -695,7 +798,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                       
                   {/* </div> */}
                 </div>
-            // </div>
           )}
           {this.state.queryTypeStr && this.state.queryTypeStr == 'functionQuery' && (
             <div>

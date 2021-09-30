@@ -9,7 +9,7 @@ export interface MyQuery extends DataQuery {
   kdbFunction: any
   queryError: any
   format: any
-  select: Select[][]
+  select: any
   funcTimeCol: any
   where: any
   useGrouping: any

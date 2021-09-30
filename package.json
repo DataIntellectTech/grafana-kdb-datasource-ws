@@ -1,5 +1,5 @@
 {
-  "name": "aquaqanalytics-kdb",
+  "name": "aquaqanalytics-kdbadaptor-datasource",
   "version": "1.0.0",
   "description": "A Grafana datasource plugin for kdb+",
   "scripts": {
@@ -21,8 +21,7 @@
     "@types/lodash": "latest",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
-    "eslint": "^7.32.0",
-    "grafana-sdk-mocks": "github:grafana/grafana-sdk-mocks"
+    "eslint": "^7.32.0"
   },
   "engines": {
     "node": ">=14"
