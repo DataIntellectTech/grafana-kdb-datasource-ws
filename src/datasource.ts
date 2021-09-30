@@ -6,9 +6,7 @@ import {
   DataSourceApi,
   DataSourceInstanceSettings,
   MutableDataFrame,
-  FieldType,
   MetricFindValue,
-  Column,
 } from '@grafana/data';
 
 import ResponseParser from './response_parser';
@@ -355,7 +353,7 @@ private buildKdbRequest(target) {
     if (target.useConflation) {
         this.buildConflation(target);
         conflationParams.val = target.conflationDurationMS.toString();
-        conflationParams.agg = target.conflationDefaultAggType;
+        conflationParams.agg = target.conflation.aggregate;
         queryParam.conflation = Object.assign({}, conflationParams);
     }
     else {
@@ -401,12 +399,12 @@ private buildTemporalField(queryDetails) {
 };
 
 private buildConflation(queryDetails) {
-    if (["s","m","h","ms"].indexOf(queryDetails.conflationUnit) == -1) {
+    if (["s","m","h","ms"].indexOf(queryDetails.conflation.unitType) == -1) {
         queryDetails.conflationUnit = conflationUnitDefault;
         queryDetails.queryError.error[1] = true;
         queryDetails.queryError.message[1] = 'Conflation unit not support. Please post conflation settings on our GitHub page.';
     };
-    queryDetails.conflationDurationMS = queryDetails.conflationDuration * durationMap[queryDetails.conflationUnit]
+    queryDetails.conflationDurationMS = queryDetails.conflation.duration * durationMap[queryDetails.conflation.unitType]
 }
 
 private buildKdbTimestamp(date : Date) {
@@ -499,11 +497,11 @@ private buildColumnParams(target): Array<string> {
                         selectElement.push(select[1].params[0]);
                     }
                     else {
-                        selectElement.push(target.conflationDefaultAggType);
+                        selectElement.push(target.conflation.aggregate);
                     }
                 }
                 else {
-                    selectElement.push(target.conflationDefaultAggType);
+                    selectElement.push(target.conflation.aggregate);
                 }
             }
             else {

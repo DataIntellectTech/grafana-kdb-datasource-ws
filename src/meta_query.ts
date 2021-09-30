@@ -151,18 +151,18 @@ export class KDBMetaQuery {
         return `meta select ${column} from ${this.target.table}`
     }
 
-    buildValueQuery(column: string, /*DateRange: any, temporalField: string, temporalDataType: string*/) {
+    buildValueQuery(column: string, DateRange: any, temporalField: string, temporalDataType: string) {
         let kdbStartDate = new Date(2000, 0, 1, 0, 0).valueOf();
-        // let fromDate = new Date(DateRange.from._d).valueOf() - (1000 *  3600);
-        // let toDate = new Date(DateRange.to._d).valueOf() + (1000 * 3600);
-        // let convPower = temporalDataType == 'p' ? 6 : 0
-        // let fromKdbNum = (fromDate - kdbStartDate) * Math.pow(10, convPower)
-        // let toKdbNum = (toDate - kdbStartDate) * Math.pow(10, convPower)
+        let fromDate = new Date(DateRange.from._d).valueOf() - (1000 *  3600);
+        let toDate = new Date(DateRange.to._d).valueOf() + (1000 * 3600);
+        let convPower = temporalDataType == 'p' ? 6 : 0
+        let fromKdbNum = (fromDate - kdbStartDate) * Math.pow(10, convPower)
+        let toKdbNum = (toDate - kdbStartDate) * Math.pow(10, convPower)
         let query = 'select c:' + column;
 
         query += ' from select [100] by ' + column;
         query += ' from '  +  this.target.table;
-        // query += ' where ' + temporalField + ' within ' + fromKdbNum + ' ' + toKdbNum;
+        query += ' where ' + temporalField + ' within ' + fromKdbNum + ' ' + toKdbNum;
 
         
         return query;

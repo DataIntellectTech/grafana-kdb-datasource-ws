@@ -1,5 +1,5 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
-
+import { Conflation } from './QueryEditor'
 export interface MyQuery extends DataQuery {
   range: any
   queryId: any
@@ -11,10 +11,12 @@ export interface MyQuery extends DataQuery {
   format: any
   select: any
   funcTimeCol: any
+  timeColumn: any
+  timeColumnType: any
   where: any
   useGrouping: any
   useConflation: any
-  conflation: any
+  conflation: Conflation
   conflationDurationMS: any
   conflationDefaultAggType: any
   panelType: any
@@ -41,7 +43,16 @@ export const defaultQuery: Partial<MyQuery> = {
   queryId: '',
   rowCountLimit: 100000,
   version: 2,
-  queryType: 'selectQuery'
+  queryType: 'selectQuery',
+  timeColumn: '',
+  timeColumnType: '',
+  conflationDurationMS: '',
+  conflationDefaultAggType: '',
+  conflation: {
+    unitType: '',
+    duration: '',
+    aggregate: ''
+  }
 };
 
 type Select = {
