@@ -12,7 +12,6 @@ export interface MyQuery extends DataQuery {
   select: Select[][]
   funcTimeCol: any
   where: any
-  rowCountLimit: any
   useGrouping: any
   useConflation: any
   conflation: any
@@ -28,7 +27,8 @@ export interface MyQuery extends DataQuery {
   group: any
   metricColumn: any
   fontWeight: any
-  maxRowCount: number
+  rowCountLimit: number
+  version: any
 }
 
 export const defaultQuery: Partial<MyQuery> = {
@@ -37,9 +37,11 @@ export const defaultQuery: Partial<MyQuery> = {
     error: [false,false,false,false],
     message: ['','','','']
   },
-  format: '',
+  format: 'table',
   queryId: '',
-  maxRowCount: 100000
+  rowCountLimit: 100000,
+  version: 2,
+  queryType: 'selectQuery'
 };
 
 type Select = {

@@ -1,7 +1,7 @@
 import defaults from 'lodash/defaults';
 import _ from 'lodash'
 import React, { ChangeEvent, PureComponent } from 'react';
-import { Button, Checkbox, Field, InlineField, LegacyForms, MultiSelect, Select } from '@grafana/ui';
+import { Button, Checkbox, Field, InlineField, InlineFormLabel, InlineLabel, InlineSegmentGroup, Input, LegacyForms, MultiSelect, Segment, SegmentInput, Select, TextArea } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
 import { defaultQuery, MyDataSourceOptions, MyQuery } from './types';
@@ -40,6 +40,7 @@ type State = {
   selectOptions: SelectableValue<string>[];
   whereOptions: SelectableValue<string>[];
   whereSegments:  WhereSegment[];
+  firstWhere: boolean;
   whereOperators: SelectableValue<string>[];
 };
 
@@ -59,11 +60,10 @@ export class QueryEditor extends PureComponent<Props, State> {
   selectParts: SqlPart[][];
   whereParts: SqlPart[]
 
-  list_string_values: any[][] = [];
-
   constructor(props: Props){
     super(props);
 
+    const { onRunQuery } = this.props;
     this.state = {
       queryTypeStr: 'selectQuery',
       tableFrom: null,
@@ -88,9 +88,11 @@ export class QueryEditor extends PureComponent<Props, State> {
       selectOptions: [],
       whereOptions: [],
       whereSegments: [],
-      whereOperators: []
+      whereOperators: [],
+      firstWhere: true
     }
-    
+    // run the default query immediately to get default look
+    onRunQuery();
   }
   
   onQueryChange(queryType: string) {
@@ -126,7 +128,10 @@ export class QueryEditor extends PureComponent<Props, State> {
     onRunQuery();
   }
   onTimeColumnChange(column: string){
+    const { onChange, query, onRunQuery } = this.props;  
+    onChange({...query, funcTimeCol: column})
     this.setState( {timeColumn: column})
+    onRunQuery();
   }
 
   onFormatChange(format: string){
@@ -139,14 +144,13 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   onMultiSelectChange = (item: Array<SelectableValue>) => {
     const { onChange, query, onRunQuery } = this.props;  
-    let values: any[] = [];
-    let string_values: string[] = [];
+    let string_values = []
+    let list_string_values = []
     for(const v of item.values()){
-      values.push({type: 'test', params: [v.value]});
+      list_string_values.push([{type: 'column', params: [v.value]}])
       string_values.push(v.value)
     }
-    this.list_string_values.push(values);
-    onChange({...query, select: this.list_string_values})
+    onChange({...query, select: list_string_values})
     // const str = values.join(',');
     this.setState({selectValues: string_values})
     onRunQuery();
@@ -182,7 +186,10 @@ export class QueryEditor extends PureComponent<Props, State> {
   }
 
   useTemporalField = (checked: boolean) => {
+    const { onChange, query, onRunQuery } = this.props;  
+    onChange({...query, useTemporalField: checked})
     this.setState({ useTemporalField: checked });
+    onRunQuery();
   };
 
   useConflation = (checked: boolean) => {
@@ -195,8 +202,25 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   setWhereSegment = (segment: WhereSegment) => {
     let segments = this.state.whereSegments
+    const { onChange, query, onRunQuery } = this.props;  
     let index = segments.indexOf(segment)
     segments[index] = segment
+
+    let whereParams = []
+    for( const segment of segments) {
+      // Only add where if all segment fields are populated
+      // Otherwise the component will render with no data until all are populated
+      if(segment.expressionField && segment.operator && segment.value){
+        let values = []
+        Object.values(segment).map(function(value){
+          values.push(value)
+        });
+      whereParams.push({params: values})
+      }
+    }
+
+    onChange({...query, where: whereParams})
+    onRunQuery();
     this.setState({whereSegments: segments})
   }
 
@@ -419,7 +443,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     return _.findIndex(selectParts, (p: any) => p.def.type === 'window' || p.def.type === 'moving_window');
   }
 
-  async addNewWhereSegment(){
+   addNewWhereSegment(){
     let newSegment: WhereSegment = {
         expressionField: '',
         operator: '',
@@ -427,7 +451,25 @@ export class QueryEditor extends PureComponent<Props, State> {
     }
     let tempSegments = this.state.whereSegments
     tempSegments.push(newSegment)
-    this.setState({whereSegments: tempSegments})
+    this.setState({whereSegments: tempSegments, firstWhere: false}, () => {
+      console.log('testing')
+    });
+    this.forceUpdate()
+  }
+
+  removeSegment(segment){
+    const { onChange, query, onRunQuery } = this.props; 
+    let segments = this.state.whereSegments.filter(obj => obj !== segment)
+    
+    onChange({...query, where: segments})
+    onRunQuery();
+    if(segments.length == 0)
+    {
+      this.setState({whereSegments: segments, firstWhere: true})  
+    }else{
+      this.setState({whereSegments: segments})  
+    }     
+    this.forceUpdate() 
   }
   
   render() {
@@ -466,6 +508,10 @@ export class QueryEditor extends PureComponent<Props, State> {
       {texlabelt: 'Sum', value: 'sum'},
       {label: 'Standard Deviation', value: 'dev'},
       {label: 'Variance', value: 'var'}
+    ];
+
+    let removeOption: SelectableValue[] = [
+      {label: 'remove', value: 'remove'}
     ];
 
     let tableOptions: SelectableValue<string>[] = this.getTableSegments();
@@ -562,72 +608,94 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <div className="gf-form-label gf-form-label--grow"></div>
                   </div>
                 </div>
-                <div className="gf-form-inline">
-                 <div className="gf-form">
-                    <InlineField
-                    label="Where"                
-                    labelWidth={20}
-                    tooltip="'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75)."
-                    grow={true}
-                  >
-                    <Button variant="primary" onClick={this.addNewWhereSegment.bind(this)} style={{ background: '#0b0c0e'}}>+</Button>
-                    {/* <MultiSelect 
-                      width={20}
-                      placeholder="Select Field"
-                      options={this.state.whereOptions}
-                      onChange={this.onMultiSelectWhereChange}
-                      value={this.state.whereValues}
-                    /> */}
-                    </InlineField>                    
-                    {( this.state.whereSegments.map((segment) => {
+                {/* <div className="gf-form-inline"> */}
+                 {/* <div className="gf-form"> */}
+                 { this.state.whereSegments.length == 0 && ( 
+                    <div className="gf-form-inline">
+                      <InlineFormLabel               
+                        width={10}
+                        tooltip="'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75)."
+                        >Where
+                      </InlineFormLabel>
+                      <Button type="button" className="btn btn-primary" onClick={this.addNewWhereSegment.bind(this)} style={{ background: '#202226'}}>+</Button>
+                      <div className="gf-form gf-form--grow">
+                            <div className="gf-form-label gf-form-label--grow"></div>
+                      </div>
+                    </div>
+                    )}
+                    {(this.state.whereSegments.map((segment) => {
                           return (
                             <div className="gf-form-inline">
-                              <div className="gf-form">
-                                <label>Expr:</label>
-                                <Select width={20}
-                                  onChange={(e: SelectableValue<string>) => {
-                                      segment.expressionField = e.value;
-                                      this.setWhereSegment(segment)
-                                      this.setWhereData(e.value)
-                                      this.setWhereOperators(e.value)
-                                    }
-                                  }
-                                  options={this.state.selectOptions}
-                                  value={segment.expressionField || 'select field'}
-                                  />
-                                {/* Fix the loading here */}
-                                <Select 
-                                  width={20}
-                                  onChange={(e: SelectableValue<string>) => {
-                                      segment.operator = e.value;
-                                      this.setWhereSegment(segment)
-                                    }
-                                  }
-                                  options={this.state.whereOperators}
-                                  value={segment.operator || '='}
-                                  />
-                                  <Select 
-                                    width={20}
-                                    onChange={(e: SelectableValue<string>) => {
-                                        segment.value = e.value;
+                              
+                              { this.state.whereSegments.indexOf(segment) == 0 && (
+                                <div className="gf-form-inline">
+                                <InlineFormLabel               
+                                  width={10}
+                                  tooltip="'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75)."
+                                  >Where
+                                </InlineFormLabel>
+                              </div>
+                              )}
+
+                              {/* <div className="gf-form">   */}
+                                { this.state.whereSegments.indexOf(segment) > 0 && (
+                                  <label className="gf-form-label query-keyword width-10"/>
+                                )}
+                                <div className="gf-form">
+                                  <InlineSegmentGroup>
+                                    <InlineLabel>                                
+                                    <Segment
+                                      value="Expr"
+                                      options={removeOption}
+                                      onChange={() => this.removeSegment(segment)}
+                                    />
+                                    <Segment
+                                      onChange={(e: SelectableValue<string>) => {
+                                        segment.expressionField = e.value;
+                                        this.setWhereSegment(segment)
+                                        // this.setWhereData(e.value)
+                                        this.setWhereOperators(e.value)
+                                      }
+                                      }
+                                      options={this.state.selectOptions}
+                                      value={segment.expressionField || ''}
+                                      placeholder="Select field"
+                                    />
+                                    <Segment
+                                      onChange={(e: SelectableValue<string>) => {
+                                        segment.operator = e.value;
                                         this.setWhereSegment(segment)
                                       }
-                                    }
-                                    options={this.state.whereValues}
-                                    value={segment.value || 'enter value'}
+                                      }
+                                      options={this.state.whereOperators}
+                                      value={segment.operator || ''}
+                                      placeholder="="
                                     />
-                                  {/* {segment.expressionField ? segment.expressionField: 'select field'} {segment.operator ? segment.operator: '='} {segment.value ? segment.value: 'enter value'} */}
-                              </div>
-                            </div>
+                                    <SegmentInput
+                                      onChange={(e:string) =>  {
+                                          segment.value = e;
+                                          this.setWhereSegment(segment)
+                                          }
+                                        }
+                                      placeholder='enter value'
+                                      value={segment.value || ''}
+                                      />
+                                    </InlineLabel>
+                                  </InlineSegmentGroup>
+                                </div>
+                                { this.state.whereSegments.indexOf(segment) == (this.state.whereSegments.length - 1) && ( <div className="gf-form-inline"> <Button type="button" className="btn btn-primary" onClick={this.addNewWhereSegment.bind(this)} style={{ background: '#202226'}}>+</Button> </div>)}
+                              {/* </div> */}
+                               <div className="gf-form gf-form--grow">
+                                 <div className="gf-form-label gf-form-label--grow"></div>
+                               </div>
+                             </div>
                             )
                         }
-                      ))}
-                  </div>
-                  <div className="gf-form gf-form--grow">
-                    <div className="gf-form-label gf-form-label--grow"></div>
-                  </div>
+                      ))}                      
+                      
+                  {/* </div> */}
                 </div>
-            </div>
+            // </div>
           )}
           {this.state.queryTypeStr && this.state.queryTypeStr == 'functionQuery' && (
             <div>

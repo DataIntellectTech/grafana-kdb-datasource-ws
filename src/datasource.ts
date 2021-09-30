@@ -8,6 +8,7 @@ import {
   MutableDataFrame,
   FieldType,
   MetricFindValue,
+  Column,
 } from '@grafana/data';
 
 import ResponseParser from './response_parser';
@@ -94,9 +95,14 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
            var errorList = [];
                 
            for(var i = 0; i < prefilterResultCount; i++){
-               console.log('options', options.targets[i])
                //Inject variables into target
             //    this.injectVariables(options.targets[i], options.scopedVars, options.range)
+                
+                // for some reason randomWalk is defaulted
+                if (options.targets[i].queryType == 'randomWalk')
+                {
+                    options.targets[i].queryType = 'selectQuery'
+                }
                allRefIDs.push(options.targets[i].refId);
                options.targets[i].range = options.range;
                if ((!options.targets[i].table && options.targets[i].queryType === 'selectQuery') || 
@@ -117,54 +123,69 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
            var requestList = validRequestList.map(target => {
                return this.buildKdbRequest(target);
                });
-            console.log('requestList', requestList)
 
 
            var nrRequests: number = requestList.length;
-            if (!this.ws || this.ws.readyState > 1) this.connectWS().then(connectStatus => {
-                    if (  connectStatus === true && nrRequests > 0)  this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList); 
-                    else if ( nrRequests === 0) this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
-                    else  this.connectFail(prefilterResultCount, allRefIDs);
-                })            
-                else { this.webSocketWait().then(() => {
-                        if (nrRequests > 0) this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList);
-                        else this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
-                    })
-                }
-                  const data = options.targets.map(target => {
-                  const query = defaults(target, defaultQuery);
-                  
-                  return new MutableDataFrame({
-                    refId: query.refId,
-                    fields: [
-                    //   { name: 'Time', values: [from, to], type: FieldType.time },
-                    //   { name: 'Value', values: [query.constant, query.constant], type: FieldType.number },
-                    ],
-                  });
-                });
-            
-                return { data };
-       };
-   
-//     const { range } = options;
-//     const from = range!.from.valueOf();
-//     const to = range!.to.valueOf();
-    
-//     // Return a constant for each query.
-//     const data = options.targets.map(target => {
-//       const query = defaults(target, defaultQuery);
-      
-//       return new MutableDataFrame({
-//         refId: query.refId,
-//         fields: [
-//           { name: 'Time', values: [from, to], type: FieldType.time },
-//           { name: 'Value', values: [query.constant, query.constant], type: FieldType.number },
-//         ],
-//       });
-//     });
+                  const promises = options.targets.map(target => {
+                      const query = defaults(target, defaultQuery);
+                      if (!this.ws || this.ws.readyState > 1) return this.connectWS().then(connectStatus => {
+                        if (  connectStatus === true && nrRequests > 0)  return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then(() => {
+                            if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((data: any) => {
+                                console.log(data)
 
-//     return { data };
-//   }
+                                var fields = []
+                                data.data[0].columns.forEach((column)=> {
+                                    fields.push({ name: column.text })
+                                })
+
+                                const frame = new MutableDataFrame({
+                                    refId: data.data[0].refId,
+                                    fields: fields
+                                    
+                                });
+                                data.data[0].rows.forEach((element: any[]) => {
+                                    var row = []
+                                    element.forEach((entry) => {
+                                        row.push(entry)
+                                    })
+                                    frame.appendRow(row)
+                                });
+                                return frame
+                            }); 
+                            else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
+                        })
+                        else if ( nrRequests === 0) return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
+                        else  return this.connectFail(prefilterResultCount, allRefIDs);
+                    })      
+                    else { return this.webSocketWait().then(() => {
+                            if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((data: any) => {
+                                console.log(data)
+
+                                var fields = []
+                                data.data[0].columns.forEach((column)=> {
+                                    fields.push({ name: column.text })
+                                })
+
+                                const frame = new MutableDataFrame({
+                                    refId: data.data[0].refId,
+                                    fields: fields
+                                    
+                                });
+                                data.data[0].rows.forEach((element: any[]) => {
+                                    var row = []
+                                    element.forEach((entry) => {
+                                        row.push(entry)
+                                    })
+                                    frame.appendRow(row)
+                                });
+                                return frame
+                            }); 
+                            else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
+                        })
+                    }
+                }); 
+                return Promise.all(promises).then((data) => ({data}));
+       };
 
     //This is the function called by Grafana when it is testing a connection on the configuration page
   async testDatasource() {
@@ -311,6 +332,7 @@ private newGetVariables(templatesrv) {
 
 //Websocket per request?
 private buildKdbRequest(target) {
+    
     let queryParam = new QueryParam();
     let kdbRequest = new KdbRequest();
     let queryDictionary = new QueryDictionary();
@@ -326,6 +348,8 @@ private buildKdbRequest(target) {
     queryParam.temporal_field = target.useTemporalField ? this.buildTemporalField(target) : [];
     queryParam.temporal_range = this.buildTemporalRange(target.range);
     queryParam.maxRowCount = target.rowCountLimit
+
+
     if (target.queryType == 'selectQuery') queryParam.where = this.buildWhereParams( (target.where) ? target.where : []);
     //conflation
     if (target.useConflation) {
@@ -660,7 +684,7 @@ executeAsyncQuery(request: any) {
     var requestPromise = new Promise(resolve => {
         let refIDn = Math.round(10000000 * Math.random());
         var wrappedRequest = {i:request, ID:refIDn};
-        console.log('wrapped', wrappedRequest)
+        // console.log('wrappedRequest', wrappedRequest)
         this.ws.send(_c.serialize(wrappedRequest));
         this.requestSentIDList.push(refIDn);
         requestResolve = resolve;
