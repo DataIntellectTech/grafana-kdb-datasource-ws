@@ -26,7 +26,7 @@ export interface MyQuery extends DataQuery {
   funcGroupCol: any
   col_meta: any
   limit: any
-  group: any
+  groupingField: any
   metricColumn: any
   fontWeight: any
   rowCountLimit: number

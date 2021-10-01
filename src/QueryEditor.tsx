@@ -3,16 +3,21 @@ import _ from 'lodash';
 import React, { ChangeEvent, PureComponent } from 'react';
 import {
   Button,
+  ButtonSelect,
   Checkbox,
+  ContextMenu,
   InlineField,
   InlineFormLabel,
   InlineLabel,
   InlineSegmentGroup,
   LegacyForms,
+  Popover,
   Segment,
   SegmentInput,
   Select,
   TextArea,
+  Tooltip,
+  WithContextMenu,
 } from '@grafana/ui';
 import { PanelProps, QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
@@ -37,7 +42,7 @@ type State = {
   conflationDuration: number;
   formatAs: string;
   // todo must be number
-  rowLimit: string;
+  rowCountLimit: number;
   showHelp: boolean;
   timeColumn: string;
   conflation: Conflation;
@@ -54,6 +59,7 @@ type State = {
   selectSegments: SelectSegment[];
   firstWhere: boolean;
   whereOperators: SelectableValue<string>[];
+  groupBy: string;
 };
 
 type WhereSegment = {
@@ -65,6 +71,8 @@ type WhereSegment = {
 type SelectSegment = {
   value: string;
   type: string;
+  aggregate?: string
+  alias?: string
 };
 
 export type Conflation = {
@@ -82,9 +90,9 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   selectParts: SqlPart[][];
   whereParts: SqlPart[];
+  
 
-
- constructor(props: Props) {
+   constructor(props: Props) {
     super(props);
 
     const { onRunQuery } = this.props;
@@ -97,7 +105,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       useConflation: false,
       conflationDuration: 5,
       formatAs: null,
-      rowLimit: null,
+      rowCountLimit: null,
       showHelp: false,
       timeColumn: null,
       conflation: null,
@@ -114,6 +122,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       whereOperators: [],
       firstWhere: true,
       selectSegments: [],
+      groupBy: null,
     };
     // run the default query immediately to get default look
     onRunQuery();
@@ -173,6 +182,9 @@ export class QueryEditor extends PureComponent<Props, State> {
   }
 
   onFormatChange(format: string) {
+    const { onChange, query, onRunQuery } = this.props;
+    onChange({ ...query, format: format  });
+    onRunQuery();
     this.setState({ formatAs: format });
   }
 
@@ -186,7 +198,7 @@ export class QueryEditor extends PureComponent<Props, State> {
    allConflationSettingsSet(conflation, useConflation){
     if((conflation.unitType && conflation.duration && conflation.aggregate) || !useConflation){
       const { onChange, query, onRunQuery } = this.props;
-      onChange({ ...query, useConflation: useConflation, conflation: conflation /*, format: 'time series' */ });
+      onChange({ ...query, useConflation: useConflation, conflation: conflation });
       onRunQuery();
     }
    }
@@ -215,7 +227,17 @@ export class QueryEditor extends PureComponent<Props, State> {
   };
 
   onRowLimitChange = (event: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ rowLimit: event.target.value });
+    const { onChange, query, onRunQuery } = this.props;
+    let rowLimit = Number(event.target.value)
+
+    if( !isNaN(rowLimit)){
+      // this.state.rowCountLimit = rowLimit
+      // this.state.queryError.error[2] = false;
+      onChange({ ...query, rowCountLimit: rowLimit });
+      onRunQuery();
+      this.setState({ rowCountLimit: rowLimit });
+    }
+    //TODO else do error
   };
 
   onUnitChange(unit: string) {
@@ -245,6 +267,13 @@ export class QueryEditor extends PureComponent<Props, State> {
     onChange({ ...query, useTemporalField: checked });
     this.setState({ useTemporalField: checked });
     onRunQuery();
+  };
+
+  useGrouping = (checked: boolean) => {
+    const { onChange, query, onRunQuery } = this.props;
+    onChange({ ...query, useGrouping: checked });
+    onRunQuery();
+    this.setState({ useGrouping: checked });
   };
 
   useConflation = (checked: boolean) => {
@@ -542,6 +571,20 @@ export class QueryEditor extends PureComponent<Props, State> {
     this.forceUpdate();
   }
 
+  onSelectAddButtonPress(option, segment){
+    switch(option.value){
+      case 'add':
+        this.addNewSelectSegment()
+        break;
+      case 'alias':
+          this.addSegmentAlias(segment)
+          break;
+      case 'aggregate': 
+          this.addSegmentAggregate(segment)
+         break;
+    }
+  }
+
   addNewSelectSegment() {
     let newSegment: SelectSegment = {
       value: '',
@@ -550,6 +593,30 @@ export class QueryEditor extends PureComponent<Props, State> {
     let tempSegments = this.state.selectSegments;
     tempSegments.push(newSegment);
     this.setState({ selectSegments: tempSegments }, () => {
+      console.log('testing');
+    });
+    this.forceUpdate();
+  }
+
+  addSegmentAlias(segment){
+    
+    let segments = this.state.selectSegments
+    segment.alias = 'value'
+    let index = segments.indexOf(segment);
+    segments[index] = segment;
+    this.setState({ selectSegments: segments }, () => {
+      console.log('testing');
+    });
+    this.forceUpdate();
+  }
+
+  addSegmentAggregate(segment){
+    
+    let segments = this.state.selectSegments
+    segment.aggregate = 'avg'
+    let index = segments.indexOf(segment);
+    segments[index] = segment;
+    this.setState({ selectSegments: segments }, () => {
       console.log('testing');
     });
     this.forceUpdate();
@@ -564,7 +631,21 @@ export class QueryEditor extends PureComponent<Props, State> {
     // let selectParams = []
     let list_string_values = [];
     for (const segment of segments) {
-      list_string_values.push([{ type: 'column', params: [segment.value] }]);
+      let params = []
+
+      if(segment.value){
+        params.push({ type: segment.type, params: [segment.value] })
+      }
+
+      if(segment.aggregate){
+        params.push({ type: 'aggregate', params: [segment.aggregate] })
+      }
+
+      if(segment.alias){
+        params.push({ type: 'alias', params: [segment.alias] })
+      }
+
+      list_string_values.push(params);
       // selectParams.push(segment.value)
     }
 
@@ -579,7 +660,21 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     let list_string_values = [];
     for (const segment of segments) {
-      list_string_values.push([{ type: 'column', params: [segment.value] }]);
+      let params = []
+
+      if(segment.value){
+        params.push({ type: segment.type, params: [segment.value] })
+      }
+
+      if(segment.aggregate){
+        params.push({ type: 'aggregate', params: [segment.aggregate] })
+      }
+
+      if(segment.alias){
+        params.push({ type: 'alias', params: [segment.alias] })
+      }
+
+      list_string_values.push(params);
       // selectParams.push(segment.value)
     }
 
@@ -589,6 +684,35 @@ export class QueryEditor extends PureComponent<Props, State> {
     this.setState({ selectSegments: segments });
     this.forceUpdate();
   }
+
+  removeSelectSegmentAlias(segment) {
+    let segments = this.state.selectSegments
+    let index = segments.indexOf(segment)
+    segments[index].alias = ''
+
+    this.setState({ selectSegments: segments });
+    this.forceUpdate();        
+  }
+
+  onGroupByChange(groupBy){   
+    const { onChange, query, onRunQuery } = this.props;
+
+    onChange({ ...query, groupingField: groupBy });
+    onRunQuery();
+
+    this.setState({groupBy: groupBy})
+  }
+
+  removeSelectSegmentAggregate(segment) {
+    let segments = this.state.selectSegments
+    let index = segments.indexOf(segment)
+    segments[index].aggregate = ''
+
+    this.setState({ selectSegments: segments });
+    this.forceUpdate();        
+  }
+
+
 
   // conflationSettingsChanged() {
   //   //Conflation errors are reported in queryError at index 1
@@ -626,14 +750,14 @@ export class QueryEditor extends PureComponent<Props, State> {
     const query = defaults(this.props.query, defaultQuery);
     // const { queryType, bid, ask, sym, time } = query;
 
-    
+    const version = this.props.datasource.meta.info.version
     
     let queryOptions: SelectableValue[] = [
       { value: 'selectQuery', label: 'Built Query' },
       { value: 'functionQuery', label: 'free-form Query' },
     ];
 
-    let formatOptions: SelectableValue[] = [{ value: 'tableFormat', label: 'Table' }];
+    let formatOptions: SelectableValue[] = [{ value: 'table', label: 'Table' }, { value: 'time series', label: 'Time series' }];
 
     let timeOptions: SelectableValue[] = [{ value: 'time', label: 'time' }];
 
@@ -659,6 +783,17 @@ export class QueryEditor extends PureComponent<Props, State> {
       { label: 'Variance', value: 'var' },
     ];
 
+    let selectAddButtonOptions: SelectableValue[] = [
+      { label: 'Add Column', value: 'add'},
+      { label: 'Define Alias', value: 'alias'},
+      { label: 'Aggregate Functions', value: 'aggregate'}
+    ];    
+
+    if(!this.state.useConflation)
+    {
+      selectAddButtonOptions = selectAddButtonOptions.filter((o) => o.value !== 'aggregate')
+    }
+
     let removeOption: SelectableValue[] = [{ label: 'remove', value: 'remove' }];
 
     let tableOptions: SelectableValue<string>[] = this.getTableSegments();
@@ -666,7 +801,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       <div>
         <div className="gf-form-inline">
           <div className="gf-form">
-            <InlineField label="Query Type" labelWidth={20} grow={true}>
+            <InlineField label="Query Type" labelWidth={20} color={'#33A2E5'} grow={true}>
               <Select
                 width={20}
                 placeholder="Select Query Type"
@@ -684,8 +819,8 @@ export class QueryEditor extends PureComponent<Props, State> {
           <div>
             <div className="gf-form-inline">
               <div className="gf-form">
-                <InlineField label="From" labelWidth={20} grow={true}>
-                  <Select
+                <InlineField label="From" labelWidth={20} style={{color: '#33A2E5'}} grow={true}>
+                  <Segment
                     width={20}
                     placeholder="Select Table"
                     options={tableOptions}
@@ -704,10 +839,11 @@ export class QueryEditor extends PureComponent<Props, State> {
                   <InlineField
                     label="Time Column"
                     labelWidth={20}
-                    grow={true}
+                    grow={true} 
+                    style={{color: '#33A2E5'}}
                     tooltip="Time series data is plotted against this column.  Results are also automatically filtered on this field using the date extents of the graph."
                   >
-                    <Select
+                    <Segment
                       width={20}
                       placeholder="time"
                       options={timeOptions}
@@ -721,24 +857,24 @@ export class QueryEditor extends PureComponent<Props, State> {
                 </div>
               </div>
             )}
-            <div className="gf-form-inline">
+            {/* <div className="gf-form-inline"> */}
               {this.state.selectSegments.length == 0 && (
                 <div className="gf-form-inline">
                   <InlineFormLabel width={10}>Select</InlineFormLabel>
-                  <Button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={this.addNewSelectSegment.bind(this)}
-                    style={{ background: '#202226' }}
-                  >
-                    +
-                  </Button>
+                  
+                  <div className="gf-form-label width-4">
+                      <Button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={this.addNewSelectSegment.bind(this)}
+                          style={{ background: '#202226', padding: '10', outline: 'none' }}
+                        >+</Button>
+                  </div>
                   <div className="gf-form gf-form--grow">
-                    <div className="gf-form-label gf-form-label--grow"></div>
+                    <div className="gf-form-label gf-form-label--grow" style={{padding: '10'}}></div>
                   </div>
                 </div>
               )}
-            </div>
             {this.state.selectSegments.map((segment) => {
               return (
                 <div className="gf-form-inline">
@@ -747,8 +883,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                       <InlineFormLabel width={10}>Select</InlineFormLabel>
                     </div>
                   )}
-
-                  {/* <div className="gf-form">   */}
                   {this.state.selectSegments.indexOf(segment) > 0 && (
                     <label className="gf-form-label query-keyword width-10" />
                   )}
@@ -756,7 +890,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <InlineSegmentGroup>
                       <InlineLabel>
                         <Segment
-                          value="Column"
+                          value="Column:"
                           options={removeOption}
                           onChange={() => this.removeSelectSegment(segment)}
                         />
@@ -772,29 +906,61 @@ export class QueryEditor extends PureComponent<Props, State> {
                       </InlineLabel>
                     </InlineSegmentGroup>
                   </div>
-                  {this.state.selectSegments.indexOf(segment) == this.state.selectSegments.length - 1 && (
+                    {segment.alias && (
+                      <div className="gf-form-inline">
+                        <InlineSegmentGroup>
+                          <InlineLabel>
+                            <Segment
+                              value="Alias:"
+                              options={removeOption}
+                              onChange={() => this.removeSelectSegmentAlias(segment)}
+                            />
+                            <SegmentInput
+                              onChange={(e: string) => {
+                                segment.alias = e;
+                                this.setSelectSegment(segment);
+                              }}
+                              value={segment.alias || ''}
+                            />
+                          </InlineLabel>
+                        </InlineSegmentGroup>
+                      </div>
+                    )}
+                    {segment.aggregate && (
+                      <div className="gf-form-inline">
+                      <InlineSegmentGroup>
+                        <InlineLabel>
+                          <Segment
+                            value="Aggregate:"
+                            options={removeOption}
+                            onChange={() => this.removeSelectSegmentAggregate(segment)}
+                          />
+                          <Segment
+                            onChange={(e: SelectableValue<string>) => {
+                              segment.aggregate = e.value;
+                              this.setSelectSegment(segment);
+                            }}
+                            options={aggregateOptions}
+                            value={segment.aggregate || ''}
+                          />
+                        </InlineLabel>
+                      </InlineSegmentGroup>
+                    </div>                      
+                    )}
                     <div className="gf-form-inline">
-                      {' '}
-                      <Button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={this.addNewSelectSegment.bind(this)}
-                        style={{ background: '#202226' }}
-                      >
-                        +
-                      </Button>{' '}
-                    </div>
-                  )}
+                      <ButtonSelect
+                          options={selectAddButtonOptions}
+                          onChange={(e: SelectableValue<string>) => this.onSelectAddButtonPress(e, segment)}
+                          className="btn btn-primary"
+                          style={{ background: '#202226' }}
+                      >+</ButtonSelect>
+                    </div>                  
                   <div className="gf-form gf-form--grow">
                     <div className="gf-form-label gf-form-label--grow"></div>
                   </div>
                 </div>
               );
             })}
-            {/* <div className="gf-form-inline"> */}
-            {/* <div className="gf-form"> */}
-
-            <div className="gf-form-inline">
               {this.state.whereSegments.length == 0 && (
                 <div className="gf-form-inline">
                   <InlineFormLabel
@@ -803,20 +969,19 @@ export class QueryEditor extends PureComponent<Props, State> {
                   >
                     Where
                   </InlineFormLabel>
-                  <Button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={this.addNewWhereSegment.bind(this)}
-                    style={{ background: '#202226' }}
-                  >
-                    +
-                  </Button>
+                  <div className="gf-form-label width-4">
+                    <Button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={this.addNewWhereSegment.bind(this)}
+                      style={{ width: '5', background: '#202226', padding: '10', outline: 'hidden'}}
+                    >+</Button>
+                  </div>
                   <div className="gf-form gf-form--grow">
                     <div className="gf-form-label gf-form-label--grow"></div>
                   </div>
                 </div>
               )}
-            </div>
             {this.state.whereSegments.map((segment) => {
               return (
                 <div className="gf-form-inline">
@@ -918,37 +1083,55 @@ export class QueryEditor extends PureComponent<Props, State> {
         {this.state.queryTypeStr && this.state.queryTypeStr !== 'kdbSideQuery' && (
           // TODO panelType !== graph / heatmap
           <div>
+            {this.state.formatAs && this.state.formatAs !== 'table' && (
             <div className="gf-form-inline">
-              <div className="gf-form">
-                <InlineFormLabel
-                  width={20}
-                  tooltip="Used to enable a date/time column, acting as a key for each record."
-                >
+                <div className="gf-form">
+                  <InlineFormLabel
+                    width={20}
+                    tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data."
+                  >
                   <Checkbox
-                    checked={this.state.useTemporalField}
-                    onChange={(e) => this.useTemporalField(e.currentTarget.checked)}
+                    checked={this.state.useGrouping}
+                    onChange={(e) => this.useGrouping(e.currentTarget.checked)}
                     css=""
                   />
-                  Use Temporal Field
-                </InlineFormLabel>
+                    Use Grouping
+                  </InlineFormLabel>
+                </div>
+                {this.state.useGrouping && (
+                  <div className="gf-form">
+                    <InlineFormLabel>Group By</InlineFormLabel>
+                    <SegmentInput
+                        value={this.state.groupBy || ''}
+                        onChange={(e: string) => {
+                          this.onGroupByChange(e);
+                        }}
+                      />
+                  </div>
+                )}
+                <div className="gf-form gf-form--grow">
+                  <div className="gf-form-label gf-form-label--grow"></div>
+                </div>
+            </div>
+            )}
+            <div className="gf-form-inline">
+              <div className="gf-form" style={{wordBreak: 'break-word', textAlign: 'right'}}>
+                <InlineFormLabel className="gf-form-label width-13" tooltip="Used to enable a date/time column, acting as a key for each record.">
+                  <span>
+                    <input type="checkbox" className="width-2" onChange={(e) => this.useTemporalField(e.currentTarget.checked)}/>
+                  </span>Use Temporal Field</InlineFormLabel>
               </div>
               <div className="gf-form gf-form--grow">
                 <div className="gf-form-label gf-form-label--grow"></div>
               </div>
             </div>
             {this.state.useTemporalField && (
+            <div className="gf-form-inline">
               <div className="gf-form">
-                <InlineFormLabel
-                  width={20}
-                  tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket."
-                >
-                  <Checkbox
-                    checked={this.state.useConflation}
-                    onChange={(e) => this.useConflation(e.currentTarget.checked)}
-                    css=""
-                  />
-                  Use Conflation
-                </InlineFormLabel>
+                <InlineFormLabel className="gf-form-label width-13" tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket.">
+                  <span>
+                    <input type="checkbox" className="width-2" onChange={(e) => this.useConflation(e.currentTarget.checked)}/>
+                  </span>Use Conflation</InlineFormLabel>
                 {this.state.useConflation && (
                   <div className="gf-form-inline">
                     <InlineFormLabel>Duration</InlineFormLabel>
@@ -977,75 +1160,12 @@ export class QueryEditor extends PureComponent<Props, State> {
                       onChange={(e: SelectableValue<string>) => this.onAggregateChange(e.value)}
                       value={this.state.conflation.aggregate || ''}
                     />
-                    <div className="gf-form gf-form--grow">
-                      <div className="gf-form-label gf-form-label--grow"></div>
-                    </div>
                   </div>
                 )}
-                {/* <div className="gf-form-inline">
-                  <div className="gf-form">
-                    <InlineField
-                        label="Use Conflation"
-                        labelWidth={30}
-                        grow={true}
-                        tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket."
-                      >
-                      <Checkbox
-                        checked={this.state.useConflation}
-                        onChange={(e) => this.useConflation(e.currentTarget.checked)}
-                        css=""/>
-                    </InlineField>
-                  </div>
-                  {this.state.useConflation && (
-                  <div className="gf-form-inline">
-                    <div className="gf-form">
-                      <FormField
-                        label='Duration'
-                        value={this.state.duration || ''}
-                        labelWidth={20}
-                        inputWidth={5}
-                        onChange={this.onDurationChange}
-                      />
-                      </div>
-                      <div className="gf-form">
-                      <InlineField
-                        label="Units"
-                        labelWidth={10}
-                        grow={true}
-                      >
-                      <Select 
-                        width={10}
-                        options={unitOptions}
-                        onChange={(e: SelectableValue<string>) => 
-                          this.onUnitChange(e.value)
-                        }
-                        value={this.state.unitOption || ''}
-                        />
-                      </InlineField>
-                    </div>
-                    <div className="gf-form">
-                      <InlineField
-                          label="Default Aggregation"
-                          tooltip="The data in each bucket are reduced to a single value per bucket via an aggregation. E.G. 'Average' would take the mean of all points within each 5 minute peroid, for every 5 minute period of your time series data. It would then be the means that are plotted."
-                          labelWidth={20}
-                          grow={true}
-                        >
-                        <Select 
-                          width={10}
-                          options={aggregateOptions}
-                          onChange={(e: SelectableValue<string>) => 
-                            this.onAggregateChange(e.value)
-                          }
-                          value={this.state.aggregate || ''}
-                          />
-                        </InlineField>
-                    </div>
-                  </div>
-                  )}
-                  <div className="gf-form gf-form--grow">
-                    <div className="gf-form-label gf-form-label--grow"></div>
-                  </div>
-                </div> */}
+               </div>
+                <div className="gf-form gf-form--grow">
+                  <div className="gf-form-label gf-form-label--grow"></div>
+                </div>
               </div>
             )}
           </div>
@@ -1053,9 +1173,9 @@ export class QueryEditor extends PureComponent<Props, State> {
         <div>
           <div className="gf-form-inline">
             <div className="fg-form">
-              <InlineField label="Format as" labelWidth={10}>
+              <InlineField label="Format as" labelWidth={10} color={'#33A2E5'}>
                 <Select
-                  width={10}
+                  width={20}
                   options={formatOptions}
                   onChange={(e: SelectableValue<string>) => this.onFormatChange(e.value)}
                   value={this.state.formatAs || ''}
@@ -1065,15 +1185,23 @@ export class QueryEditor extends PureComponent<Props, State> {
             <div className="gf-form">
               <FormField
                 label="Row Limit"
-                value={this.state.rowLimit || ''}
-                labelWidth={20}
+                value={this.state.rowCountLimit || ''}
+                labelWidth={10} 
+                style={{color: '#33A2E5'}}
                 tooltip="An integer used to limit the number of rows loaded by Grafana for performance purposes."
                 placeholder="1000"
                 onChange={this.onRowLimitChange}
               />
             </div>
-            <div onClick={this.showHelp}>
-              <label>Show Help</label>
+             <div className="gf-form">
+              <Button
+                onClick={this.showHelp.bind(this)}
+                className="btn btn-primary"
+                style={{ background: '#202226', color: '#33A2E5', outline: 'none'}}
+               >Show Help
+                {!this.state.showHelp && (<i className="fa fa-caret-right"></i>)}
+                {this.state.showHelp && (<i className="fa fa-caret-down"></i>)}
+               </Button>
             </div>
             <div className="gf-form gf-form--grow">
               <div className="gf-form-label gf-form-label--grow"></div>
@@ -1081,43 +1209,70 @@ export class QueryEditor extends PureComponent<Props, State> {
           </div>
         </div>
         {this.state.showHelp && (
-          <div>
-            <pre className="gf-form-pre alert alert-info">
-              Plugin Version: First, choose the datasource you wish to query. Query Type - Built Query: Essential: From
-              - Select Table: - Click 'Select Table' and type in the table you wish to query. If not tables appear in a
-              drop down, check your datasource is connected. Time Column - Select Time: - Click 'Select Time' and type
-              the column you wish to use as the time axis for the graph. This field can be diabled in on table
-              visualisation. Select - Select Column: - Click 'select column' and type the column you wish to select for
-              your visualisation. More columns may be added using the plus button beside and typing 'Column'. - To
-              remove a column, click 'Column:' and press 'Remove' in the drop-down. - The identification of a column can
-              be customised by clicking the plus button bside the column and entering 'Alias'. - If conflation is used,
-              the aggregate function applied to a column can be changed by clicking the plus button, typing 'Aggregate'
-              and choosing from the drop-down menu. - If you are creating a table and selecting a time coloumn, you may
-              need to change the 'type' to 'time' in the visualisation menu. Row Limit: - This limits the number of
-              records that can be returned by the server to aid the performance of Grafana. If row limit is reached,
-              either change the number or use conflation. Optional: Where - Expression: - Click the plus button and type
-              'Expression' to add a where-clause template. - Each element can be changed in the where-clause by clicking
-              on them. - Click 'Expr:' and click 'Remove' to remove an expression. Grouping - Select Field: - To enable
-              grouping, check the box. Then click 'Select Field', type the field by which to categorise your data.
-              Conflation - Duration, Units, Default Aggregation: - To enable conflation, check the box. Then adjust the
-              time-buckets by changing the number and units. - The Default Aggregation is the operation applied across
-              the records per time-bucket. This can be overriden under the 'Select Column' section by using the plus
-              button. Example of using Alias, Where and Conflation: FROM: trade TIME COLUMN: time SELECT: Column: price;
-              Alias: GOOG WHERE: Expr: sym = GOOG USE CONFLATION: Duration - 30; Units - Seconds; Aggregation - Last
-              Query Type - Free-form Query: Esential: Function - Enter function: - Enter a kdb select statement into the
-              textbox. - If using graph visualisation, ensure time is selected in your statement. Time Column - time
-              (Graph visualisation): - Enter here the time column against which Grafana will plot your timeseries data.
-              - This can be disabled in table visualisation using the checkbox. Optional: Grouping - Select Field: - In
-              the function, ensure to select the column by which to group your data. DO NOT put it in the by-clause of
-              the function for graphical visualisation. - Type the column name into the grouping field. Conflation -
-              Duration, Units, Default Aggregation: - To enable conflation, check the box. Then adjust the time-buckets
-              by changing the number and units. - The Default Aggregation is the operation applied across the records
-              per time-bucket. - This is not currently independently configurable. To aggregate columns differently, add
-              duplicate your query and change the column and aggregation. Query Type - Function: - Click 'Select
-              Function' and type/choose the function to be used. - The plugin will attempt to detect the number of
-              arguments and create segments to be adjusted. If this fails, more argument segments can be added using the
-              plus button. - Conflation and row limit functions are explaining in the Built Query mode.
-            </pre>
+          <div className="gf-form"  >
+              <pre className="gf-form-pre alert alert-info">
+                Plugin Version: {version}
+                First, choose the datasource you wish to query.
+                Query Type - Built Query:
+                  Essential:
+                    From - Select Table:
+                    - Click 'Select Table' and type in the table you wish to query. If not tables appear in a drop down, check your datasource is connected.
+                    Time Column - Select Time:
+                    - Click 'Select Time' and type the column you wish to use as the time axis for the graph. This field can be diabled in on table visualisation.
+                    Select - Select Column:
+                    - Click 'select column' and type the column you wish to select for your visualisation. More columns may be added using the plus button beside and typing 'Column'.
+                    - To remove a column, click 'Column:' and press 'Remove' in the drop-down.
+                    - The identification of a column can be customised by clicking the plus button bside the column and entering 'Alias'.
+                    - If conflation is used, the aggregate function applied to a column can be changed by clicking the plus button, typing 'Aggregate' and choosing from the drop-down menu. 
+                    - If you are creating a table and selecting a time coloumn, you may need to change the 'type' to 'time' in the visualisation menu.
+                    Row Limit:
+                    - This limits the number of records that can be returned by the server to aid the performance of Grafana. If row limit is reached, either change the number or use conflation.
+
+                  Optional:
+                    Where - Expression:
+                    - Click the plus button and type 'Expression' to add a where-clause template.
+                    - Each element can be changed in the where-clause by clicking on them.
+                    - Click 'Expr:' and click 'Remove' to remove an expression.
+                    Grouping - Select Field:
+                    - To enable grouping, check the box. Then click 'Select Field', type the field by which to categorise your data.
+                    Conflation - Duration, Units, Default Aggregation:
+                    - To enable conflation, check the box. Then adjust the time-buckets by changing the number and units.
+                    - The Default Aggregation is the operation applied across the records per time-bucket. This can be overriden under the 'Select Column' section by using the plus button.
+                  
+                  Example of using Alias, Where and Conflation:
+                  FROM: trade
+                  TIME COLUMN: time
+                  SELECT: Column: price; Alias: GOOG
+                  WHERE: Expr: sym = GOOG
+                  USE CONFLATION: Duration - 30; Units - Seconds; Aggregation - Last
+                
+                  
+                Query Type - Free-form Query:
+                  Esential:
+                    Function - Enter function:
+                    - Enter a kdb select statement into the textbox.
+                    - If using graph visualisation, ensure time is selected in your statement.
+                    Time Column - time (Graph visualisation):
+                    - Enter here the time column against which Grafana will plot your timeseries data.
+                    - This can be disabled in table visualisation using the checkbox.
+
+                  Optional:
+                    Grouping - Select Field:
+                    - In the function, ensure to select the column by which to group your data. DO NOT put it in the by-clause of the function for graphical visualisation.
+                    - Type the column name into the grouping field.
+                    Conflation - Duration, Units, Default Aggregation:
+                    - To enable conflation, check the box. Then adjust the time-buckets by changing the number and units.
+                    - The Default Aggregation is the operation applied across the records per time-bucket. 
+                    - This is not currently independently configurable. To aggregate columns differently, add duplicate your query and change the column and aggregation.
+
+                    
+                Query Type - Function:
+                    - Click 'Select Function' and type/choose the function to be used.
+                    - The plugin will attempt to detect the number of arguments and create segments to be adjusted. If this fails, more argument segments can be added using the plus button.
+                    - Conflation and row limit functions are explaining in the Built Query mode.
+
+
+              </pre>
           </div>
         )}
       </div>
