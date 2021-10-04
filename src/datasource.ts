@@ -7,6 +7,14 @@ import {
   DataSourceInstanceSettings,
   MutableDataFrame,
   MetricFindValue,
+  FieldType,
+  ArrayVector,
+  ArrayDataFrame,
+  DataFrame,
+  TimeSeries,
+  toDataFrame,
+  FieldDTO,
+  outerJoinDataFrames,
 } from '@grafana/data';
 
 import ResponseParser from './response_parser';
@@ -20,6 +28,8 @@ import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
 import { graphFunction } from './model/kdb-request-config';
 import { conflationDurationDefault, conflationUnitDefault } from './QueryEditor';
+import { Field } from '@grafana/ui';
+import _ from 'lodash';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
    //This is declaring the types of each member
@@ -132,23 +142,38 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                                 console.log(data)
 
                                 var fields = []
-                                data.data[0].columns.forEach((column)=> {
-                                    fields.push({ name: column.text })
-                                })
+                                if(data.data[0].columns){
+                                        data.data[0].columns.forEach((column)=> {
+                                            fields.push({ name: column.text })
+                                        })
 
-                                const frame = new MutableDataFrame({
-                                    refId: data.data[0].refId,
-                                    fields: fields
-                                    
-                                });
-                                data.data[0].rows.forEach((element: any[]) => {
-                                    var row = []
-                                    element.forEach((entry) => {
-                                        row.push(entry)
+                                    const frame = new MutableDataFrame({
+                                        refId: data.data[0].refId,
+                                        fields: fields
+                                        
+                                    });
+                                    data.data[0].rows.forEach((element: any[]) => {
+                                        var row = []
+                                        element.forEach((entry) => {
+                                            row.push(entry)
+                                        })
+                                        frame.appendRow(row)
+                                    });
+                                    return frame
+                                }else{
+                                    // time series
+                                    const frame = new MutableDataFrame({
+                                        refId: data.data[0].refId,
+                                        fields: [
+                                            { name: 'value', type: FieldType.number},
+                                            { name: 'time', type: FieldType.time},
+                                        ]
+                                    });
+                                    data.data[0].datapoints.forEach((datapoint: any[]) => {
+                                        frame.appendRow([datapoint[0], datapoint[1]])
                                     })
-                                    frame.appendRow(row)
-                                });
-                                return frame
+                                    return frame
+                                }
                             }); 
                             else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
                         })
@@ -156,27 +181,225 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                         else  return this.connectFail(prefilterResultCount, allRefIDs);
                     })      
                     else { return this.webSocketWait().then(() => {
-                            if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((data: any) => {
-                                console.log(data)
+                            if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((series: any) => {
+                                console.log(series)
 
-                                var fields = []
-                                data.data[0].columns.forEach((column)=> {
-                                    fields.push({ name: column.text })
-                                })
+                                if(series.data[0].columns){
+                                     var fields = []
+                                        series.data[0].columns.forEach((column)=> {
+                                            fields.push({ name: column.text })
+                                        })
 
-                                const frame = new MutableDataFrame({
-                                    refId: data.data[0].refId,
-                                    fields: fields
-                                    
-                                });
-                                data.data[0].rows.forEach((element: any[]) => {
-                                    var row = []
-                                    element.forEach((entry) => {
-                                        row.push(entry)
+                                    const frame = new MutableDataFrame({
+                                        refId: series.data[0].refId,
+                                        fields: fields
+                                        
+                                    });
+                                    series.data[0].rows.forEach((element: any[]) => {
+                                        var row = []
+                                        element.forEach((entry) => {
+                                            row.push(entry)
+                                        })
+                                        frame.appendRow(row)
+                                        frame.add
+                                    });
+                                    return frame
+                                }else{
+                                    // time series
+
+                                    let data = { data: [] as MutableDataFrame[] };
+
+                                    series.data.forEach(target => {
+
+                                        let datapoints = target.datapoints
+                                        const timeValues = datapoints.map(datapoint => datapoint[1])
+                                        const values = datapoints.map(datapoint => datapoint[0])
+                                        
+                                        const fields = [
+                                            { name: 'Time', values: timeValues, type: FieldType.time },
+                                            {
+                                                name: target.target,
+                                                values: values,
+                                            },
+                                        ];
+
+                                        data.data.push(
+                                            new MutableDataFrame({
+                                                refId: target.refId,
+                                                fields: fields,
+                                            })
+                                        )
                                     })
-                                    frame.appendRow(row)
-                                });
-                                return frame
+                                    return outerJoinDataFrames({frames: data.data})
+
+                                    // let dataFrames = { data: [] as MutableDataFrame[] };
+
+                                    
+                                    // series.data.forEach(target => {
+                                        
+                                    //     let times: any[] = []
+                                    //     let values: any[] = []
+
+                                    //     target.datapoints.forEach(datapoint => {
+                                    //         times.push(datapoint[1])
+                                    //         values.push(datapoint[0])
+                                    //     })
+                                        
+                                    //     let fields: any[] = [
+                                    //         {
+                                    //             name: 'Time',
+                                    //             values: times
+                                    //         },
+                                    //         {
+                                    //             name: target.target,
+                                    //             values: values
+                                    //         }
+                                    //     ]
+
+                                    //     dataFrames.data.push(
+                                    //         new MutableDataFrame({
+                                    //             refId: target.refId,
+                                    //             fields: fields
+                                    //         })
+                                    //     )
+                                    // })
+                                    // return dataFrames
+
+                                    /* Possibly close */
+
+                                    // const dataFrame = new MutableDataFrame({
+                                    //     refId: series.data[0].refId,
+                                    //     fields: [
+                                    //         { name: 'Time', type: FieldType.time}
+                                    //     ]
+                                    // });
+
+                                    // series.data.forEach(target => {
+                                    //     // dataFrame.addField(target.target)
+                                        
+                                    //     let values: any[] = []
+
+                                    //     target.datapoints.forEach(datapoint =>{
+                                    //         values.push(datapoint[0])
+                                    //         dataFrame.add(datapoint[1])
+                                    //         // dataFrame.add(datapoint[0])
+                                    //     })
+
+                                    //     let field: FieldDTO = {
+                                    //         name: target.target,
+                                    //         values: values
+                                    //     }
+                                    //     dataFrame.addField(field)
+                                    // })
+
+                                    // return dataFrame
+
+                                    /* end Possibly close */
+
+                                    
+                                    /* LATEST WORKING */
+
+                                    // const frames: any[] = [];
+                                    // data.data.forEach(target => {
+                                    //     let series = _.map(target.datapoints, point => {
+                                    //         return { Time: point[1], Value: point[0]}
+                                    //     })
+                                    //     // entries.forEach(entry => {
+                                    //     //      const series = [
+                                    //     //         { Time: entry[1], Value: entry[0] }
+                                    //     //     ]
+                                    //     const frame = toDataFrame(series)
+                                    //     frame.name = target.target
+                                    //     frames.push(frame);
+                                    //     // })                                       
+                                    // })
+                                    // return  frames
+
+                                    /* END LATEST WORKING*/
+
+
+                                    // const dataFrames: MutableDataFrame[] = []
+
+
+                                    // data.data.forEach(target => {
+                                    //     const dataFrame = new MutableDataFrame({
+                                    //         refId: target.refId,
+                                    //         fields: [
+                                    //             {name: target.target, type: FieldType.string},
+                                    //             {name: 'time', type: FieldType.time}
+                                    //         ]
+                                    //     })
+                                    //     target.datapoints.forEach(datapoint => {
+                                    //         var row = []
+                                    //         datapoint.forEach(point => {
+                                    //             row.push(point)
+                                    //         })
+                                    //         dataFrame.appendRow(row)
+                                    //     })
+                                    //     dataFrames.push(dataFrame)
+                                    // })
+                                    
+                                    // return { dataFrames }
+                                    // const objs: any[] = []
+                                    // // data.data.forEach((target) => {
+                                    // // target.datapoints.forEach(datapoint => {  
+                                    // //     objs.push({ value: datapoint[0], time: datapoint[1]})
+                                    // //     // const frame = new ArrayDataFrame(datapoint[0]);
+                                    // //     // frame.setFieldType(target.target, FieldType.string)
+                                    // //     // frame.setFieldType('time', FieldType.time)
+                                    // //     // frame.refId = target.refId
+                                    // //     // dataFrames.push(frame)
+                                    // //     })
+                                    // // })
+
+                                    // // const frame = new ArrayDataFrame(objs);
+                                    // let names: any[] = []
+
+                                    // data.data.forEach(target => {
+                                    //     names.push(target.target)
+                                    // })
+                                    
+                                    // const frame = new ArrayDataFrame(data.data, names);
+                                    //     // frame.setFieldType('time', FieldType.time)
+                                    //     frame.refId = target.refId
+                                    //     dataFrames.push(frame)
+
+
+                                    // // type fieldType = {
+                                    // //     name: string,
+                                    // //     type: FieldType,
+                                    // //     values: ArrayVector
+                                    // // };
+
+                                    // // const frameTime = new MutableDataFrame({
+                                    // //     fields: [
+                                    // //         { name: 'time', type: FieldType.number},                                            
+                                    // //     ]
+                                    // // });
+
+                                    // // let fields: fieldType[] = []
+                                    // // data.data.forEach((target) => {
+                                    // //     let vector = new ArrayVector()
+                                    // //     target.datapoints.forEach(datapoint =>{
+                                    // //         vector.add(datapoint[0])
+                                    // //         frameTime.appendRow(datapoint[1])
+                                    // //     })
+                                    // //     let field: fieldType = {
+                                    // //         name: target.target,
+                                    // //         type: FieldType.other,
+                                    // //         values: vector
+                                    // //     }
+                                    // //     fields.push(field)                              
+                                    // // })
+
+                                    // // const frame = new MutableDataFrame({
+                                    // //     refId: data.data[0].refId,
+                                    // //     fields: fields
+                                    // // });
+                                    
+                                    // // return dataFrames
+                                    // return frame
+                                }
                             }); 
                             else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
                         })
@@ -488,45 +711,50 @@ private buildWhereParams(queryWhereList): Array<string> {
 //Builds the list of select functions consisting of the column name and an aggregation function where applicable
 private buildColumnParams(target): Array<string> {
     let columnArray: any[] = [];
-    target.select.forEach(select => {
-        if (select[0].params[0] !== 'select column') {
-            let selectElement = [];
-            if (target.useConflation) {
-                if (select.length !== 1) {
-                    if (select[1].type == 'aggregate') {
-                        selectElement.push(select[1].params[0]);
+
+    if(target.select){
+       target.select.forEach(select => {
+            if (select[0].params[0] !== 'select column') {
+                let selectElement = [];
+                if (target.useConflation) {
+                    if (select.length !== 1) {
+                        if (select[1].type == 'aggregate') {
+                            selectElement.push(select[1].params[0]);
+                        }
+                        else {
+                            selectElement.push(target.conflation.aggregate);
+                        }
                     }
                     else {
                         selectElement.push(target.conflation.aggregate);
                     }
                 }
                 else {
-                    selectElement.push(target.conflation.aggregate);
+                    selectElement.push('::'); //dummy value for kdb function
                 }
-            }
-            else {
-                selectElement.push('::'); //dummy value for kdb function
-            }
-            selectElement.push('`' + select[0].params[0]);
+                selectElement.push('`' + select[0].params[0]);
 
-            //dealing with aliasing
-            let alias = '::';
-            if (select.length > 1) {
-                if (select[1].type == 'alias') {
-                    alias = select[1].params[0];
+                //dealing with aliasing
+                let alias = '::';
+                if (select.length > 1) {
+                    if (select[1].type == 'alias') {
+                        alias = select[1].params[0];
+                    }
                 }
-            }
-            if (select.length == 3) {
-                if (select[2].type == 'alias') {
-                    alias = select[2].params[0];
+                if (select.length == 3) {
+                    if (select[2].type == 'alias') {
+                        alias = select[2].params[0];
+                    }
                 }
+
+                selectElement.push(alias);
+                columnArray.push(selectElement);
             }
 
-            selectElement.push(alias);
-            columnArray.push(selectElement);
-        }
-
-    });
+        }); 
+    }else{ //temporary fix
+        columnArray.push(['::', '`value', '::'])
+    }
     return columnArray;
 }
 
@@ -682,7 +910,6 @@ executeAsyncQuery(request: any) {
     var requestPromise = new Promise(resolve => {
         let refIDn = Math.round(10000000 * Math.random());
         var wrappedRequest = {i:request, ID:refIDn};
-        // console.log('wrappedRequest', wrappedRequest)
         this.ws.send(_c.serialize(wrappedRequest));
         this.requestSentIDList.push(refIDn);
         requestResolve = resolve;

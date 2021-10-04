@@ -287,6 +287,9 @@ export class QueryEditor extends PureComponent<Props, State> {
   };
 
   onFunctionChange = (event) => {
+    const { onChange, query, onRunQuery } = this.props;
+    onChange({ ...query, kdbFunction: event.target.value });
+    onRunQuery();
     this.setState({ functionBody: event.target.value });
   };
 
@@ -634,7 +637,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       let params = []
 
       if(segment.value){
-        params.push({ type: segment.type, params: [segment.value] })
+        params.push({ type: 'column', params: [segment.value] })
       }
 
       if(segment.aggregate){
@@ -1060,7 +1063,8 @@ export class QueryEditor extends PureComponent<Props, State> {
           </div>
         )}
         {this.state.queryTypeStr && this.state.queryTypeStr == 'functionQuery' && (
-          <div>
+          
+          <div className="gf-form-inline">
             <div className="gf-form" style={{ height: '111px' }}>
               <span className="gf-form-label query-keyword width-10" style={{ height: '111px' }}>
                 Function
@@ -1074,7 +1078,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                 onChange={this.onFunctionChange}
               ></textarea>
             </div>
-
             <div className="gf-form gf-form--grow" style={{ height: '111px' }}>
               <div className="gf-form-label gf-form-label--grow" style={{ height: '111px' }}></div>
             </div>
@@ -1121,6 +1124,15 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <input type="checkbox" className="width-2" onChange={(e) => this.useTemporalField(e.currentTarget.checked)}/>
                   </span>Use Temporal Field</InlineFormLabel>
               </div>
+              {this.state.queryTypeStr === 'functionQuery' && this.state.useTemporalField && (
+                <Segment
+                  width={20}
+                  placeholder="time"
+                  options={timeOptions}
+                  onChange={(e: SelectableValue<string>) => this.onTimeColumnChange(e.value)}
+                  value={this.state.timeColumn || ''}
+              />
+              )}
               <div className="gf-form gf-form--grow">
                 <div className="gf-form-label gf-form-label--grow"></div>
               </div>
