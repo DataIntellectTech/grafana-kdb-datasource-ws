@@ -25,5 +25,9 @@
   },
   "engines": {
     "node": ">=14"
+  },
+  "dependencies": {
+    "eslint-plugin-react": "^7.26.1",
+    "lodash": "^4.17.21"
   }
 }

@@ -31,12 +31,9 @@ import { SqlPart } from './sql_part/sql_part';
 const { FormField } = LegacyForms;
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
-type pProps = PanelProps
 type State = {
   queryTypeStr: string;
   tableFrom: string;
-  selectValues: string[];
-  whereValues: SelectableValue<string>[];
   useTemporalField: boolean;
   useConflation: boolean;
   conflationDuration: number;
@@ -52,9 +49,7 @@ type State = {
   useGrouping: boolean;
   funcGroupCol: string;
   target: MyQuery;
-  tableOption: string;
   selectOptions: SelectableValue<string>[];
-  whereOptions: SelectableValue<string>[];
   whereSegments: WhereSegment[];
   selectSegments: SelectSegment[];
   firstWhere: boolean;
@@ -95,34 +90,45 @@ export class QueryEditor extends PureComponent<Props, State> {
    constructor(props: Props) {
     super(props);
 
+    const query = defaults(this.props.query, defaultQuery);
+
     const { onRunQuery } = this.props;
+    let selectSegments: SelectSegment[] = []
+    query.select.map(segments => {
+      segments.map(segment => {
+          selectSegments.push({ value: segment.params[0], type: 'column', aggregate: segment.params[1], alias: segment.params[2] })
+      })
+    })
+
+    let whereSegments: WhereSegment[] = []
+    query.where.map(segment => {
+      whereSegments.push({ expressionField: segment.params[0], operator: segment.params[1], value: segment.params[2]})
+    })
+
+
     this.state = {
       queryTypeStr: 'selectQuery',
-      tableFrom: null,
-      selectValues: [],
-      whereValues: [],
-      useTemporalField: false,
-      useConflation: false,
+      tableFrom: query.table,
+      useTemporalField: query.useTemporalField,
+      useConflation: query.useConflation,
       conflationDuration: 5,
-      formatAs: null,
-      rowCountLimit: null,
+      formatAs: query.format,
+      rowCountLimit: query.rowCountLimit,
       showHelp: false,
-      timeColumn: null,
-      conflation: null,
-      functionBody: null,
+      timeColumn: query.timeColumn,
+      conflation: query.conflation,
+      functionBody: query.kdbFunction,
       isQueryError: false,
       queryErrorMessage: null,
-      useGrouping: false,
-      funcGroupCol: null,
+      useGrouping: query.useGrouping,
+      funcGroupCol: query.funcGroupCol,
       target: null,
-      tableOption: null,
-      selectOptions: [],
-      whereOptions: [],
-      whereSegments: [],
+      selectOptions: this.getSelectOptions(query.table),
+      whereSegments: whereSegments,
       whereOperators: [],
       firstWhere: true,
-      selectSegments: [],
-      groupBy: null,
+      selectSegments: selectSegments,
+      groupBy: query.groupingField,
     };
     // run the default query immediately to get default look
     onRunQuery();
@@ -152,9 +158,10 @@ export class QueryEditor extends PureComponent<Props, State> {
     const { onChange, query, onRunQuery } = this.props;
     onChange({ ...query, table: table });
     this.setState({ tableFrom: table }, () => {
-      this.getSelectOptions(table).then((options) => {
+      let options = this.getSelectOptions(table)
+      // this.getSelectOptions(table).then((options) => {
         this.setState({ selectOptions: options });
-      });
+      // });
     });
     onRunQuery();
   }
@@ -202,29 +209,6 @@ export class QueryEditor extends PureComponent<Props, State> {
       onRunQuery();
     }
    }
-
-  onMultiSelectChange = (item: Array<SelectableValue>) => {
-    const { onChange, query, onRunQuery } = this.props;
-    let string_values = [];
-    let list_string_values = [];
-    for (const v of item.values()) {
-      list_string_values.push([{ type: 'column', params: [v.value] }]);
-      string_values.push(v.value);
-    }
-    onChange({ ...query, select: list_string_values });
-    // const str = values.join(',');
-    this.setState({ selectValues: string_values });
-    onRunQuery();
-  };
-
-  onMultiSelectWhereChange = (item: Array<SelectableValue>) => {
-    let values: SelectableValue<string>[] = [];
-    for (const v of item.values()) {
-      values.push(v.value);
-    }
-    // const str = values.join(',');
-    this.setState({ whereValues: values });
-  };
 
   onRowLimitChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { onChange, query, onRunQuery } = this.props;
@@ -284,6 +268,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     };
     this.allConflationSettingsSet(conflation, checked)
     this.setState({ useConflation: checked, conflation: conflation });
+    this.forceUpdate()
   };
 
   onFunctionChange = (event) => {
@@ -316,11 +301,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     onRunQuery();
     this.setState({ whereSegments: segments });
   };
-
-  async setWhereData(field: string) {
-    this.getWhereValues(field).then((values) => this.setState({ whereValues: values }));
-  }
-
+  
   async setWhereOperators(field: string) {
     this.getOperators(field).then((operators) => this.setState({ whereOperators: operators }));
   }
@@ -385,18 +366,25 @@ export class QueryEditor extends PureComponent<Props, State> {
     // .catch(this.handleQueryError.bind(this));
   }
 
-  async getSelectOptions(table?) {
+  getSelectOptions(table) {
     //TODO figure this out
     let target = {
       format: 'dummy',
-      table: table ? (this.state.tableFrom ? this.state.tableFrom : null) : null,
+      table: table
     };
     const queryModel = new KDBQuery(target);
     const metaBuilder = new KDBMetaQuery(target, queryModel);
-
-    return this.props.datasource
+    let values: SelectableValue<string>[] = [];
+    
+    Promise.resolve(this.props.datasource
       .metricFindQueryDefault(metaBuilder.buildColumnQuery(target.format == 'time series' ? 'value' : 'tableValue'))
-      .then(this.transformToSegments({}));
+      .then(this.transformToSegments({}))
+      .then((options) => {
+          options.forEach((option) => values.push({ value: option.value, label: option.label }));
+        }));
+
+      return values;
+
   }
 
   transformToSegments(config) {
@@ -748,7 +736,7 @@ export class QueryEditor extends PureComponent<Props, State> {
   //   // this.updatePersistedParts();
   //   // this.panelCtrl.refresh();
   // }
-
+  
   render() {
     const query = defaults(this.props.query, defaultQuery);
     // const { queryType, bid, ask, sym, time } = query;
@@ -792,7 +780,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       { label: 'Aggregate Functions', value: 'aggregate'}
     ];    
 
-    if(!this.state.useConflation)
+    if(!this.state.useConflation )
     {
       selectAddButtonOptions = selectAddButtonOptions.filter((o) => o.value !== 'aggregate')
     }
@@ -800,6 +788,8 @@ export class QueryEditor extends PureComponent<Props, State> {
     let removeOption: SelectableValue[] = [{ label: 'remove', value: 'remove' }];
 
     let tableOptions: SelectableValue<string>[] = this.getTableSegments();
+    
+    
     return (
       <div>
         <div className="gf-form-inline">
@@ -1011,7 +1001,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                           onChange={(e: SelectableValue<string>) => {
                             segment.expressionField = e.value;
                             this.setWhereSegment(segment);
-                            // this.setWhereData(e.value)
                             this.setWhereOperators(e.value);
                           }}
                           options={this.state.selectOptions}
@@ -1089,17 +1078,10 @@ export class QueryEditor extends PureComponent<Props, State> {
             {this.state.formatAs && this.state.formatAs !== 'table' && (
             <div className="gf-form-inline">
                 <div className="gf-form">
-                  <InlineFormLabel
-                    width={20}
-                    tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data."
-                  >
-                  <Checkbox
-                    checked={this.state.useGrouping}
-                    onChange={(e) => this.useGrouping(e.currentTarget.checked)}
-                    css=""
-                  />
-                    Use Grouping
-                  </InlineFormLabel>
+                  <InlineFormLabel className="gf-form-label width-13" tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data.">
+                  <span>
+                    <input type="checkbox" className="width-2" checked={this.state.useGrouping} onChange={(e) => this.useGrouping(e.currentTarget.checked)}/>
+                  </span>Use Grouping</InlineFormLabel>
                 </div>
                 {this.state.useGrouping && (
                   <div className="gf-form">
@@ -1121,7 +1103,7 @@ export class QueryEditor extends PureComponent<Props, State> {
               <div className="gf-form" style={{wordBreak: 'break-word', textAlign: 'right'}}>
                 <InlineFormLabel className="gf-form-label width-13" tooltip="Used to enable a date/time column, acting as a key for each record.">
                   <span>
-                    <input type="checkbox" className="width-2" onChange={(e) => this.useTemporalField(e.currentTarget.checked)}/>
+                    <input type="checkbox" className="width-2" checked={this.state.useTemporalField} onChange={(e) => this.useTemporalField(e.currentTarget.checked)}/>
                   </span>Use Temporal Field</InlineFormLabel>
               </div>
               {this.state.queryTypeStr === 'functionQuery' && this.state.useTemporalField && (
@@ -1142,7 +1124,7 @@ export class QueryEditor extends PureComponent<Props, State> {
               <div className="gf-form">
                 <InlineFormLabel className="gf-form-label width-13" tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket.">
                   <span>
-                    <input type="checkbox" className="width-2" onChange={(e) => this.useConflation(e.currentTarget.checked)}/>
+                    <input type="checkbox" className="width-2" checked={this.state.useConflation} onChange={(e) => this.useConflation(e.currentTarget.checked)}/>
                   </span>Use Conflation</InlineFormLabel>
                 {this.state.useConflation && (
                   <div className="gf-form-inline">
