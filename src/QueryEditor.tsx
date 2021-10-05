@@ -251,12 +251,14 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   useTemporalField = (checked: boolean) => {
     const { onChange, query, onRunQuery } = this.props;
-    onChange({ ...query, useTemporalField: checked });
+    if(!checked){
+      // reset conflation and grouping flags
+      onChange({ ...query, useTemporalField: checked, useConflation: false, useGrouping: false });
+    }else{
+      onChange({ ...query, useTemporalField: checked });
+    }
     this.setState({ useTemporalField: checked });
     onRunQuery();
-    // reset conflation & grouping
-    this.useConflation(false)
-    this.useGrouping(false)
   };
 
   useGrouping = (checked: boolean) => {

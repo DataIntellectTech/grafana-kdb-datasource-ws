@@ -202,7 +202,6 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                                             row.push(entry)
                                         })
                                         frame.appendRow(row)
-                                        frame.add
                                     });
                                     return frame
                                 }else{
