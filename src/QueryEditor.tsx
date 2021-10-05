@@ -92,19 +92,22 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     const query = defaults(this.props.query, defaultQuery);
 
-    const { onRunQuery } = this.props;
     let selectSegments: SelectSegment[] = []
-    query.select.map(segments => {
+    const { onRunQuery } = this.props;
+    if(query.select) {
+      query.select.map(segments => {
       segments.map(segment => {
           selectSegments.push({ value: segment.params[0], type: 'column', aggregate: segment.params[1], alias: segment.params[2] })
       })
-    })
+     })
+    }
 
     let whereSegments: WhereSegment[] = []
-    query.where.map(segment => {
-      whereSegments.push({ expressionField: segment.params[0], operator: segment.params[1], value: segment.params[2]})
-    })
-
+    if(query.where){
+      query.where.map(segment => {
+        whereSegments.push({ expressionField: segment.params[0], operator: segment.params[1], value: segment.params[2]})
+      })
+    }
 
     this.state = {
       queryTypeStr: 'selectQuery',
@@ -251,9 +254,14 @@ export class QueryEditor extends PureComponent<Props, State> {
     onChange({ ...query, useTemporalField: checked });
     this.setState({ useTemporalField: checked });
     onRunQuery();
+    // reset conflation & grouping
+    this.useConflation(false)
+    this.useGrouping(false)
   };
 
   useGrouping = (checked: boolean) => {
+    // reset grouping if checked
+    this.onGroupByChange('')
     const { onChange, query, onRunQuery } = this.props;
     onChange({ ...query, useGrouping: checked });
     onRunQuery();
@@ -794,7 +802,9 @@ export class QueryEditor extends PureComponent<Props, State> {
       <div>
         <div className="gf-form-inline">
           <div className="gf-form">
-            <InlineField label="Query Type" labelWidth={20} color={'#33A2E5'} grow={true}>
+            <span className="gf-form-label query-keyword width-10">
+                Query Type
+              </span>
               <Select
                 width={20}
                 placeholder="Select Query Type"
@@ -802,7 +812,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                 onChange={(e: SelectableValue<string>) => this.onQueryChange(e.value)}
                 value={this.state.queryTypeStr || ''}
               />
-            </InlineField>
           </div>
           <div className="gf-form gf-form--grow">
             <div className="gf-form-label gf-form-label--grow"></div>
@@ -812,7 +821,10 @@ export class QueryEditor extends PureComponent<Props, State> {
           <div>
             <div className="gf-form-inline">
               <div className="gf-form">
-                <InlineField label="From" labelWidth={20} style={{color: '#33A2E5'}} grow={true}>
+                {/* <InlineField label="From" labelWidth={20} style={{color: '#33A2E5'}} grow={true}> */}
+                  <span className="gf-form-label query-keyword width-10">
+                     From
+                  </span>
                   <Segment
                     width={20}
                     placeholder="Select Table"
@@ -820,7 +832,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     onChange={(e: SelectableValue<string>) => this.onTableFromChange(e.value)}
                     value={this.state.tableFrom || ''}
                   />
-                </InlineField>
+                {/* </InlineField> */}
               </div>
               <div className="gf-form gf-form--grow">
                 <div className="gf-form-label gf-form-label--grow"></div>
@@ -829,13 +841,9 @@ export class QueryEditor extends PureComponent<Props, State> {
             {this.state.useTemporalField && (
               <div className="gf-form-inline">
                 <div className="gf-form">
-                  <InlineField
-                    label="Time Column"
-                    labelWidth={20}
-                    grow={true} 
-                    style={{color: '#33A2E5'}}
-                    tooltip="Time series data is plotted against this column.  Results are also automatically filtered on this field using the date extents of the graph."
-                  >
+                    <InlineFormLabel className="query-keyword" tooltip="Time series data is plotted against this column.  Results are also automatically filtered on this field using the date extents of the graph.">
+                      Time Column
+                    </InlineFormLabel>
                     <Segment
                       width={20}
                       placeholder="time"
@@ -843,7 +851,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                       onChange={(e: SelectableValue<string>) => this.onTimeColumnChange(e.value)}
                       value={this.state.timeColumn || ''}
                     />
-                  </InlineField>
                 </div>
                 <div className="gf-form gf-form--grow">
                   <div className="gf-form-label gf-form-label--grow"></div>
@@ -853,8 +860,9 @@ export class QueryEditor extends PureComponent<Props, State> {
             {/* <div className="gf-form-inline"> */}
               {this.state.selectSegments.length == 0 && (
                 <div className="gf-form-inline">
-                  <InlineFormLabel width={10}>Select</InlineFormLabel>
-                  
+                  <span className="gf-form-label query-keyword width-10">
+                     Select
+                  </span>
                   <div className="gf-form-label width-4">
                       <Button
                           type="button"
@@ -873,16 +881,17 @@ export class QueryEditor extends PureComponent<Props, State> {
                 <div className="gf-form-inline">
                   {this.state.selectSegments.indexOf(segment) == 0 && (
                     <div className="gf-form-inline">
-                      <InlineFormLabel width={10}>Select</InlineFormLabel>
+                    <span className="gf-form-label query-keyword width-10">
+                       Select
+                    </span>
                     </div>
                   )}
                   {this.state.selectSegments.indexOf(segment) > 0 && (
                     <label className="gf-form-label query-keyword width-10" />
                   )}
                   <div className="gf-form">
-                    <InlineSegmentGroup>
-                      <InlineLabel>
-                        <Segment
+                    {/* <InlineSegmentGroup> */}
+                        <Segment className="query-keyword"
                           value="Column:"
                           options={removeOption}
                           onChange={() => this.removeSelectSegment(segment)}
@@ -896,13 +905,11 @@ export class QueryEditor extends PureComponent<Props, State> {
                           value={segment.value || ''}
                           placeholder="Select field"
                         />
-                      </InlineLabel>
-                    </InlineSegmentGroup>
+                    {/* </InlineSegmentGroup> */}
                   </div>
                     {segment.alias && (
                       <div className="gf-form-inline">
                         <InlineSegmentGroup>
-                          <InlineLabel>
                             <Segment
                               value="Alias:"
                               options={removeOption}
@@ -915,14 +922,12 @@ export class QueryEditor extends PureComponent<Props, State> {
                               }}
                               value={segment.alias || ''}
                             />
-                          </InlineLabel>
                         </InlineSegmentGroup>
                       </div>
                     )}
                     {segment.aggregate && (
                       <div className="gf-form-inline">
                       <InlineSegmentGroup>
-                        <InlineLabel>
                           <Segment
                             value="Aggregate:"
                             options={removeOption}
@@ -936,7 +941,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                             options={aggregateOptions}
                             value={segment.aggregate || ''}
                           />
-                        </InlineLabel>
                       </InlineSegmentGroup>
                     </div>                      
                     )}
@@ -956,7 +960,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             })}
               {this.state.whereSegments.length == 0 && (
                 <div className="gf-form-inline">
-                  <InlineFormLabel
+                  <InlineFormLabel className="query-keyword"
                     width={10}
                     tooltip="'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75)."
                   >
@@ -980,7 +984,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                 <div className="gf-form-inline">
                   {this.state.whereSegments.indexOf(segment) == 0 && (
                     <div className="gf-form-inline">
-                      <InlineFormLabel
+                      <InlineFormLabel className="query-keyword"
                         width={10}
                         tooltip="'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75)."
                       >
@@ -994,8 +998,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <label className="gf-form-label query-keyword width-10" />
                   )}
                   <div className="gf-form">
-                    <InlineSegmentGroup>
-                      <InlineLabel>
                         <Segment value="Expr" options={removeOption} onChange={() => this.removeSegment(segment)} />
                         <Segment
                           onChange={(e: SelectableValue<string>) => {
@@ -1024,8 +1026,6 @@ export class QueryEditor extends PureComponent<Props, State> {
                           placeholder="enter value"
                           value={segment.value || ''}
                         />
-                      </InlineLabel>
-                    </InlineSegmentGroup>
                   </div>
                   {this.state.whereSegments.indexOf(segment) == this.state.whereSegments.length - 1 && (
                     <div className="gf-form-inline">
@@ -1078,14 +1078,14 @@ export class QueryEditor extends PureComponent<Props, State> {
             {this.state.formatAs && this.state.formatAs !== 'table' && (
             <div className="gf-form-inline">
                 <div className="gf-form">
-                  <InlineFormLabel className="gf-form-label width-13" tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data.">
+                  <InlineFormLabel className="gf-form-label query-keyword width-13" tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data.">
                   <span>
                     <input type="checkbox" className="width-2" checked={this.state.useGrouping} onChange={(e) => this.useGrouping(e.currentTarget.checked)}/>
                   </span>Use Grouping</InlineFormLabel>
                 </div>
                 {this.state.useGrouping && (
                   <div className="gf-form">
-                    <InlineFormLabel>Group By</InlineFormLabel>
+                    <InlineFormLabel className="query-keyword">Group By</InlineFormLabel>
                     <SegmentInput
                         value={this.state.groupBy || ''}
                         onChange={(e: string) => {
@@ -1101,7 +1101,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             )}
             <div className="gf-form-inline">
               <div className="gf-form" style={{wordBreak: 'break-word', textAlign: 'right'}}>
-                <InlineFormLabel className="gf-form-label width-13" tooltip="Used to enable a date/time column, acting as a key for each record.">
+                <InlineFormLabel className="gf-form-label query-keyword width-13" tooltip="Used to enable a date/time column, acting as a key for each record.">
                   <span>
                     <input type="checkbox" className="width-2" checked={this.state.useTemporalField} onChange={(e) => this.useTemporalField(e.currentTarget.checked)}/>
                   </span>Use Temporal Field</InlineFormLabel>
@@ -1122,27 +1122,27 @@ export class QueryEditor extends PureComponent<Props, State> {
             {this.state.useTemporalField && (
             <div className="gf-form-inline">
               <div className="gf-form">
-                <InlineFormLabel className="gf-form-label width-13" tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket.">
+                <InlineFormLabel className="gf-form-label query-keyword width-13" tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket.">
                   <span>
                     <input type="checkbox" className="width-2" checked={this.state.useConflation} onChange={(e) => this.useConflation(e.currentTarget.checked)}/>
                   </span>Use Conflation</InlineFormLabel>
                 {this.state.useConflation && (
                   <div className="gf-form-inline">
-                    <InlineFormLabel>Duration</InlineFormLabel>
+                    <InlineFormLabel className="query-keyword">Duration</InlineFormLabel>
                     <SegmentInput
                       value={this.state.conflation.duration || 5}
                       onChange={(e: string) => {
                         this.onDurationChange(e);
                       }}
                     />
-                    <InlineFormLabel>Units</InlineFormLabel>
+                    <InlineFormLabel className="query-keyword">Units</InlineFormLabel>
                     <Select
                       width={20}
                       options={unitOptions}
                       onChange={(e: SelectableValue<string>) => this.onUnitChange(e.value)}
                       value={this.state.conflation.unitType || ''}
                     />
-                    <InlineFormLabel
+                    <InlineFormLabel className="query-keyword"
                       width={20}
                       tooltip="The data in each bucket are reduced to a single value per bucket via an aggregation. E.G. 'Average' would take the mean of all points within each 5 minute peroid, for every 5 minute period of your time series data. It would then be the means that are plotted."
                     >
@@ -1166,22 +1166,20 @@ export class QueryEditor extends PureComponent<Props, State> {
         )}
         <div>
           <div className="gf-form-inline">
-            <div className="fg-form">
-              <InlineField label="Format as" labelWidth={10} color={'#33A2E5'}>
+            <div className="gf-form">
+              <InlineFormLabel className="gf-form-label query-keyword">Format as</InlineFormLabel>
                 <Select
                   width={20}
                   options={formatOptions}
                   onChange={(e: SelectableValue<string>) => this.onFormatChange(e.value)}
                   value={this.state.formatAs || ''}
                 />
-              </InlineField>
             </div>
             <div className="gf-form">
-              <FormField
+              <FormField className="query-keyword"
                 label="Row Limit"
                 value={this.state.rowCountLimit || ''}
-                labelWidth={10} 
-                style={{color: '#33A2E5'}}
+                labelWidth={10}
                 tooltip="An integer used to limit the number of rows loaded by Grafana for performance purposes."
                 placeholder="1000"
                 onChange={this.onRowLimitChange}

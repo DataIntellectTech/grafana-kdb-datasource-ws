@@ -52,7 +52,8 @@ export const defaultQuery: Partial<MyQuery> = {
     unitType: '',
     duration: '',
     aggregate: ''
-  }
+  },
+  where: []
 };
 
 type Select = {

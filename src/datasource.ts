@@ -30,6 +30,7 @@ import { graphFunction } from './model/kdb-request-config';
 import { conflationDurationDefault, conflationUnitDefault } from './QueryEditor';
 import { Field } from '@grafana/ui';
 import _ from 'lodash';
+import { getTemplateSrv } from '@grafana/runtime';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
    //This is declaring the types of each member
@@ -104,7 +105,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                 
            for(var i = 0; i < prefilterResultCount; i++){
                //Inject variables into target
-            //    this.injectVariables(options.targets[i], options.scopedVars, options.range)
+                this.injectVariables(options.targets[i], options.scopedVars, options.range)
                 
                 // for some reason randomWalk is defaulted
                 if (options.targets[i].queryType == 'randomWalk')
@@ -320,7 +321,7 @@ private fieldInjectVariables(attrib:any, search:string, replace:any) {
 }
 
 private injectVariables(target, scoped, range) {
-    let instVariables = this.newGetVariables(this.templateSrv)
+    let instVariables = this.newGetVariables(getTemplateSrv())
     // console.log('TEMPLATESRV:', this.templateSrv);
     // console.log('VARIABLES: ', instVariables);
     // console.log('scp',scoped)
