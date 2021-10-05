@@ -3,7 +3,6 @@
   "type": "datasource",
   "name": "kdb+",
   "id": "aquaqanalytics-kdbadaptor-datasource",
-  "metrics": true,
   "info": {
     "description": "A Grafana datasource plugin for kdb+",
     "author": {
@@ -19,8 +18,8 @@
       {"name":"Github", "url":"https://github.com/AquaQAnalytics"},
       {"name":"AquaQ Analytics", "url":"https://www.aquaq.co.uk"}
     ],
-    "version": "2.0.0",
-    "updated": "2020-12-10"
+    "version": "3.0.0",
+    "updated": "2021-10-05"
   },
   "alerting": true,
   "annotations": false,

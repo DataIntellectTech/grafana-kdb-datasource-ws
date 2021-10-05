@@ -946,12 +946,12 @@ export class QueryEditor extends PureComponent<Props, State> {
                       </InlineSegmentGroup>
                     </div>                      
                     )}
-                    <div className="gf-form-inline">
+                    <div>
                       <ButtonSelect
                           options={selectAddButtonOptions}
                           onChange={(e: SelectableValue<string>) => this.onSelectAddButtonPress(e, segment)}
-                          className="btn btn-primary"
                           style={{ background: '#202226' }}
+
                       >+</ButtonSelect>
                     </div>                  
                   <div className="gf-form gf-form--grow">
@@ -1204,8 +1204,8 @@ export class QueryEditor extends PureComponent<Props, State> {
         </div>
         {this.state.showHelp && (
           <div className="gf-form"  >
-              <pre className="gf-form-pre alert alert-info">
-                Plugin Version: {version}
+              <pre className="gf-form-pre alert alert-info"> {`
+                Plugin Version:`} {version} {`
                 First, choose the datasource you wish to query.
                 Query Type - Built Query:
                   Essential:
@@ -1266,7 +1266,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     - Conflation and row limit functions are explaining in the Built Query mode.
 
 
-              </pre>
+              `}</pre>
           </div>
         )}
       </div>
