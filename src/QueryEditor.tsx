@@ -87,6 +87,48 @@ export class QueryEditor extends PureComponent<Props, State> {
   whereParts: SqlPart[];
   
 
+   version = this.props.datasource.meta.info.version
+    
+  queryOptions: SelectableValue[] = [
+    { value: 'selectQuery', label: 'Built Query' },
+    { value: 'functionQuery', label: 'free-form Query' },
+  ];
+
+  formatOptions: SelectableValue[] = [{ value: 'table', label: 'Table' }, { value: 'time series', label: 'Time series' }];
+
+
+  unitOptions: SelectableValue[] = [
+    { value: 'ms', label: 'Miliseconds' },
+    { value: 's', label: 'Seconds' },
+    { value: 'm', label: 'Minutes' },
+    { value: 'h', label: 'Hours' },
+  ];
+
+  aggregateOptions: SelectableValue[] = [
+    { label: 'Average', value: 'avg' },
+    { label: 'Count', value: 'count' },
+    { label: 'First', value: 'first' },
+    { label: 'Last', value: 'last' },
+    { label: 'Maximum', value: 'max' },
+    { label: 'Median', value: 'med' },
+    { label: 'Minimum', value: 'min' },
+    { label: 'Sample Std Dev', value: 'sdev' },
+    { label: 'Sample Variance', value: 'svar' },
+    { texlabelt: 'Sum', value: 'sum' },
+    { label: 'Standard Deviation', value: 'dev' },
+    { label: 'Variance', value: 'var' },
+  ];
+
+  selectAddButtonOptions: SelectableValue[] = [
+    { label: 'Add Column', value: 'add'},
+    { label: 'Define Alias', value: 'alias'},
+    { label: 'Aggregate Functions', value: 'aggregate'}
+  ];    
+  removeOption: SelectableValue[] = [{ label: 'remove', value: 'remove' }];
+
+
+
+
    constructor(props: Props) {
     super(props);
 
@@ -339,7 +381,6 @@ export class QueryEditor extends PureComponent<Props, State> {
         operators.forEach((operator) => temp.push({ value: operator, label: operator }));
         return temp;
       });
-    // .then(this.transformToOperators({}))
   }
 
   async getWhereValues(field: string) {
@@ -370,12 +411,11 @@ export class QueryEditor extends PureComponent<Props, State> {
         .then(this.transformToSegments({}))
         .then((options) => {
           options.forEach((option) => values.push({ value: option.value, label: option.label }));
-        })
-    );
+        }));
     return values;
-    // .catch(this.handleQueryError.bind(this));
   }
 
+  
   getSelectOptions(table) {
     //TODO figure this out
     let target = {
@@ -746,60 +786,41 @@ export class QueryEditor extends PureComponent<Props, State> {
   //   // this.updatePersistedParts();
   //   // this.panelCtrl.refresh();
   // }
+  getTimeColumnSegments() {
+    let target = {
+      table: this.state.tableFrom,
+    };
+    const queryModel = new KDBQuery(target);
+    const metaBuilder = new KDBMetaQuery(target, queryModel);
+
+    let values: SelectableValue<string>[] = [];
+    
+    Promise.resolve(this.props.datasource
+        .metricFindQueryDefault(metaBuilder.buildColumnQuery('time'))
+        .then(this.transformToSegments({})).then((options) => {
+          options.forEach((option) => values.push({ value: option.value, label: option.label }));
+        }));
+
+        return values;
+}
+
   
   render() {
-    const query = defaults(this.props.query, defaultQuery);
-    // const { queryType, bid, ask, sym, time } = query;
-
-    const version = this.props.datasource.meta.info.version
     
-    let queryOptions: SelectableValue[] = [
-      { value: 'selectQuery', label: 'Built Query' },
-      { value: 'functionQuery', label: 'free-form Query' },
-    ];
 
-    let formatOptions: SelectableValue[] = [{ value: 'table', label: 'Table' }, { value: 'time series', label: 'Time series' }];
+    const {lastQueryError} = this.props.query;
 
-    let timeOptions: SelectableValue[] = [{ value: 'time', label: 'time' }];
+    const tableOptions: SelectableValue<string>[] = this.getTableSegments();
 
-    let unitOptions: SelectableValue[] = [
-      { value: 'ms', label: 'Miliseconds' },
-      { value: 's', label: 'Seconds' },
-      { value: 'm', label: 'Minutes' },
-      { value: 'h', label: 'Hours' },
-    ];
+    const timeOptions: SelectableValue[] = this.getTimeColumnSegments();
 
-    let aggregateOptions: SelectableValue[] = [
-      { label: 'Average', value: 'avg' },
-      { label: 'Count', value: 'count' },
-      { label: 'First', value: 'first' },
-      { label: 'Last', value: 'last' },
-      { label: 'Maximum', value: 'max' },
-      { label: 'Median', value: 'med' },
-      { label: 'Minimum', value: 'min' },
-      { label: 'Sample Std Dev', value: 'sdev' },
-      { label: 'Sample Variance', value: 'svar' },
-      { texlabelt: 'Sum', value: 'sum' },
-      { label: 'Standard Deviation', value: 'dev' },
-      { label: 'Variance', value: 'var' },
-    ];
-
-    let selectAddButtonOptions: SelectableValue[] = [
-      { label: 'Add Column', value: 'add'},
-      { label: 'Define Alias', value: 'alias'},
-      { label: 'Aggregate Functions', value: 'aggregate'}
-    ];    
+    var selectAddButtonOptions = this.selectAddButtonOptions
 
     if(!this.state.useConflation )
     {
       selectAddButtonOptions = selectAddButtonOptions.filter((o) => o.value !== 'aggregate')
     }
-
-    let removeOption: SelectableValue[] = [{ label: 'remove', value: 'remove' }];
-
-    let tableOptions: SelectableValue<string>[] = this.getTableSegments();
-    
-    
+   
     return (
       <div>
         <div className="gf-form-inline">
@@ -810,7 +831,7 @@ export class QueryEditor extends PureComponent<Props, State> {
               <Select
                 width={20}
                 placeholder="Select Query Type"
-                options={queryOptions}
+                options={this.queryOptions}
                 onChange={(e: SelectableValue<string>) => this.onQueryChange(e.value)}
                 value={this.state.queryTypeStr || ''}
               />
@@ -895,7 +916,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     {/* <InlineSegmentGroup> */}
                         <Segment className="query-keyword"
                           value="Column:"
-                          options={removeOption}
+                          options={this.removeOption}
                           onChange={() => this.removeSelectSegment(segment)}
                         />
                         <Segment
@@ -914,7 +935,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                         <InlineSegmentGroup>
                             <Segment
                               value="Alias:"
-                              options={removeOption}
+                              options={this.removeOption}
                               onChange={() => this.removeSelectSegmentAlias(segment)}
                             />
                             <SegmentInput
@@ -932,7 +953,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                       <InlineSegmentGroup>
                           <Segment
                             value="Aggregate:"
-                            options={removeOption}
+                            options={this.removeOption}
                             onChange={() => this.removeSelectSegmentAggregate(segment)}
                           />
                           <Segment
@@ -940,7 +961,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                               segment.aggregate = e.value;
                               this.setSelectSegment(segment);
                             }}
-                            options={aggregateOptions}
+                            options={this.aggregateOptions}
                             value={segment.aggregate || ''}
                           />
                       </InlineSegmentGroup>
@@ -1000,7 +1021,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <label className="gf-form-label query-keyword width-10" />
                   )}
                   <div className="gf-form">
-                        <Segment value="Expr" options={removeOption} onChange={() => this.removeSegment(segment)} />
+                        <Segment value="Expr" options={this.removeOption} onChange={() => this.removeSegment(segment)} />
                         <Segment
                           onChange={(e: SelectableValue<string>) => {
                             segment.expressionField = e.value;
@@ -1140,7 +1161,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <InlineFormLabel className="query-keyword">Units</InlineFormLabel>
                     <Select
                       width={20}
-                      options={unitOptions}
+                      options={this.unitOptions}
                       onChange={(e: SelectableValue<string>) => this.onUnitChange(e.value)}
                       value={this.state.conflation.unitType || ''}
                     />
@@ -1152,7 +1173,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     </InlineFormLabel>
                     <Select
                       width={20}
-                      options={aggregateOptions}
+                      options={this.aggregateOptions}
                       onChange={(e: SelectableValue<string>) => this.onAggregateChange(e.value)}
                       value={this.state.conflation.aggregate || ''}
                     />
@@ -1172,7 +1193,7 @@ export class QueryEditor extends PureComponent<Props, State> {
               <InlineFormLabel className="gf-form-label query-keyword">Format as</InlineFormLabel>
                 <Select
                   width={20}
-                  options={formatOptions}
+                  options={this.formatOptions}
                   onChange={(e: SelectableValue<string>) => this.onFormatChange(e.value)}
                   value={this.state.formatAs || ''}
                 />
@@ -1205,7 +1226,7 @@ export class QueryEditor extends PureComponent<Props, State> {
         {this.state.showHelp && (
           <div className="gf-form"  >
               <pre className="gf-form-pre alert alert-info"> {`
-                Plugin Version:`} {version} {`
+                Plugin Version:`} {this.version} {`
                 First, choose the datasource you wish to query.
                 Query Type - Built Query:
                   Essential:

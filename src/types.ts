@@ -31,6 +31,7 @@ export interface MyQuery extends DataQuery {
   fontWeight: any
   rowCountLimit: number
   version: any
+  error: string
 }
 
 export const defaultQuery: Partial<MyQuery> = {
@@ -53,7 +54,10 @@ export const defaultQuery: Partial<MyQuery> = {
     duration: '',
     aggregate: ''
   },
-  where: []
+  where: [] = [],
+  select: [] = [],
+  error: '',
+  lastQueryError: ''
 };
 
 type Select = {

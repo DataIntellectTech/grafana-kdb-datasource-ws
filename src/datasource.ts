@@ -185,6 +185,11 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                             if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((series: any) => {
                                 console.log(series)
 
+                                if(series.data[0].meta.errorReceived)
+                                {
+                                    options.targets[0].error = series.data[0].meta.errorMessage
+                                }
+
                                 if(series.data[0].columns){
                                      var fields = []
                                         series.data[0].columns.forEach((column)=> {
@@ -259,11 +264,13 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     //Replace Table Variables
     target.table = this.fieldInjectVariables(target.table,search,replace)
     //Replace select clause variables
-    for(let i = 0; i < target.select[0].length; i++) {
-        for(let y = 0; y < target.select[0][i].params.length; y++) {
-            target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
-        };
-    }; 
+    if(target.select !== [] && target.select.length > 0){
+        for(let i = 0; i < target.select[0].length; i++) {
+            for(let y = 0; y < target.select[0][i].params.length; y++) {
+                target.select[0][i].params[y] = target.select[0][i].params[y].replace(search, replace);
+            };
+        }; 
+    }
     //Replace where clause variables
     if(target.where !== []) {
         for(let i = 0; i < target.where.length; i++) {
@@ -371,7 +378,7 @@ private newGetVariables(templatesrv) {
     let instVariables = [];
     for (let i=0;i< this.templateSrv.variables.length;i++) {
         //Set the 'all' value if the option is enabled
-        if ( templatesrv.variables[i].options[0].text === 'All') {
+        if (templatesrv.variables[i].options[0] && templatesrv.variables[i].options[0].text === 'All') {
             let valueArray = [];
             for (let j=1;j<this.templateSrv.variables[i].options.length;j++) {
                 valueArray.push(this.templateSrv.variables[i].options[j].value);
