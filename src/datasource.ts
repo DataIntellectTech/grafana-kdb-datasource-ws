@@ -134,115 +134,164 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                });
 
 
-           var nrRequests: number = requestList.length;
-                  const promises = options.targets.map(target => {
-                      const query = defaults(target, defaultQuery);
-                      if (!this.ws || this.ws.readyState > 1) return this.connectWS().then(connectStatus => {
-                        if (  connectStatus === true && nrRequests > 0)  return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then(() => {
-                            if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((data: any) => {
-                                console.log(data)
-
-                                var fields = []
-                                if(data.data[0].columns){
-                                        data.data[0].columns.forEach((column)=> {
-                                            fields.push({ name: column.text })
-                                        })
-
-                                    const frame = new MutableDataFrame({
-                                        refId: data.data[0].refId,
-                                        fields: fields
-                                        
-                                    });
-                                    data.data[0].rows.forEach((element: any[]) => {
-                                        var row = []
-                                        element.forEach((entry) => {
-                                            row.push(entry)
-                                        })
-                                        frame.appendRow(row)
-                                    });
-                                    return frame
-                                }else{
-                                    // time series
-                                    const frame = new MutableDataFrame({
-                                        refId: data.data[0].refId,
-                                        fields: [
-                                            { name: 'value', type: FieldType.number},
-                                            { name: 'time', type: FieldType.time},
-                                        ]
-                                    });
-                                    data.data[0].datapoints.forEach((datapoint: any[]) => {
-                                        frame.appendRow([datapoint[0], datapoint[1]])
-                                    })
-                                    return frame
-                                }
-                            }); 
-                            else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
+               var nrRequests: number = requestList.length;
+               if(!this.ws || this.ws.readyState > 1) return this.connectWS().then(connectStatus => {
+                   if(connectStatus === true && nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs, errorList).then((series: any) => {
+                      
+                        let data: MutableDataFrame[] = []
+                        series.data.forEach(target => {
+                            var fields = []
+                            target.columns.forEach((column) =>{
+                                fields.push({name: column.text})
+                            });
+                            const frame = new MutableDataFrame({
+                                refId: target.refId,
+                                fields: fields
+                            })
+                            target.rows.forEach((element) => {
+                                var row = []
+                                element.forEach((entry) => {
+                                    row.push(entry)
+                                })
+                                frame.appendRow(row)
+                            });
+                            data.push(frame)
+                        });
+                    return {data}
+                   })
+                   else if (connectStatus === true && nrRequests === 0) return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList).then(() => {return {data: []}});
+                   else return this.connectFail(prefilterResultCount, allRefIDs).then(() => {return {data: []}});
+               })
+            else{return this.webSocketWait().then(() => {
+                if(nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs, errorList).then((series: any) => {
+                      
+                    let data: MutableDataFrame[] = []
+                    series.data.forEach(target => {
+                        var fields = []
+                        target.columns.forEach((column) =>{
+                            fields.push({name: column.text})
+                        });
+                        const frame = new MutableDataFrame({
+                            refId: target.refId,
+                            fields: fields
                         })
-                        else if ( nrRequests === 0) return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
-                        else  return this.connectFail(prefilterResultCount, allRefIDs);
-                    })      
-                    else { return this.webSocketWait().then(() => {
-                            if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((series: any) => {
-                                console.log(series)
+                        target.rows.forEach((element) => {
+                            var row = []
+                            element.forEach((entry) => {
+                                row.push(entry)
+                            })
+                            frame.appendRow(row)
+                        });
+                        data.push(frame)
+                    });
+                return {data}
+               })
+                else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList).then(() => {return {data: []}});
+            })}
+            
+                //   const promises = options.targets.map(target => {
+                //       const query = defaults(target, defaultQuery);
+                //       if (!this.ws || this.ws.readyState > 1) return this.connectWS().then(connectStatus => {
+                //         if (  connectStatus === true && nrRequests > 0)  return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then(() => {
+                //             if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((data: any) => {
+                //                 console.log(data)
 
-                                if(series.data[0].meta.errorReceived)
-                                {
-                                    options.targets[0].error = series.data[0].meta.errorMessage
-                                }
+                //                 var fields = []
+                //                 if(data.data[0].columns){
+                //                         data.data[0].columns.forEach((column)=> {
+                //                             fields.push({ name: column.text })
+                //                         })
 
-                                if(series.data[0].columns){
-                                     var fields = []
-                                        series.data[0].columns.forEach((column)=> {
-                                            fields.push({ name: column.text })
-                                        })
-
-                                    const frame = new MutableDataFrame({
-                                        refId: series.data[0].refId,
-                                        fields: fields
+                //                     const frame = new MutableDataFrame({
+                //                         refId: data.data[0].refId,
+                //                         fields: fields
                                         
-                                    });
-                                    series.data[0].rows.forEach((element: any[]) => {
-                                        var row = []
-                                        element.forEach((entry) => {
-                                            row.push(entry)
-                                        })
-                                        frame.appendRow(row)
-                                    });
-                                    return frame
-                                }else{
-                                    // time series
+                //                     });
+                //                     data.data[0].rows.forEach((element: any[]) => {
+                //                         var row = []
+                //                         element.forEach((entry) => {
+                //                             row.push(entry)
+                //                         })
+                //                         frame.appendRow(row)
+                //                     });
+                //                     return frame
+                //                 }else{
+                //                     // time series
+                //                     const frame = new MutableDataFrame({
+                //                         refId: data.data[0].refId,
+                //                         fields: [
+                //                             { name: 'value', type: FieldType.number},
+                //                             { name: 'time', type: FieldType.time},
+                //                         ]
+                //                     });
+                //                     data.data[0].datapoints.forEach((datapoint: any[]) => {
+                //                         frame.appendRow([datapoint[0], datapoint[1]])
+                //                     })
+                //                     return frame
+                //                 }
+                //             }); 
+                //             else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
+                //         })
+                //         else if ( nrRequests === 0) return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
+                //         else  return this.connectFail(prefilterResultCount, allRefIDs);
+                //     })      
+                //     else { return this.webSocketWait().then(() => {
+                //             if (nrRequests > 0) return this.sendQueries(nrRequests, requestList, nrBlankRequests, blankRefIDs,errorList).then((series: any) => {
+                //                 console.log(series)
 
-                                    let data = { data: [] as MutableDataFrame[] };
+                //                 if(series.data[0].columns){
+                //                      var fields = []
+                //                         series.data[0].columns.forEach((column)=> {
+                //                             fields.push({ name: column.text })
+                //                         })
 
-                                    series.data.forEach(target => {
-
-                                        let datapoints = target.datapoints
-                                        const timeValues = datapoints.map(datapoint => datapoint[1])
-                                        const values = datapoints.map(datapoint => datapoint[0])
+                //                     const frame = new MutableDataFrame({
+                //                         refId: series.data[0].refId,
+                //                         fields: fields
                                         
-                                        const fields = [
-                                            { name: 'Time', values: timeValues, type: FieldType.time },
-                                            {
-                                                name: target.target,
-                                                values: values,
-                                            },
-                                        ];
+                //                     });
+                //                     series.data[0].rows.forEach((element: any[]) => {
+                //                         var row = []
+                //                         element.forEach((entry) => {
+                //                             row.push(entry)
+                //                         })
+                //                         frame.appendRow(row)
+                //                     });
+                //                     return frame
+                //                 }else{
+                //                     // time series
 
-                                        data.data.push(
-                                            new MutableDataFrame({
-                                                refId: target.refId,
-                                                fields: fields,
-                                            })
-                                        )
-                                    })
-                                    return outerJoinDataFrames({frames: data.data})
-                                }
-                            }); 
-                            else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
-                        })
-                    }
-                }); 
-                return Promise.all(promises).then((data) => ({data}));
+                //                     let data = { data: [] as MutableDataFrame[] };
+
+                //                     series.data.forEach(target => {
+
+                //                         let datapoints = target.datapoints
+                //                         const timeValues = datapoints.map(datapoint => datapoint[1])
+                //                         const values = datapoints.map(datapoint => datapoint[0])
+                                        
+                //                         const fields = [
+                //                             { name: 'Time', values: timeValues, type: FieldType.time },
+                //                             {
+                //                                 name: target.target,
+                //                                 values: values,
+                //                             },
+                //                         ];
+
+                //                         data.data.push(
+                //                             new MutableDataFrame({
+                //                                 refId: target.refId,
+                //                                 fields: fields,
+                //                             })
+                //                         )
+                //                     })
+                //                     return outerJoinDataFrames({frames: data.data})
+                //                 }
+                //             }); 
+                //             else return this.emptyQueries(nrBlankRequests, blankRefIDs, errorList);
+                //         })
+                //     }
+                // }); 
+                // return Promise.all(promises).then((data) => ({data}));
        };
 
     //This is the function called by Grafana when it is testing a connection on the configuration page
