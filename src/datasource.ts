@@ -15,6 +15,7 @@ import {
   toDataFrame,
   FieldDTO,
   outerJoinDataFrames,
+  DataQueryError,
 } from '@grafana/data';
 
 import ResponseParser from './response_parser';
@@ -87,7 +88,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   }
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
-           // console.log('options', options)
+           // console.log('options', options
            var prefilterResultCount = options.targets.length;
 
            if (prefilterResultCount == 0) {
@@ -150,7 +151,16 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     // Build the DataFrames to return to Grafana
     buildDataFrames(series){
         let data: MutableDataFrame[] = []
+        let error = {} as DataQueryError
+        
+        
         series.data.forEach(target => {
+            if(target.meta.errorMessage)
+            {
+                error.message = target.meta.errorMessage
+                throw new Error(target.meta.errorMessage)
+                
+            }
             if(target.columns){
                 var fields = []
                 target.columns.forEach((column) =>{
@@ -191,7 +201,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                 )
             }
         });
-    return {data}
+    return {data, error}
     }
 
     //This is the function called by Grafana when it is testing a connection on the configuration page
@@ -325,16 +335,17 @@ private injectVariables(target, scoped, range) {
 //Change templateSrv object to be handled as variables
 private newGetVariables(templatesrv) {
     let instVariables = [];
-    for (let i=0;i< this.templateSrv.variables.length;i++) {
+    let variables = templatesrv.getVariables()
+    for (let i=0;i<variables.length;i++) {
         //Set the 'all' value if the option is enabled
-        if (templatesrv.variables[i].options[0] && templatesrv.variables[i].options[0].text === 'All') {
+        if (variables[i].options[0] && variables[i].options[0].text === 'All') {
             let valueArray = [];
-            for (let j=1;j<this.templateSrv.variables[i].options.length;j++) {
-                valueArray.push(this.templateSrv.variables[i].options[j].value);
+            for (let j=1;j<variables[i].options.length;j++) {
+                valueArray.push(variables[i].options[j].value);
             }    
-            templatesrv.variables[i].allValue = valueArray;
+            variables[i].allValue = valueArray;
         } 
-        instVariables.push(this.templateSrv.variables[i]);
+        instVariables.push(variables[i]);
     }
     return instVariables
 }
@@ -357,7 +368,6 @@ private buildKdbRequest(target) {
     queryParam.temporal_field = target.useTemporalField ? this.buildTemporalField(target) : [];
     queryParam.temporal_range = this.buildTemporalRange(target.range);
     queryParam.maxRowCount = target.rowCountLimit
-
 
     if (target.queryType == 'selectQuery') queryParam.where = this.buildWhereParams( (target.where) ? target.where : []);
     //conflation

@@ -2,6 +2,7 @@ import defaults from 'lodash/defaults';
 import _ from 'lodash';
 import React, { ChangeEvent, PureComponent } from 'react';
 import {
+  Alert,
   Button,
   ButtonSelect,
   Checkbox,
@@ -19,7 +20,7 @@ import {
   Tooltip,
   WithContextMenu,
 } from '@grafana/ui';
-import { PanelProps, QueryEditorProps, SelectableValue } from '@grafana/data';
+import { DataQueryError, PanelProps, QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
 import { defaultQuery, MyDataSourceOptions, MyQuery } from './types';
 import { KDBMetaQuery } from './meta_query';
@@ -743,10 +744,10 @@ export class QueryEditor extends PureComponent<Props, State> {
   onGroupByChange(groupBy){   
     const { onChange, query, onRunQuery } = this.props;
 
-    onChange({ ...query, groupingField: groupBy });
+    onChange({ ...query, groupingField: groupBy, funcGroupCol: groupBy });
     onRunQuery();
 
-    this.setState({groupBy: groupBy})
+    this.setState({groupBy: groupBy, funcGroupCol: groupBy})
   }
 
   removeSelectSegmentAggregate(segment) {
@@ -813,7 +814,12 @@ export class QueryEditor extends PureComponent<Props, State> {
   render() {
     
 
-    const {lastQueryError} = this.props.query;
+    const data = this.props.data;
+    var error: DataQueryError
+    if(data)
+    {
+      error = data.error
+    }
 
     const tableOptions: SelectableValue<string>[] = this.getTableSegments();
 
@@ -1101,7 +1107,6 @@ export class QueryEditor extends PureComponent<Props, State> {
           </div>
         )}
         {this.state.queryTypeStr && this.state.queryTypeStr !== 'kdbSideQuery' && (
-          // TODO panelType !== graph / heatmap
           <div>
             {this.state.formatAs && this.state.formatAs !== 'table' && (
             <div className="gf-form-inline">
@@ -1295,6 +1300,12 @@ export class QueryEditor extends PureComponent<Props, State> {
               `}</pre>
           </div>
         )}
+        { error && (
+          <Alert title={error.message} />
+        // <div className="gf-form">
+        //   <pre className="gf-form-pre alert alert-error">{error.message}</pre>
+        // </div>
+        )}     
       </div>
     );
   }
