@@ -305,11 +305,16 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   useGrouping = (checked: boolean) => {
     // reset grouping if checked
-    this.onGroupByChange('')
     const { onChange, query, onRunQuery } = this.props;
-    onChange({ ...query, useGrouping: checked });
-    onRunQuery();
-    this.setState({ useGrouping: checked });
+    if(!checked){
+      onChange({ ...query, useGrouping: checked });
+      onRunQuery();
+      this.setState({ useGrouping: checked });
+    }else{      
+      onChange({ ...query, useGrouping: checked, groupingField: '' });
+      onRunQuery();
+      this.setState({ useGrouping: checked, groupBy: '' });
+    }
   };
 
   useConflation = (checked: boolean) => {

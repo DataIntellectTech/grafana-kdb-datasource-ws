@@ -724,6 +724,7 @@ executeAsyncReceive(responseObj) {
 
 //Called for query variables
 async metricFindQuery(kdbRequest: KdbRequest): Promise<MetricFindValue[]> {
+    kdbRequest = this.injectUserVars(kdbRequest)
     return new Promise((resolve, reject) => {
         resolve(this.executeAsyncQuery(kdbRequest).then((result) => {
             const values = []
@@ -755,6 +756,29 @@ async metricFindQuery(kdbRequest: KdbRequest): Promise<MetricFindValue[]> {
         }));
     });
 }
+
+    // Possibly not needed? Can reuse injectVariables instead possibly (no scoped/ranged vars though)
+    injectUserVars(kdbRequest){
+        let instVariables = this.newGetVariables(getTemplateSrv())
+        let localVarArray = []
+        let localValueArray = [];
+        //local variables inject (user variables)
+        for(let i = 0; i < instVariables.length; i++) {
+            localVarArray.push('$' + instVariables[i].name)
+
+            // Make sure length of current is greater than 0, otherwise an option hasn't been selected yet
+            if(Object.keys(instVariables[i].current).length > 0 && instVariables[i].current.text[0] === 'All'){
+                localValueArray.push(instVariables[i].allValue)
+            }
+            else {
+                localValueArray.push(instVariables[i].current.value)
+            }
+        };
+        for(let kv = 0; kv < localVarArray.length; kv++){
+            kdbRequest = kdbRequest.replace(localVarArray[kv], localValueArray[kv])
+        }
+        return kdbRequest
+    }
 
 metricFindQueryDefault(/*kdbRequest: KdbRequest*/ kdbRequest: any) {
     // console.log('met',kdbRequest)
