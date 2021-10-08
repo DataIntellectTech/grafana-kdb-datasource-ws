@@ -367,7 +367,9 @@ private buildKdbRequest(target) {
     queryParam.column = this.buildColumnParams(target);
     queryParam.temporal_field = target.useTemporalField ? this.buildTemporalField(target) : [];
     queryParam.temporal_range = this.buildTemporalRange(target.range);
-    queryParam.maxRowCount = target.rowCountLimit
+    queryParam.maxRowCount = target.rowCountLimit;
+    if(target.postbackFunction)
+        queryParam.postbackFunction = target.postbackFunction;
 
     if (target.queryType == 'selectQuery') queryParam.where = this.buildWhereParams( (target.where) ? target.where : []);
     //conflation
@@ -400,6 +402,12 @@ private buildKdbRequest(target) {
     kdbRequest.format = target.format;
     kdbRequest.queryId = target.queryId;
     kdbRequest.version = target.version;
+    if(target.useAsyncFunction)
+        kdbRequest.useAsyncFunction = target.useAsyncFunction;
+    if(target.useCustomPostback)
+        kdbRequest.useCustomPostback = target.useCustomPostback;    
+    if(target.asyncProcTypes)
+        kdbRequest.asyncProcTypes = target.asyncProcTypes;
 
     return [
         ((target.format == 'time series') ? graphFunction : tabFunction),

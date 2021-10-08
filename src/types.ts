@@ -32,6 +32,10 @@ export interface MyQuery extends DataQuery {
   rowCountLimit: number
   version: any
   error: string
+  useAsyncFunction: boolean
+  useCustomPostback: boolean
+  asyncProcTypes: string
+  postbackFunction: string
 }
 
 export const defaultQuery: Partial<MyQuery> = {
@@ -57,7 +61,11 @@ export const defaultQuery: Partial<MyQuery> = {
   where: [] = [],
   select: [] = [],
   error: '',
-  lastQueryError: ''
+  lastQueryError: '',
+  useAsyncFunction: false,
+  useCustomPostback: false,
+  asyncProcTypes: '',
+  postbackFunction: ''
 };
 
 type Select = {

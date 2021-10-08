@@ -56,6 +56,10 @@ type State = {
   firstWhere: boolean;
   whereOperators: SelectableValue<string>[];
   groupBy: string;
+  useAsyncFunction: boolean;
+  asyncField: string;
+  useCustomPostback: boolean;
+  postbackFunction: string;
 };
 
 type WhereSegment = {
@@ -175,6 +179,10 @@ export class QueryEditor extends PureComponent<Props, State> {
       firstWhere: true,
       selectSegments: selectSegments,
       groupBy: query.groupingField,
+      asyncField: query.asyncProcTypes,
+      useAsyncFunction: query.useAsyncFunction,
+      useCustomPostback: query.useCustomPostback,
+      postbackFunction: query.postbackFunction,
     };
     // run the default query immediately to get default look
     onRunQuery();
@@ -809,7 +817,40 @@ export class QueryEditor extends PureComponent<Props, State> {
 
         return values;
 }
+  useAsyncFunction(checked){
+    const { onChange, query, onRunQuery } = this.props;
+    if(!checked){
+      onChange({ ...query, useAsyncFunction: checked });
+      onRunQuery();
+      this.setState({ useAsyncFunction: checked });
+    }else{      
+      onChange({ ...query, useAsyncFunction: checked, asyncProcTypes: '' });
+      onRunQuery();
+      this.setState({ useAsyncFunction: checked, asyncField: '' });
+    }
+  }
+  
+  asyncFieldChanged(asyncField){
+    const { onChange, query, onRunQuery } = this.props;
 
+    onChange({ ...query, asyncProcTypes: asyncField});
+    onRunQuery();
+
+    this.setState({asyncField: asyncField})
+  }
+
+  useCustomPostback(checked){
+    const { onChange, query, onRunQuery } = this.props;
+    if(!checked){
+      onChange({ ...query, useCustomPostback: checked });
+      onRunQuery();
+      this.setState({ useCustomPostback: checked });
+    }else{      
+      onChange({ ...query, useCustomPostback: checked, postbackFunction: '' });
+      onRunQuery();
+      this.setState({ useCustomPostback: checked, postbackFunction: '' });
+    }
+  }
   
   render() {
     
@@ -1108,10 +1149,63 @@ export class QueryEditor extends PureComponent<Props, State> {
         )}
         {this.state.queryTypeStr && this.state.queryTypeStr !== 'kdbSideQuery' && (
           <div>
+            {this.state.queryTypeStr && this.state.queryTypeStr == 'functionQuery' && (
+                <div>
+                  <div className="gf-form-inline">
+                    <div className="gf-form">
+                      <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="This allows use of asynchronous functions provided they utilise a postback function. Enable 'Custom Postback' if using non-TorQ Gateway.">
+                          <span>
+                          <input type="checkbox" className="width-2" checked={this.state.useAsyncFunction} onChange={(e) => this.useAsyncFunction(e.currentTarget.checked)}/>
+                        </span>Use Async with Postback</InlineFormLabel>
+                  </div>
+                    {this.state.useAsyncFunction && (  
+                      <div className="gf-form">            
+                          <InlineFormLabel className="query-keyword">Proc Types:</InlineFormLabel>
+                            <SegmentInput
+                                placeholder="Proc"
+                                value={this.state.asyncField || ''}
+                                onChange={(e: string) => {
+                                  this.asyncFieldChanged(e);
+                                }}
+                              />
+                          </div>       
+                        )}
+                        {this.state.useAsyncFunction && (  
+                          <div className="gf-form">
+                            <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="This allows use of asynchronous functions provided they utilise a postback function. Enable 'Custom Postback' if using non-TorQ Gateway.">
+                            <span>
+                              <input type="checkbox" className="width-2" checked={this.state.useCustomPostback} onChange={(e) => this.useCustomPostback(e.currentTarget.checked)}/>
+                            </span>Custom Postback</InlineFormLabel>
+                          </div>       
+                      )}
+                      <div className="gf-form gf-form--grow">
+                        <div className="gf-form-label gf-form-label--grow"></div>
+                      </div>
+                  </div>
+                  {this.state.useAsyncFunction && this.state.useCustomPostback && (
+                    <div className="gf-form-inline" style={{ height: '111px;'}}>       
+                      <span className="gf-form-label query-keyword width-10" style={{ height: '111px' }}/>
+                      <div style={{ height: '111px;'}}>
+                      <textarea
+                          className="gf-form-textarea width-30"
+                          rows={5}
+                          style={{ background: '#0b0c0e' }}
+                          value={this.state.postbackFunction}
+                          placeholder="Enter custom postback function"
+                          onChange={this.asyncFieldChanged}
+                        />
+                      </div>
+                      <div className="gf-form gf-form--grow">
+                        <div className="gf-form-label gf-form-label--grow" style={{ height: '111px'}}></div>
+                      </div>
+                    </div>
+                  )}
+                  </div>
+              )}
             {this.state.formatAs && this.state.formatAs !== 'table' && (
             <div className="gf-form-inline">
                 <div className="gf-form">
-                  <InlineFormLabel className="gf-form-label query-keyword width-13" tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data.">
+                  <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data.">
                   <span>
                     <input type="checkbox" className="width-2" checked={this.state.useGrouping} onChange={(e) => this.useGrouping(e.currentTarget.checked)}/>
                   </span>Use Grouping</InlineFormLabel>
@@ -1134,7 +1228,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             )}
             <div className="gf-form-inline">
               <div className="gf-form" style={{wordBreak: 'break-word', textAlign: 'right'}}>
-                <InlineFormLabel className="gf-form-label query-keyword width-13" tooltip="Used to enable a date/time column, acting as a key for each record.">
+                <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="Used to enable a date/time column, acting as a key for each record.">
                   <span>
                     <input type="checkbox" className="width-2" checked={this.state.useTemporalField} onChange={(e) => this.useTemporalField(e.currentTarget.checked)}/>
                   </span>Use Temporal Field</InlineFormLabel>
@@ -1155,7 +1249,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             {this.state.useTemporalField && (
             <div className="gf-form-inline">
               <div className="gf-form">
-                <InlineFormLabel className="gf-form-label query-keyword width-13" tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket.">
+                <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket.">
                   <span>
                     <input type="checkbox" className="width-2" checked={this.state.useConflation} onChange={(e) => this.useConflation(e.currentTarget.checked)}/>
                   </span>Use Conflation</InlineFormLabel>
@@ -1305,7 +1399,7 @@ export class QueryEditor extends PureComponent<Props, State> {
         // <div className="gf-form">
         //   <pre className="gf-form-pre alert alert-error">{error.message}</pre>
         // </div>
-        )}     
+        )}    
       </div>
     );
   }
