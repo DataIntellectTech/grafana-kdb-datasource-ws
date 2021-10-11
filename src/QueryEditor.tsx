@@ -593,9 +593,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     };
     let tempSegments = this.state.whereSegments;
     tempSegments.push(newSegment);
-    this.setState({ whereSegments: tempSegments, firstWhere: false }, () => {
-      console.log('testing');
-    });
+    this.setState({ whereSegments: tempSegments, firstWhere: false });
     this.forceUpdate();
   }
 
@@ -647,9 +645,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     };
     let tempSegments = this.state.selectSegments;
     tempSegments.push(newSegment);
-    this.setState({ selectSegments: tempSegments }, () => {
-      console.log('testing');
-    });
+    this.setState({ selectSegments: tempSegments });
     this.forceUpdate();
   }
 
@@ -659,9 +655,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     segment.alias = 'value'
     let index = segments.indexOf(segment);
     segments[index] = segment;
-    this.setState({ selectSegments: segments }, () => {
-      console.log('testing');
-    });
+    this.setState({ selectSegments: segments });
     this.forceUpdate();
   }
 
@@ -671,9 +665,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     segment.aggregate = 'avg'
     let index = segments.indexOf(segment);
     segments[index] = segment;
-    this.setState({ selectSegments: segments }, () => {
-      console.log('testing');
-    });
+    this.setState({ selectSegments: segments });
     this.forceUpdate();
   }
 

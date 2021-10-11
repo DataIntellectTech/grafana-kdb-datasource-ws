@@ -210,7 +210,6 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
    //Replace variables with their values
    private variablesReplace(target:any, search: string, replace:any) {
     //Format Options as array or scalar
-    // console.log('VARIABLESREPLACE TARGET: ', target)
     if (Array.isArray(replace)) {
         target.kdbFunction = target.kdbFunction.replace(search, replace.join(','))
     } else {
