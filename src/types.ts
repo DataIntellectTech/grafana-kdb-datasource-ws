@@ -1,48 +1,48 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
-import { Conflation } from './QueryEditor'
+import { Conflation } from './QueryEditor';
 export interface MyQuery extends DataQuery {
-  range: any
-  queryId: any
-  queryType: any
-  dataTopic: any
-  table: any
-  kdbFunction: any
-  queryError: any
-  format: any
-  select: any
-  funcTimeCol: any
-  timeColumn: any
-  timeColumnType: any
-  where: any
-  useGrouping: any
-  useConflation: any
-  conflation: Conflation
-  conflationDurationMS: any
-  conflationDefaultAggType: any
-  panelType: any
-  useTemporalField: any
-  errorFound: any
-  lastQueryError: any
-  funcGroupCol: any
-  col_meta: any
-  limit: any
-  groupingField: any
-  metricColumn: any
-  fontWeight: any
-  rowCountLimit: number
-  version: any
-  error: string
-  useAsyncFunction: boolean
-  useCustomPostback: boolean
-  asyncProcTypes: string
-  postbackFunction: string
+  range: any;
+  queryId: any;
+  queryType: any;
+  dataTopic: any;
+  table: any;
+  kdbFunction: any;
+  queryError: any;
+  format: any;
+  select: any;
+  funcTimeCol: any;
+  timeColumn: any;
+  timeColumnType: any;
+  where: any;
+  useGrouping: any;
+  useConflation: any;
+  conflation: Conflation;
+  conflationDurationMS: any;
+  conflationDefaultAggType: any;
+  panelType: any;
+  useTemporalField: any;
+  errorFound: any;
+  lastQueryError: any;
+  funcGroupCol: any;
+  col_meta: any;
+  limit: any;
+  groupingField: any;
+  metricColumn: any;
+  fontWeight: any;
+  rowCountLimit: number;
+  version: any;
+  error: string;
+  useAsyncFunction: boolean;
+  useCustomPostback: boolean;
+  asyncProcTypes: string;
+  postbackFunction: string;
 }
 
 export const defaultQuery: Partial<MyQuery> = {
   kdbFunction: '',
   queryError: {
-    error: [false,false,false,false],
-    message: ['','','','']
+    error: [false, false, false, false],
+    message: ['', '', '', ''],
   },
   format: 'table',
   queryId: '',
@@ -56,7 +56,7 @@ export const defaultQuery: Partial<MyQuery> = {
   conflation: {
     unitType: '',
     duration: 0,
-    aggregate: ''
+    aggregate: '',
   },
   where: [] = [],
   select: [] = [],
@@ -65,7 +65,7 @@ export const defaultQuery: Partial<MyQuery> = {
   useAsyncFunction: false,
   useCustomPostback: false,
   asyncProcTypes: '',
-  postbackFunction: ''
+  postbackFunction: '',
 };
 
 /**
@@ -80,4 +80,3 @@ export interface MyDataSourceOptions extends DataSourceJsonData {
   password?: string;
   timeInterval: string;
 }
-

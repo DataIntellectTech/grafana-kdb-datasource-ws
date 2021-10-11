@@ -1,36 +1,24 @@
 import defaults from 'lodash/defaults';
 import _ from 'lodash';
-import React, { ChangeEvent, PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 import {
   Alert,
   Button,
   ButtonSelect,
-  Checkbox,
-  ContextMenu,
-  InlineField,
   InlineFormLabel,
-  InlineLabel,
   InlineSegmentGroup,
-  LegacyForms,
-  Popover,
   Segment,
   SegmentAsync,
   SegmentInput,
   Select,
-  TextArea,
-  Tooltip,
-  WithContextMenu,
 } from '@grafana/ui';
-import { DataQueryError, PanelProps, QueryEditorProps, SelectableValue } from '@grafana/data';
+import { DataQueryError, QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
 import { defaultQuery, MyDataSourceOptions, MyQuery } from './types';
 import { KDBMetaQuery } from './meta_query';
 import KDBQuery from './kdb_query';
-import { values } from 'lodash';
 import sqlPart from './sql_part';
 import { SqlPart } from './sql_part/sql_part';
-
-const { FormField } = LegacyForms;
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 type State = {
@@ -71,14 +59,14 @@ type WhereSegment = {
 type SelectSegment = {
   value: string;
   type: string;
-  aggregate?: string
-  alias?: string
+  aggregate?: string;
+  alias?: string;
 };
 
 export type Conflation = {
   unitType: string;
   duration: number;
-  aggregate: string
+  aggregate: string;
 };
 
 export const conflationUnitDefault: string = 'm';
@@ -90,17 +78,18 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   selectParts: SqlPart[][];
   whereParts: SqlPart[];
-  
 
-   version = this.props.datasource.meta.info.version
-    
+  version = this.props.datasource.meta.info.version;
+
   queryOptions: SelectableValue[] = [
     { value: 'selectQuery', label: 'Built Query' },
     { value: 'functionQuery', label: 'free-form Query' },
   ];
 
-  formatOptions: SelectableValue[] = [{ value: 'table', label: 'Table' }, { value: 'time series', label: 'Time series' }];
-
+  formatOptions: SelectableValue[] = [
+    { value: 'table', label: 'Table' },
+    { value: 'time series', label: 'Time series' },
+  ];
 
   unitOptions: SelectableValue[] = [
     { value: 'ms', label: 'Miliseconds' },
@@ -125,35 +114,41 @@ export class QueryEditor extends PureComponent<Props, State> {
   ];
 
   selectAddButtonOptions: SelectableValue[] = [
-    { label: 'Add Column', value: 'add'},
-    { label: 'Define Alias', value: 'alias'},
-    { label: 'Aggregate Functions', value: 'aggregate'}
-  ];    
+    { label: 'Add Column', value: 'add' },
+    { label: 'Define Alias', value: 'alias' },
+    { label: 'Aggregate Functions', value: 'aggregate' },
+  ];
   removeOption: SelectableValue[] = [{ label: 'remove', value: 'remove' }];
 
-
-
-
-   constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
 
     const query = defaults(this.props.query, defaultQuery);
 
-    let selectSegments: SelectSegment[] = []
+    let selectSegments: SelectSegment[] = [];
     const { onRunQuery } = this.props;
-    if(query.select) {
-      query.select.map(segments => {
-      segments.map(segment => {
-          selectSegments.push({ value: segment.params[0], type: 'column', aggregate: segment.params[1], alias: segment.params[2] })
-      })
-     })
+    if (query.select) {
+      query.select.map((segments) => {
+        segments.map((segment) => {
+          selectSegments.push({
+            value: segment.params[0],
+            type: 'column',
+            aggregate: segment.params[1],
+            alias: segment.params[2],
+          });
+        });
+      });
     }
 
-    let whereSegments: WhereSegment[] = []
-    if(query.where){
-      query.where.map(segment => {
-        whereSegments.push({ expressionField: segment.params[0], operator: segment.params[1], value: segment.params[2]})
-      })
+    let whereSegments: WhereSegment[] = [];
+    if (query.where) {
+      query.where.map((segment) => {
+        whereSegments.push({
+          expressionField: segment.params[0],
+          operator: segment.params[1],
+          value: segment.params[2],
+        });
+      });
     }
 
     this.state = {
@@ -212,9 +207,9 @@ export class QueryEditor extends PureComponent<Props, State> {
     const { onChange, query, onRunQuery } = this.props;
     onChange({ ...query, table: table });
     this.setState({ tableFrom: table }, () => {
-      let options = this.getSelectOptions.bind(this)
+      let options = this.getSelectOptions.bind(this);
       // this.getSelectOptions(table).then((options) => {
-        this.setState({ selectOptions: options });
+      this.setState({ selectOptions: options });
       // });
     });
     onRunQuery();
@@ -244,31 +239,31 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   onFormatChange(format: string) {
     const { onChange, query, onRunQuery } = this.props;
-    onChange({ ...query, format: format  });
+    onChange({ ...query, format: format });
     onRunQuery();
     this.setState({ formatAs: format });
   }
 
   onDurationChange(duration: number) {
-    let conflation = this.state.conflation
-    conflation.duration = duration
-    this.allConflationSettingsSet(conflation, this.state.useConflation)
+    let conflation = this.state.conflation;
+    conflation.duration = duration;
+    this.allConflationSettingsSet(conflation, this.state.useConflation);
     this.setState({ conflation: conflation });
   }
 
-   allConflationSettingsSet(conflation, useConflation){
-    if((conflation.unitType && conflation.duration && conflation.aggregate) || !useConflation){
+  allConflationSettingsSet(conflation, useConflation) {
+    if ((conflation.unitType && conflation.duration && conflation.aggregate) || !useConflation) {
       const { onChange, query, onRunQuery } = this.props;
       onChange({ ...query, useConflation: useConflation, conflation: conflation });
       onRunQuery();
     }
-   }
+  }
 
   onRowLimitChange = (duration: number) => {
     const { onChange, query, onRunQuery } = this.props;
-    let rowLimit = Number(duration)
+    let rowLimit = Number(duration);
 
-    if( !isNaN(rowLimit)){
+    if (!isNaN(rowLimit)) {
       // this.state.rowCountLimit = rowLimit
       // this.state.queryError.error[2] = false;
       onChange({ ...query, rowCountLimit: rowLimit });
@@ -279,16 +274,16 @@ export class QueryEditor extends PureComponent<Props, State> {
   };
 
   onUnitChange(unit: string) {
-    let conflation = this.state.conflation
-    conflation.unitType = unit
-    this.allConflationSettingsSet(conflation, this.state.useConflation)
+    let conflation = this.state.conflation;
+    conflation.unitType = unit;
+    this.allConflationSettingsSet(conflation, this.state.useConflation);
     this.setState({ conflation: conflation });
   }
 
   onAggregateChange(value: string) {
-    let conflation = this.state.conflation
-    conflation.aggregate = value
-    this.allConflationSettingsSet(conflation, this.state.useConflation)
+    let conflation = this.state.conflation;
+    conflation.aggregate = value;
+    this.allConflationSettingsSet(conflation, this.state.useConflation);
     this.setState({ conflation: conflation });
   }
 
@@ -302,10 +297,10 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   useTemporalField = (checked: boolean) => {
     const { onChange, query, onRunQuery } = this.props;
-    if(!checked){
+    if (!checked) {
       // reset conflation and grouping flags
       onChange({ ...query, useTemporalField: checked, useConflation: false, useGrouping: false });
-    }else{
+    } else {
       onChange({ ...query, useTemporalField: checked });
     }
     this.setState({ useTemporalField: checked });
@@ -315,11 +310,11 @@ export class QueryEditor extends PureComponent<Props, State> {
   useGrouping = (checked: boolean) => {
     // reset grouping if checked
     const { onChange, query, onRunQuery } = this.props;
-    if(!checked){
+    if (!checked) {
       onChange({ ...query, useGrouping: checked });
       onRunQuery();
       this.setState({ useGrouping: checked });
-    }else{      
+    } else {
       onChange({ ...query, useGrouping: checked, groupingField: '' });
       onRunQuery();
       this.setState({ useGrouping: checked, groupBy: '' });
@@ -330,11 +325,11 @@ export class QueryEditor extends PureComponent<Props, State> {
     let conflation: Conflation = {
       unitType: '',
       duration: 0,
-      aggregate: '' 
+      aggregate: '',
     };
-    this.allConflationSettingsSet(conflation, checked)
+    this.allConflationSettingsSet(conflation, checked);
     this.setState({ useConflation: checked, conflation: conflation });
-    this.forceUpdate()
+    this.forceUpdate();
   };
 
   onFunctionChange = (event) => {
@@ -367,7 +362,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     onRunQuery();
     this.setState({ whereSegments: segments });
   };
-  
+
   async setWhereOperators(field: string) {
     this.getOperators(field).then((operators) => this.setState({ whereOperators: operators }));
   }
@@ -418,37 +413,38 @@ export class QueryEditor extends PureComponent<Props, State> {
     const queryModel = new KDBQuery(target);
     const metaBuilder = new KDBMetaQuery(target, queryModel);
 
-      const { datasource } = this.props;
+    const { datasource } = this.props;
 
-      return new Promise<Array<SelectableValue<any>>>((resolve) => {
-        setTimeout(async() => {
-          const response = await datasource.metricFindQueryDefault(metaBuilder.buildTableQuery()).then(this.transformToSegments({}))
-          const result = response.map((option: any) => {
-              return {value: option.value, label: option.label}
-          })
-          resolve(result)
-        }, 0);
-      });
+    return new Promise<Array<SelectableValue<any>>>((resolve) => {
+      setTimeout(async () => {
+        const response = await datasource
+          .metricFindQueryDefault(metaBuilder.buildTableQuery())
+          .then(this.transformToSegments({}));
+        const result = response.map((option: any) => {
+          return { value: option.value, label: option.label };
+        });
+        resolve(result);
+      }, 0);
+    });
   }
 
-  
   getSelectOptions() {
     const { datasource, query } = this.props;
 
     const queryModel = new KDBQuery(query);
     const metaBuilder = new KDBMetaQuery(query, queryModel);
-    
-      return new Promise<Array<SelectableValue<any>>>((resolve) => {
-        setTimeout(async() => {
-          const response = await datasource.metricFindQueryDefault(metaBuilder.buildColumnQuery(query.format == 'time series' ? 'value' : 'tableValue')).then(this.transformToSegments({}))
-          const result = response.map((option: any) => {
-            return {value: option.value,label: option.label}
-          })
-          resolve(result)
-        }, 0);
-      });
 
-
+    return new Promise<Array<SelectableValue<any>>>((resolve) => {
+      setTimeout(async () => {
+        const response = await datasource
+          .metricFindQueryDefault(metaBuilder.buildColumnQuery(query.format == 'time series' ? 'value' : 'tableValue'))
+          .then(this.transformToSegments({}));
+        const result = response.map((option: any) => {
+          return { value: option.value, label: option.label };
+        });
+        resolve(result);
+      }, 0);
+    });
   }
 
   transformToSegments(config) {
@@ -624,24 +620,24 @@ export class QueryEditor extends PureComponent<Props, State> {
     this.forceUpdate();
   }
 
-  onSelectAddButtonPress(option, segment){
-    switch(option.value){
+  onSelectAddButtonPress(option, segment) {
+    switch (option.value) {
       case 'add':
-        this.addNewSelectSegment()
+        this.addNewSelectSegment();
         break;
       case 'alias':
-          this.addSegmentAlias(segment)
-          break;
-      case 'aggregate': 
-          this.addSegmentAggregate(segment)
-         break;
+        this.addSegmentAlias(segment);
+        break;
+      case 'aggregate':
+        this.addSegmentAggregate(segment);
+        break;
     }
   }
 
   addNewSelectSegment() {
     let newSegment: SelectSegment = {
       value: '',
-      type: ''
+      type: '',
     };
     let tempSegments = this.state.selectSegments;
     tempSegments.push(newSegment);
@@ -649,20 +645,18 @@ export class QueryEditor extends PureComponent<Props, State> {
     this.forceUpdate();
   }
 
-  addSegmentAlias(segment){
-    
-    let segments = this.state.selectSegments
-    segment.alias = 'value'
+  addSegmentAlias(segment) {
+    let segments = this.state.selectSegments;
+    segment.alias = 'value';
     let index = segments.indexOf(segment);
     segments[index] = segment;
     this.setState({ selectSegments: segments });
     this.forceUpdate();
   }
 
-  addSegmentAggregate(segment){
-    
-    let segments = this.state.selectSegments
-    segment.aggregate = 'avg'
+  addSegmentAggregate(segment) {
+    let segments = this.state.selectSegments;
+    segment.aggregate = 'avg';
     let index = segments.indexOf(segment);
     segments[index] = segment;
     this.setState({ selectSegments: segments });
@@ -678,18 +672,18 @@ export class QueryEditor extends PureComponent<Props, State> {
     // let selectParams = []
     let list_string_values = [];
     for (const segment of segments) {
-      let params = []
+      let params = [];
 
-      if(segment.value){
-        params.push({ type: 'column', params: [segment.value] })
+      if (segment.value) {
+        params.push({ type: 'column', params: [segment.value] });
       }
 
-      if(segment.aggregate){
-        params.push({ type: 'aggregate', params: [segment.aggregate] })
+      if (segment.aggregate) {
+        params.push({ type: 'aggregate', params: [segment.aggregate] });
       }
 
-      if(segment.alias){
-        params.push({ type: 'alias', params: [segment.alias] })
+      if (segment.alias) {
+        params.push({ type: 'alias', params: [segment.alias] });
       }
 
       list_string_values.push(params);
@@ -707,18 +701,18 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     let list_string_values = [];
     for (const segment of segments) {
-      let params = []
+      let params = [];
 
-      if(segment.value){
-        params.push({ type: segment.type, params: [segment.value] })
+      if (segment.value) {
+        params.push({ type: segment.type, params: [segment.value] });
       }
 
-      if(segment.aggregate){
-        params.push({ type: 'aggregate', params: [segment.aggregate] })
+      if (segment.aggregate) {
+        params.push({ type: 'aggregate', params: [segment.aggregate] });
       }
 
-      if(segment.alias){
-        params.push({ type: 'alias', params: [segment.alias] })
+      if (segment.alias) {
+        params.push({ type: 'alias', params: [segment.alias] });
       }
 
       list_string_values.push(params);
@@ -733,33 +727,31 @@ export class QueryEditor extends PureComponent<Props, State> {
   }
 
   removeSelectSegmentAlias(segment) {
-    let segments = this.state.selectSegments
-    let index = segments.indexOf(segment)
-    segments[index].alias = ''
+    let segments = this.state.selectSegments;
+    let index = segments.indexOf(segment);
+    segments[index].alias = '';
 
     this.setState({ selectSegments: segments });
-    this.forceUpdate();        
+    this.forceUpdate();
   }
 
-  onGroupByChange(groupBy){   
+  onGroupByChange(groupBy) {
     const { onChange, query, onRunQuery } = this.props;
 
     onChange({ ...query, groupingField: groupBy, funcGroupCol: groupBy });
     onRunQuery();
 
-    this.setState({groupBy: groupBy, funcGroupCol: groupBy})
+    this.setState({ groupBy: groupBy, funcGroupCol: groupBy });
   }
 
   removeSelectSegmentAggregate(segment) {
-    let segments = this.state.selectSegments
-    let index = segments.indexOf(segment)
-    segments[index].aggregate = ''
+    let segments = this.state.selectSegments;
+    let index = segments.indexOf(segment);
+    segments[index].aggregate = '';
 
     this.setState({ selectSegments: segments });
-    this.forceUpdate();        
+    this.forceUpdate();
   }
-
-
 
   // conflationSettingsChanged() {
   //   //Conflation errors are reported in queryError at index 1
@@ -797,46 +789,48 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     const queryModel = new KDBQuery(query);
     const metaBuilder = new KDBMetaQuery(query, queryModel);
-  
+
     return new Promise<Array<SelectableValue<any>>>((resolve) => {
-      setTimeout(async() => {
-        const response = await datasource.metricFindQueryDefault(metaBuilder.buildColumnQuery('time')).then(this.transformToSegments({}));
+      setTimeout(async () => {
+        const response = await datasource
+          .metricFindQueryDefault(metaBuilder.buildColumnQuery('time'))
+          .then(this.transformToSegments({}));
         const result = response.map((option: any) => {
-          return {value: option.value, label: option.label}
-        })
-        resolve(result)
+          return { value: option.value, label: option.label };
+        });
+        resolve(result);
       }, 0);
     });
-}
-  useAsyncFunction(checked){
+  }
+  useAsyncFunction(checked) {
     const { onChange, query, onRunQuery } = this.props;
-    if(!checked){
+    if (!checked) {
       onChange({ ...query, useAsyncFunction: checked });
       onRunQuery();
       this.setState({ useAsyncFunction: checked });
-    }else{      
+    } else {
       onChange({ ...query, useAsyncFunction: checked, asyncProcTypes: '' });
       onRunQuery();
       this.setState({ useAsyncFunction: checked, asyncField: '' });
     }
   }
-  
-  asyncFieldChanged(asyncField){
+
+  asyncFieldChanged(asyncField) {
     const { onChange, query, onRunQuery } = this.props;
 
-    onChange({ ...query, asyncProcTypes: asyncField});
+    onChange({ ...query, asyncProcTypes: asyncField });
     onRunQuery();
 
-    this.setState({asyncField: asyncField})
+    this.setState({ asyncField: asyncField });
   }
 
-  useCustomPostback(checked){
+  useCustomPostback(checked) {
     const { onChange, query, onRunQuery } = this.props;
-    if(!checked){
+    if (!checked) {
       onChange({ ...query, useCustomPostback: checked });
       onRunQuery();
       this.setState({ useCustomPostback: checked });
-    }else{      
+    } else {
       onChange({ ...query, useCustomPostback: checked, postbackFunction: '' });
       onRunQuery();
       this.setState({ useCustomPostback: checked, postbackFunction: '' });
@@ -844,37 +838,32 @@ export class QueryEditor extends PureComponent<Props, State> {
   }
 
   render() {
-    
     const query = defaults(this.props.query, defaultQuery);
 
     const data = this.props.data;
-    var error: DataQueryError
-    if(data)
-    {
-      error = data.error
+    var error: DataQueryError;
+    if (data) {
+      error = data.error;
     }
 
-    var selectAddButtonOptions = this.selectAddButtonOptions
+    var selectAddButtonOptions = this.selectAddButtonOptions;
 
-    if(!this.state.useConflation )
-    {
-      selectAddButtonOptions = selectAddButtonOptions.filter((o) => o.value !== 'aggregate')
+    if (!this.state.useConflation) {
+      selectAddButtonOptions = selectAddButtonOptions.filter((o) => o.value !== 'aggregate');
     }
-   
+
     return (
       <div>
         <div className="gf-form-inline">
           <div className="gf-form">
-            <span className="gf-form-label query-keyword width-10">
-                Query Type
-              </span>
-              <Select
-                width={20}
-                placeholder="Select Query Type"
-                options={this.queryOptions}
-                onChange={(e: SelectableValue<string>) => this.onQueryChange(e.value)}
-                value={this.state.queryTypeStr || ''}
-              />
+            <span className="gf-form-label query-keyword width-10">Query Type</span>
+            <Select
+              width={20}
+              placeholder="Select Query Type"
+              options={this.queryOptions}
+              onChange={(e: SelectableValue<string>) => this.onQueryChange(e.value)}
+              value={this.state.queryTypeStr || ''}
+            />
           </div>
           <div className="gf-form gf-form--grow">
             <div className="gf-form-label gf-form-label--grow"></div>
@@ -885,16 +874,14 @@ export class QueryEditor extends PureComponent<Props, State> {
             <div className="gf-form-inline">
               <div className="gf-form">
                 {/* <InlineField label="From" labelWidth={20} style={{color: '#33A2E5'}} grow={true}> */}
-                  <span className="gf-form-label query-keyword width-10">
-                     From
-                  </span>
-                  <SegmentAsync
-                    width={20}
-                    placeholder="Select Table"
-                    loadOptions={this.getTableSegments.bind(this)}
-                    onChange={(e: SelectableValue<string>) => this.onTableFromChange(e.value)}
-                    value={this.state.tableFrom || ''}
-                  />
+                <span className="gf-form-label query-keyword width-10">From</span>
+                <SegmentAsync
+                  width={20}
+                  placeholder="Select Table"
+                  loadOptions={this.getTableSegments.bind(this)}
+                  onChange={(e: SelectableValue<string>) => this.onTableFromChange(e.value)}
+                  value={this.state.tableFrom || ''}
+                />
                 {/* </InlineField> */}
               </div>
               <div className="gf-form gf-form--grow">
@@ -904,16 +891,19 @@ export class QueryEditor extends PureComponent<Props, State> {
             {this.state.useTemporalField && (
               <div className="gf-form-inline">
                 <div className="gf-form">
-                    <InlineFormLabel className="query-keyword" tooltip="Time series data is plotted against this column.  Results are also automatically filtered on this field using the date extents of the graph.">
-                      Time Column
-                    </InlineFormLabel>
-                    <SegmentAsync
-                      width={20}
-                      placeholder="time"
-                      loadOptions={this.getTimeColumnSegments.bind(this)}
-                      onChange={(e: SelectableValue<string>) => this.onTimeColumnChange(e.value)}
-                      value={this.state.timeColumn || ''}
-                    />
+                  <InlineFormLabel
+                    className="query-keyword"
+                    tooltip="Time series data is plotted against this column.  Results are also automatically filtered on this field using the date extents of the graph."
+                  >
+                    Time Column
+                  </InlineFormLabel>
+                  <SegmentAsync
+                    width={20}
+                    placeholder="time"
+                    loadOptions={this.getTimeColumnSegments.bind(this)}
+                    onChange={(e: SelectableValue<string>) => this.onTimeColumnChange(e.value)}
+                    value={this.state.timeColumn || ''}
+                  />
                 </div>
                 <div className="gf-form gf-form--grow">
                   <div className="gf-form-label gf-form-label--grow"></div>
@@ -921,32 +911,30 @@ export class QueryEditor extends PureComponent<Props, State> {
               </div>
             )}
             {/* <div className="gf-form-inline"> */}
-              {this.state.selectSegments.length == 0 && (
-                <div className="gf-form-inline">
-                  <span className="gf-form-label query-keyword width-10">
-                     Select
-                  </span>
-                  <div className="gf-form-label width-4">
-                      <Button
-                          type="button"
-                          className="btn btn-primary"
-                          onClick={this.addNewSelectSegment.bind(this)}
-                          style={{ background: '#202226', padding: '10', outline: 'none' }}
-                        >+</Button>
-                  </div>
-                  <div className="gf-form gf-form--grow">
-                    <div className="gf-form-label gf-form-label--grow" style={{padding: '10'}}></div>
-                  </div>
+            {this.state.selectSegments.length == 0 && (
+              <div className="gf-form-inline">
+                <span className="gf-form-label query-keyword width-10">Select</span>
+                <div className="gf-form-label width-4">
+                  <Button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={this.addNewSelectSegment.bind(this)}
+                    style={{ background: '#202226', padding: '10', outline: 'none' }}
+                  >
+                    +
+                  </Button>
                 </div>
-              )}
+                <div className="gf-form gf-form--grow">
+                  <div className="gf-form-label gf-form-label--grow" style={{ padding: '10' }}></div>
+                </div>
+              </div>
+            )}
             {this.state.selectSegments.map((segment) => {
               return (
                 <div className="gf-form-inline">
                   {this.state.selectSegments.indexOf(segment) == 0 && (
                     <div className="gf-form-inline">
-                    <span className="gf-form-label query-keyword width-10">
-                       Select
-                    </span>
+                      <span className="gf-form-label query-keyword width-10">Select</span>
                     </div>
                   )}
                   {this.state.selectSegments.indexOf(segment) > 0 && (
@@ -954,100 +942,106 @@ export class QueryEditor extends PureComponent<Props, State> {
                   )}
                   <div className="gf-form">
                     {/* <InlineSegmentGroup> */}
-                        <Segment className="query-keyword"
-                          value="Column:"
-                          options={this.removeOption}
-                          onChange={() => this.removeSelectSegment(segment)}
-                        />
-                        <SegmentAsync
-                          onChange={(e: SelectableValue<string>) => {
-                            segment.value = e.value;
-                            this.setSelectSegment(segment);
-                          }}
-                          loadOptions={this.getSelectOptions.bind(this)}
-                          value={segment.value || ''}
-                          placeholder="Select field"
-                        />
+                    <Segment
+                      className="query-keyword"
+                      value="Column:"
+                      options={this.removeOption}
+                      onChange={() => this.removeSelectSegment(segment)}
+                    />
+                    <SegmentAsync
+                      onChange={(e: SelectableValue<string>) => {
+                        segment.value = e.value;
+                        this.setSelectSegment(segment);
+                      }}
+                      loadOptions={this.getSelectOptions.bind(this)}
+                      value={segment.value || ''}
+                      placeholder="Select field"
+                    />
                     {/* </InlineSegmentGroup> */}
                   </div>
-                    {segment.alias && (
-                      <div className="gf-form-inline">
-                        <InlineSegmentGroup>
-                            <Segment
-                              value="Alias:"
-                              options={this.removeOption}
-                              onChange={() => this.removeSelectSegmentAlias(segment)}
-                            />
-                            <SegmentInput
-                              onChange={(e: string) => {
-                                segment.alias = e;
-                                this.setSelectSegment(segment);
-                              }}
-                              value={segment.alias || ''}
-                            />
-                        </InlineSegmentGroup>
-                      </div>
-                    )}
-                    {segment.aggregate && (
-                      <div className="gf-form-inline">
+                  {segment.alias && (
+                    <div className="gf-form-inline">
                       <InlineSegmentGroup>
-                          <Segment
-                            value="Aggregate:"
-                            options={this.removeOption}
-                            onChange={() => this.removeSelectSegmentAggregate(segment)}
-                          />
-                          <Segment
-                            onChange={(e: SelectableValue<string>) => {
-                              segment.aggregate = e.value;
-                              this.setSelectSegment(segment);
-                            }}
-                            options={this.aggregateOptions}
-                            value={segment.aggregate || ''}
-                          />
+                        <Segment
+                          value="Alias:"
+                          options={this.removeOption}
+                          onChange={() => this.removeSelectSegmentAlias(segment)}
+                        />
+                        <SegmentInput
+                          onChange={(e: string) => {
+                            segment.alias = e;
+                            this.setSelectSegment(segment);
+                          }}
+                          value={segment.alias || ''}
+                        />
                       </InlineSegmentGroup>
-                    </div>                      
-                    )}
-                    <div>
-                      <ButtonSelect
-                          options={selectAddButtonOptions}
-                          onChange={(e: SelectableValue<string>) => this.onSelectAddButtonPress(e, segment)}
-                          style={{ background: '#202226' }}
-
-                      >+</ButtonSelect>
-                    </div>                  
+                    </div>
+                  )}
+                  {segment.aggregate && (
+                    <div className="gf-form-inline">
+                      <InlineSegmentGroup>
+                        <Segment
+                          value="Aggregate:"
+                          options={this.removeOption}
+                          onChange={() => this.removeSelectSegmentAggregate(segment)}
+                        />
+                        <Segment
+                          onChange={(e: SelectableValue<string>) => {
+                            segment.aggregate = e.value;
+                            this.setSelectSegment(segment);
+                          }}
+                          options={this.aggregateOptions}
+                          value={segment.aggregate || ''}
+                        />
+                      </InlineSegmentGroup>
+                    </div>
+                  )}
+                  <div>
+                    <ButtonSelect
+                      options={selectAddButtonOptions}
+                      onChange={(e: SelectableValue<string>) => this.onSelectAddButtonPress(e, segment)}
+                      style={{ background: '#202226' }}
+                    >
+                      +
+                    </ButtonSelect>
+                  </div>
                   <div className="gf-form gf-form--grow">
                     <div className="gf-form-label gf-form-label--grow"></div>
                   </div>
                 </div>
               );
             })}
-              {this.state.whereSegments.length == 0 && (
-                <div className="gf-form-inline">
-                  <InlineFormLabel className="query-keyword"
-                    width={10}
-                    tooltip="'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75)."
+            {this.state.whereSegments.length == 0 && (
+              <div className="gf-form-inline">
+                <InlineFormLabel
+                  className="query-keyword"
+                  width={10}
+                  tooltip="'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75)."
+                >
+                  Where
+                </InlineFormLabel>
+                <div className="gf-form-label width-4">
+                  <Button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={this.addNewWhereSegment.bind(this)}
+                    style={{ width: '5', background: '#202226', padding: '10', outline: 'hidden' }}
                   >
-                    Where
-                  </InlineFormLabel>
-                  <div className="gf-form-label width-4">
-                    <Button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={this.addNewWhereSegment.bind(this)}
-                      style={{ width: '5', background: '#202226', padding: '10', outline: 'hidden'}}
-                    >+</Button>
-                  </div>
-                  <div className="gf-form gf-form--grow">
-                    <div className="gf-form-label gf-form-label--grow"></div>
-                  </div>
+                    +
+                  </Button>
                 </div>
-              )}
+                <div className="gf-form gf-form--grow">
+                  <div className="gf-form-label gf-form-label--grow"></div>
+                </div>
+              </div>
+            )}
             {this.state.whereSegments.map((segment) => {
               return (
                 <div className="gf-form-inline">
                   {this.state.whereSegments.indexOf(segment) == 0 && (
                     <div className="gf-form-inline">
-                      <InlineFormLabel className="query-keyword"
+                      <InlineFormLabel
+                        className="query-keyword"
                         width={10}
                         tooltip="'in' and 'within' operator arguments need to be provided as a comma seperated list (e.g. sym in AAPL,MSFT,IBM). 'within' requires lower bound first (e.g within 75,100; NOT within 100,75)."
                       >
@@ -1061,34 +1055,34 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <label className="gf-form-label query-keyword width-10" />
                   )}
                   <div className="gf-form">
-                        <Segment value="Expr" options={this.removeOption} onChange={() => this.removeSegment(segment)} />
-                        <Segment
-                          onChange={(e: SelectableValue<string>) => {
-                            segment.expressionField = e.value;
-                            this.setWhereSegment(segment);
-                            this.setWhereOperators(e.value);
-                          }}
-                          options={this.getSelectOptions.bind(this)}
-                          value={segment.expressionField || ''}
-                          placeholder="Select field"
-                        />
-                        <Segment
-                          onChange={(e: SelectableValue<string>) => {
-                            segment.operator = e.value;
-                            this.setWhereSegment(segment);
-                          }}
-                          options={this.state.whereOperators}
-                          value={segment.operator || '='}
-                          defaultValue={'='}
-                        />
-                        <SegmentInput
-                          onChange={(e: string) => {
-                            segment.value = e;
-                            this.setWhereSegment(segment);
-                          }}
-                          placeholder="enter value"
-                          value={segment.value || ''}
-                        />
+                    <Segment value="Expr" options={this.removeOption} onChange={() => this.removeSegment(segment)} />
+                    <Segment
+                      onChange={(e: SelectableValue<string>) => {
+                        segment.expressionField = e.value;
+                        this.setWhereSegment(segment);
+                        this.setWhereOperators(e.value);
+                      }}
+                      options={this.getSelectOptions.bind(this)}
+                      value={segment.expressionField || ''}
+                      placeholder="Select field"
+                    />
+                    <Segment
+                      onChange={(e: SelectableValue<string>) => {
+                        segment.operator = e.value;
+                        this.setWhereSegment(segment);
+                      }}
+                      options={this.state.whereOperators}
+                      value={segment.operator || '='}
+                      defaultValue={'='}
+                    />
+                    <SegmentInput
+                      onChange={(e: string) => {
+                        segment.value = e;
+                        this.setWhereSegment(segment);
+                      }}
+                      placeholder="enter value"
+                      value={segment.value || ''}
+                    />
                   </div>
                   {this.state.whereSegments.indexOf(segment) == this.state.whereSegments.length - 1 && (
                     <div className="gf-form-inline">
@@ -1115,7 +1109,6 @@ export class QueryEditor extends PureComponent<Props, State> {
           </div>
         )}
         {this.state.queryTypeStr && this.state.queryTypeStr == 'functionQuery' && (
-          
           <div className="gf-form-inline">
             <div className="gf-form" style={{ height: '111px' }}>
               <span className="gf-form-label query-keyword width-10" style={{ height: '111px' }}>
@@ -1138,88 +1131,128 @@ export class QueryEditor extends PureComponent<Props, State> {
         {this.state.queryTypeStr && this.state.queryTypeStr !== 'kdbSideQuery' && (
           <div>
             {this.state.queryTypeStr && this.state.queryTypeStr == 'functionQuery' && (
-                <div>
-                  <div className="gf-form-inline">
-                    <div className="gf-form">
-                      <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="This allows use of asynchronous functions provided they utilise a postback function. Enable 'Custom Postback' if using non-TorQ Gateway.">
-                          <span>
-                          <input type="checkbox" className="width-2" checked={this.state.useAsyncFunction} onChange={(e) => this.useAsyncFunction(e.currentTarget.checked)}/>
-                        </span>Use Async with Postback</InlineFormLabel>
-                  </div>
-                    {this.state.useAsyncFunction && (  
-                      <div className="gf-form">            
-                          <InlineFormLabel className="query-keyword">Proc Types:</InlineFormLabel>
-                            <SegmentInput
-                                placeholder="Proc"
-                                value={this.state.asyncField || ''}
-                                onChange={(e: string) => {
-                                  this.asyncFieldChanged(e);
-                                }}
-                              />
-                          </div>       
-                        )}
-                        {this.state.useAsyncFunction && (  
-                          <div className="gf-form">
-                            <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="This allows use of asynchronous functions provided they utilise a postback function. Enable 'Custom Postback' if using non-TorQ Gateway.">
-                            <span>
-                              <input type="checkbox" className="width-2" checked={this.state.useCustomPostback} onChange={(e) => this.useCustomPostback(e.currentTarget.checked)}/>
-                            </span>Custom Postback</InlineFormLabel>
-                          </div>       
-                      )}
-                      <div className="gf-form gf-form--grow">
-                        <div className="gf-form-label gf-form-label--grow"></div>
-                      </div>
-                  </div>
-                  {this.state.useAsyncFunction && this.state.useCustomPostback && (
-                    <div className="gf-form-inline" style={{ height: '111px;'}}>       
-                      <span className="gf-form-label query-keyword width-10" style={{ height: '111px' }}/>
-                      <div style={{ height: '111px;'}}>
-                      <textarea
-                          className="gf-form-textarea width-30"
-                          rows={5}
-                          style={{ background: '#0b0c0e' }}
-                          value={this.state.postbackFunction}
-                          placeholder="Enter custom postback function"
-                          onChange={this.asyncFieldChanged}
+              <div>
+                <div className="gf-form-inline">
+                  <div className="gf-form">
+                    <InlineFormLabel
+                      className="gf-form-label query-keyword width-15"
+                      tooltip="This allows use of asynchronous functions provided they utilise a postback function. Enable 'Custom Postback' if using non-TorQ Gateway."
+                    >
+                      <span>
+                        <input
+                          type="checkbox"
+                          className="width-2"
+                          checked={this.state.useAsyncFunction}
+                          onChange={(e) => this.useAsyncFunction(e.currentTarget.checked)}
                         />
-                      </div>
-                      <div className="gf-form gf-form--grow">
-                        <div className="gf-form-label gf-form-label--grow" style={{ height: '111px'}}></div>
-                      </div>
+                      </span>
+                      Use Async with Postback
+                    </InlineFormLabel>
+                  </div>
+                  {this.state.useAsyncFunction && (
+                    <div className="gf-form">
+                      <InlineFormLabel className="query-keyword">Proc Types:</InlineFormLabel>
+                      <SegmentInput
+                        placeholder="Proc"
+                        value={this.state.asyncField || ''}
+                        onChange={(e: string) => {
+                          this.asyncFieldChanged(e);
+                        }}
+                      />
                     </div>
                   )}
+                  {this.state.useAsyncFunction && (
+                    <div className="gf-form">
+                      <InlineFormLabel
+                        className="gf-form-label query-keyword width-15"
+                        tooltip="This allows use of asynchronous functions provided they utilise a postback function. Enable 'Custom Postback' if using non-TorQ Gateway."
+                      >
+                        <span>
+                          <input
+                            type="checkbox"
+                            className="width-2"
+                            checked={this.state.useCustomPostback}
+                            onChange={(e) => this.useCustomPostback(e.currentTarget.checked)}
+                          />
+                        </span>
+                        Custom Postback
+                      </InlineFormLabel>
+                    </div>
+                  )}
+                  <div className="gf-form gf-form--grow">
+                    <div className="gf-form-label gf-form-label--grow"></div>
                   </div>
-              )}
+                </div>
+                {this.state.useAsyncFunction && this.state.useCustomPostback && (
+                  <div className="gf-form-inline" style={{ height: '111px;' }}>
+                    <span className="gf-form-label query-keyword width-10" style={{ height: '111px' }} />
+                    <div style={{ height: '111px;' }}>
+                      <textarea
+                        className="gf-form-textarea width-30"
+                        rows={5}
+                        style={{ background: '#0b0c0e' }}
+                        value={this.state.postbackFunction}
+                        placeholder="Enter custom postback function"
+                        onChange={this.asyncFieldChanged}
+                      />
+                    </div>
+                    <div className="gf-form gf-form--grow">
+                      <div className="gf-form-label gf-form-label--grow" style={{ height: '111px' }}></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             {this.state.formatAs && this.state.formatAs !== 'table' && (
-            <div className="gf-form-inline">
+              <div className="gf-form-inline">
                 <div className="gf-form">
-                  <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data.">
-                  <span>
-                    <input type="checkbox" className="width-2" checked={this.state.useGrouping} onChange={(e) => this.useGrouping(e.currentTarget.checked)}/>
-                  </span>Use Grouping</InlineFormLabel>
+                  <InlineFormLabel
+                    className="gf-form-label query-keyword width-15"
+                    tooltip="Used to separate selected data into relevant groups. The column specified is the one which contains the groups by which you wish to separate your data."
+                  >
+                    <span>
+                      <input
+                        type="checkbox"
+                        className="width-2"
+                        checked={this.state.useGrouping}
+                        onChange={(e) => this.useGrouping(e.currentTarget.checked)}
+                      />
+                    </span>
+                    Use Grouping
+                  </InlineFormLabel>
                 </div>
                 {this.state.useGrouping && (
                   <div className="gf-form">
                     <InlineFormLabel className="query-keyword">Group By</InlineFormLabel>
                     <SegmentInput
-                        value={this.state.groupBy || ''}
-                        onChange={(e: string) => {
-                          this.onGroupByChange(e);
-                        }}
-                      />
+                      value={this.state.groupBy || ''}
+                      onChange={(e: string) => {
+                        this.onGroupByChange(e);
+                      }}
+                    />
                   </div>
                 )}
                 <div className="gf-form gf-form--grow">
                   <div className="gf-form-label gf-form-label--grow"></div>
                 </div>
-            </div>
+              </div>
             )}
             <div className="gf-form-inline">
-              <div className="gf-form" style={{wordBreak: 'break-word', textAlign: 'right'}}>
-                <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="Used to enable a date/time column, acting as a key for each record.">
+              <div className="gf-form" style={{ wordBreak: 'break-word', textAlign: 'right' }}>
+                <InlineFormLabel
+                  className="gf-form-label query-keyword width-15"
+                  tooltip="Used to enable a date/time column, acting as a key for each record."
+                >
                   <span>
-                    <input type="checkbox" className="width-2" checked={this.state.useTemporalField} onChange={(e) => this.useTemporalField(e.currentTarget.checked)}/>
-                  </span>Use Temporal Field</InlineFormLabel>
+                    <input
+                      type="checkbox"
+                      className="width-2"
+                      checked={this.state.useTemporalField}
+                      onChange={(e) => this.useTemporalField(e.currentTarget.checked)}
+                    />
+                  </span>
+                  Use Temporal Field
+                </InlineFormLabel>
               </div>
               {this.state.queryTypeStr === 'functionQuery' && this.state.useTemporalField && (
                 <SegmentAsync
@@ -1228,50 +1261,61 @@ export class QueryEditor extends PureComponent<Props, State> {
                   loadOptions={this.getTimeColumnSegments.bind(this)}
                   onChange={(e: SelectableValue<string>) => this.onTimeColumnChange(e.value)}
                   value={this.state.timeColumn || ''}
-              />
+                />
               )}
               <div className="gf-form gf-form--grow">
                 <div className="gf-form-label gf-form-label--grow"></div>
               </div>
             </div>
             {this.state.useTemporalField && (
-            <div className="gf-form-inline">
-              <div className="gf-form">
-                <InlineFormLabel className="gf-form-label query-keyword width-15" tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket.">
-                  <span>
-                    <input type="checkbox" className="width-2" checked={this.state.useConflation} onChange={(e) => this.useConflation(e.currentTarget.checked)}/>
-                  </span>Use Conflation</InlineFormLabel>
-                {this.state.useConflation && (
-                  <div className="gf-form-inline">
-                    <InlineFormLabel className="query-keyword">Duration</InlineFormLabel>
-                    <SegmentInput
-                      value={this.state.conflation.duration || 5}
-                      onChange={(e: number) => {
-                        this.onDurationChange(e);
-                      }}
-                    />
-                    <InlineFormLabel className="query-keyword">Units</InlineFormLabel>
-                    <Select
-                      width={20}
-                      options={this.unitOptions}
-                      onChange={(e: SelectableValue<string>) => this.onUnitChange(e.value)}
-                      value={this.state.conflation.unitType || ''}
-                    />
-                    <InlineFormLabel className="query-keyword"
-                      width={20}
-                      tooltip="The data in each bucket are reduced to a single value per bucket via an aggregation. E.G. 'Average' would take the mean of all points within each 5 minute peroid, for every 5 minute period of your time series data. It would then be the means that are plotted."
-                    >
-                      Default Aggregation
-                    </InlineFormLabel>
-                    <Select
-                      width={20}
-                      options={this.aggregateOptions}
-                      onChange={(e: SelectableValue<string>) => this.onAggregateChange(e.value)}
-                      value={this.state.conflation.aggregate || ''}
-                    />
-                  </div>
-                )}
-               </div>
+              <div className="gf-form-inline">
+                <div className="gf-form">
+                  <InlineFormLabel
+                    className="gf-form-label query-keyword width-15"
+                    tooltip="The time series data is divided into 'buckets' of time, then reduced to a single point for each interval bucket."
+                  >
+                    <span>
+                      <input
+                        type="checkbox"
+                        className="width-2"
+                        checked={this.state.useConflation}
+                        onChange={(e) => this.useConflation(e.currentTarget.checked)}
+                      />
+                    </span>
+                    Use Conflation
+                  </InlineFormLabel>
+                  {this.state.useConflation && (
+                    <div className="gf-form-inline">
+                      <InlineFormLabel className="query-keyword">Duration</InlineFormLabel>
+                      <SegmentInput
+                        value={this.state.conflation.duration || 5}
+                        onChange={(e: number) => {
+                          this.onDurationChange(e);
+                        }}
+                      />
+                      <InlineFormLabel className="query-keyword">Units</InlineFormLabel>
+                      <Select
+                        width={20}
+                        options={this.unitOptions}
+                        onChange={(e: SelectableValue<string>) => this.onUnitChange(e.value)}
+                        value={this.state.conflation.unitType || ''}
+                      />
+                      <InlineFormLabel
+                        className="query-keyword"
+                        width={20}
+                        tooltip="The data in each bucket are reduced to a single value per bucket via an aggregation. E.G. 'Average' would take the mean of all points within each 5 minute peroid, for every 5 minute period of your time series data. It would then be the means that are plotted."
+                      >
+                        Default Aggregation
+                      </InlineFormLabel>
+                      <Select
+                        width={20}
+                        options={this.aggregateOptions}
+                        onChange={(e: SelectableValue<string>) => this.onAggregateChange(e.value)}
+                        value={this.state.conflation.aggregate || ''}
+                      />
+                    </div>
+                  )}
+                </div>
                 <div className="gf-form gf-form--grow">
                   <div className="gf-form-label gf-form-label--grow"></div>
                 </div>
@@ -1283,15 +1327,20 @@ export class QueryEditor extends PureComponent<Props, State> {
           <div className="gf-form-inline">
             <div className="gf-form">
               <InlineFormLabel className="gf-form-label query-keyword">Format as</InlineFormLabel>
-                <Select
-                  width={20}
-                  options={this.formatOptions}
-                  onChange={(e: SelectableValue<string>) => this.onFormatChange(e.value)}
-                  value={this.state.formatAs || ''}
-                />
+              <Select
+                width={20}
+                options={this.formatOptions}
+                onChange={(e: SelectableValue<string>) => this.onFormatChange(e.value)}
+                value={this.state.formatAs || ''}
+              />
             </div>
             <div className="gf-form">
-              <InlineFormLabel className="query-keyword" tooltip="An integer used to limit the number of rows loaded by Grafana for performance purposes.">Row Limit</InlineFormLabel>
+              <InlineFormLabel
+                className="query-keyword"
+                tooltip="An integer used to limit the number of rows loaded by Grafana for performance purposes."
+              >
+                Row Limit
+              </InlineFormLabel>
               <SegmentInput
                 value={this.state.rowCountLimit || ''}
                 onChange={(e: number) => {
@@ -1299,15 +1348,16 @@ export class QueryEditor extends PureComponent<Props, State> {
                 }}
               />
             </div>
-             <div className="gf-form">
+            <div className="gf-form">
               <Button
                 onClick={this.showHelp.bind(this)}
                 className="btn btn-primary"
-                style={{ background: '#202226', color: '#33A2E5', outline: 'none'}}
-               >Show Help
-                {!this.state.showHelp && (<i className="fa fa-caret-right"></i>)}
-                {this.state.showHelp && (<i className="fa fa-caret-down"></i>)}
-               </Button>
+                style={{ background: '#202226', color: '#33A2E5', outline: 'none' }}
+              >
+                Show Help
+                {!this.state.showHelp && <i className="fa fa-caret-right"></i>}
+                {this.state.showHelp && <i className="fa fa-caret-down"></i>}
+              </Button>
             </div>
             <div className="gf-form gf-form--grow">
               <div className="gf-form-label gf-form-label--grow"></div>
@@ -1315,9 +1365,13 @@ export class QueryEditor extends PureComponent<Props, State> {
           </div>
         </div>
         {this.state.showHelp && (
-          <div className="gf-form"  >
-              <pre className="gf-form-pre alert alert-info"> {`
-                Plugin Version:`} {this.version} {`
+          <div className="gf-form">
+            <pre className="gf-form-pre alert alert-info">
+              {' '}
+              {`
+                Plugin Version:`}{' '}
+              {this.version}{' '}
+              {`
                 First, choose the datasource you wish to query.
                 Query Type - Built Query:
                   Essential:
@@ -1378,15 +1432,16 @@ export class QueryEditor extends PureComponent<Props, State> {
                     - Conflation and row limit functions are explaining in the Built Query mode.
 
 
-              `}</pre>
+              `}
+            </pre>
           </div>
         )}
-        { error && (
+        {error && (
           <Alert title={error.message} />
-        // <div className="gf-form">
-        //   <pre className="gf-form-pre alert alert-error">{error.message}</pre>
-        // </div>
-        )}    
+          // <div className="gf-form">
+          //   <pre className="gf-form-pre alert alert-error">{error.message}</pre>
+          // </div>
+        )}
       </div>
     );
   }

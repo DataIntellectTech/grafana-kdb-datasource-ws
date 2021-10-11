@@ -1,5 +1,5 @@
 import React, { ChangeEvent, PureComponent } from 'react';
-import { Checkbox, InfoBox, LegacyForms, } from '@grafana/ui';
+import { Alert, Checkbox, LegacyForms, } from '@grafana/ui';
 import { DataSourcePluginOptionsEditorProps } from '@grafana/data';
 import { MyDataSourceOptions } from './types';
 
@@ -130,8 +130,9 @@ export class ConfigEditor extends PureComponent<Props, State> {
         </div>
         <div className="gf-form-group">
             {this.state.authChecked && !this.state.tlsChecked && (
-              <InfoBox
-                title={<div style={{color:'red'}}>Connection Insecure</div>}
+              <Alert
+                title={"Connection Insecure"}
+                severity={"error"}
                 >
                 <br/>
                 <p>                  
@@ -142,11 +143,12 @@ export class ConfigEditor extends PureComponent<Props, State> {
                   See the <a className="external-link" target="_blank" href="https://code.kx.com/q/kb/ssl/">kx wiki SSL/TLS page</a> for more information.
                 </p>
                 </p>
-              </InfoBox>
+              </Alert>
             )}
             {this.state.authChecked && this.state.tlsChecked && (
-              <InfoBox
-                title={<div style={{color:'green'}}>TLS Enabled</div>}
+              <Alert
+                title={"TLS Enabled"}
+                severity={"success"}
                 >
                 <br/>
                 <p>
@@ -158,7 +160,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
                 <p>
                   See the <a className="external-link" target="_blank" href="https://code.kx.com/q/kb/ssl/">kx wiki SSL/TLS page</a> for more information.
                 </p>
-              </InfoBox>
+              </Alert>
             )}
             {this.state.authChecked && (
             <div>

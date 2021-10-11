@@ -1,4 +1,4 @@
 export class ConflationParams {
-    val: string;
-    agg: string;
+  val: string;
+  agg: string;
 }
