@@ -55,7 +55,7 @@ export const defaultQuery: Partial<MyQuery> = {
   conflationDefaultAggType: '',
   conflation: {
     unitType: '',
-    duration: '',
+    duration: 0,
     aggregate: ''
   },
   where: [] = [],
@@ -68,10 +68,6 @@ export const defaultQuery: Partial<MyQuery> = {
   postbackFunction: ''
 };
 
-type Select = {
-  type: string,
-  params: any[]
-}
 /**
  * These are options configured for each DataSource instance
  */

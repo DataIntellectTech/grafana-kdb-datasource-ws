@@ -88,16 +88,13 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   }
 
   query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
-           // console.log('options', options
            var prefilterResultCount = options.targets.length;
-
+        
            if (prefilterResultCount == 0) {
                return new Promise(resolve => {
                  resolve({data: []})
                  }
-               )};
-   
-        
+               )}; 
 
            var allRefIDs = [];
            var blankRefIDs = [];
@@ -133,7 +130,6 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
            var requestList = validRequestList.map(target => {
                return this.buildKdbRequest(target);
                });
-
 
                var nrRequests: number = requestList.length;
                if(!this.ws || this.ws.readyState > 1) return this.connectWS().then(connectStatus => {
@@ -408,6 +404,13 @@ private buildKdbRequest(target) {
         kdbRequest.useCustomPostback = target.useCustomPostback;    
     if(target.asyncProcTypes)
         kdbRequest.asyncProcTypes = target.asyncProcTypes;
+
+
+    for(let i=0;i < target.queryError.error.length;i++) {
+        if(target.queryError.error[i]){
+            throw new Error(target.queryError.message[i])
+        }
+    }
 
     return [
         ((target.format == 'time series') ? graphFunction : tabFunction),

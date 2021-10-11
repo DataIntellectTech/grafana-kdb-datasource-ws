@@ -14,6 +14,7 @@ import {
   LegacyForms,
   Popover,
   Segment,
+  SegmentAsync,
   SegmentInput,
   Select,
   TextArea,
@@ -39,7 +40,6 @@ type State = {
   useConflation: boolean;
   conflationDuration: number;
   formatAs: string;
-  // todo must be number
   rowCountLimit: number;
   showHelp: boolean;
   timeColumn: string;
@@ -77,7 +77,7 @@ type SelectSegment = {
 
 export type Conflation = {
   unitType: string;
-  duration: string;
+  duration: number;
   aggregate: string
 };
 
@@ -173,7 +173,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       useGrouping: query.useGrouping,
       funcGroupCol: query.funcGroupCol,
       target: null,
-      selectOptions: this.getSelectOptions(query.table),
+      selectOptions: [],
       whereSegments: whereSegments,
       whereOperators: [],
       firstWhere: true,
@@ -212,7 +212,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     const { onChange, query, onRunQuery } = this.props;
     onChange({ ...query, table: table });
     this.setState({ tableFrom: table }, () => {
-      let options = this.getSelectOptions(table)
+      let options = this.getSelectOptions.bind(this)
       // this.getSelectOptions(table).then((options) => {
         this.setState({ selectOptions: options });
       // });
@@ -249,7 +249,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     this.setState({ formatAs: format });
   }
 
-  onDurationChange(duration: string) {
+  onDurationChange(duration: number) {
     let conflation = this.state.conflation
     conflation.duration = duration
     this.allConflationSettingsSet(conflation, this.state.useConflation)
@@ -264,9 +264,9 @@ export class QueryEditor extends PureComponent<Props, State> {
     }
    }
 
-  onRowLimitChange = (event: ChangeEvent<HTMLInputElement>) => {
+  onRowLimitChange = (duration: number) => {
     const { onChange, query, onRunQuery } = this.props;
-    let rowLimit = Number(event.target.value)
+    let rowLimit = Number(duration)
 
     if( !isNaN(rowLimit)){
       // this.state.rowCountLimit = rowLimit
@@ -329,7 +329,7 @@ export class QueryEditor extends PureComponent<Props, State> {
   useConflation = (checked: boolean) => {
     let conflation: Conflation = {
       unitType: '',
-      duration: '',
+      duration: 0,
       aggregate: '' 
     };
     this.allConflationSettingsSet(conflation, checked)
@@ -417,47 +417,47 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     const queryModel = new KDBQuery(target);
     const metaBuilder = new KDBMetaQuery(target, queryModel);
-    let values: SelectableValue<string>[] = [];
 
-    Promise.resolve(
-      this.props.datasource
-        .metricFindQueryDefault(metaBuilder.buildTableQuery())
-        .then(this.transformToSegments({}))
-        .then((options) => {
-          options.forEach((option) => values.push({ value: option.value, label: option.label }));
-        }));
-    return values;
+      const { datasource } = this.props;
+
+      return new Promise<Array<SelectableValue<any>>>((resolve) => {
+        setTimeout(async() => {
+          const response = await datasource.metricFindQueryDefault(metaBuilder.buildTableQuery()).then(this.transformToSegments({}))
+          const result = response.map((option: any) => {
+              return {value: option.value, label: option.label}
+          })
+          resolve(result)
+        }, 0);
+      });
   }
 
   
-  getSelectOptions(table) {
-    //TODO figure this out
-    let target = {
-      format: 'dummy',
-      table: table
-    };
-    const queryModel = new KDBQuery(target);
-    const metaBuilder = new KDBMetaQuery(target, queryModel);
-    let values: SelectableValue<string>[] = [];
-    
-    Promise.resolve(this.props.datasource
-      .metricFindQueryDefault(metaBuilder.buildColumnQuery(target.format == 'time series' ? 'value' : 'tableValue'))
-      .then(this.transformToSegments({}))
-      .then((options) => {
-          options.forEach((option) => values.push({ value: option.value, label: option.label }));
-        }));
+  getSelectOptions() {
+    const { datasource, query } = this.props;
 
-      return values;
+    const queryModel = new KDBQuery(query);
+    const metaBuilder = new KDBMetaQuery(query, queryModel);
+    
+      return new Promise<Array<SelectableValue<any>>>((resolve) => {
+        setTimeout(async() => {
+          const response = await datasource.metricFindQueryDefault(metaBuilder.buildColumnQuery(query.format == 'time series' ? 'value' : 'tableValue')).then(this.transformToSegments({}))
+          const result = response.map((option: any) => {
+            return {value: option.value,label: option.label}
+          })
+          resolve(result)
+        }, 0);
+      });
+
 
   }
 
   transformToSegments(config) {
-    return (results: SelectableValue[]) => {
+    return (results: SelectableValue<string>[]) => {
       const segments = _.map(results, (segment) => {
         return {
           label: segment.table ? segment.table : segment.c,
           value: segment.table ? segment.table : segment.c,
-        } as SelectableValue;
+        };
       });
 
       if (config.addTemplateVars) {
@@ -801,21 +801,20 @@ export class QueryEditor extends PureComponent<Props, State> {
   //   // this.panelCtrl.refresh();
   // }
   getTimeColumnSegments() {
-    let target = {
-      table: this.state.tableFrom,
-    };
-    const queryModel = new KDBQuery(target);
-    const metaBuilder = new KDBMetaQuery(target, queryModel);
+    const { datasource, query } = this.props;
 
-    let values: SelectableValue<string>[] = [];
-    
-    Promise.resolve(this.props.datasource
-        .metricFindQueryDefault(metaBuilder.buildColumnQuery('time'))
-        .then(this.transformToSegments({})).then((options) => {
-          options.forEach((option) => values.push({ value: option.value, label: option.label }));
-        }));
-
-        return values;
+    const queryModel = new KDBQuery(query);
+    const metaBuilder = new KDBMetaQuery(query, queryModel);
+  
+    return new Promise<Array<SelectableValue<any>>>((resolve) => {
+      setTimeout(async() => {
+        const response = await datasource.metricFindQueryDefault(metaBuilder.buildColumnQuery('time')).then(this.transformToSegments({}));
+        const result = response.map((option: any) => {
+          return {value: option.value,label: option.label}
+        })
+        resolve(result)
+      }, 0);
+    });
 }
   useAsyncFunction(checked){
     const { onChange, query, onRunQuery } = this.props;
@@ -851,9 +850,10 @@ export class QueryEditor extends PureComponent<Props, State> {
       this.setState({ useCustomPostback: checked, postbackFunction: '' });
     }
   }
-  
+
   render() {
     
+    const query = defaults(this.props.query, defaultQuery);
 
     const data = this.props.data;
     var error: DataQueryError
@@ -861,10 +861,6 @@ export class QueryEditor extends PureComponent<Props, State> {
     {
       error = data.error
     }
-
-    const tableOptions: SelectableValue<string>[] = this.getTableSegments();
-
-    const timeOptions: SelectableValue[] = this.getTimeColumnSegments();
 
     var selectAddButtonOptions = this.selectAddButtonOptions
 
@@ -900,10 +896,10 @@ export class QueryEditor extends PureComponent<Props, State> {
                   <span className="gf-form-label query-keyword width-10">
                      From
                   </span>
-                  <Segment
+                  <SegmentAsync
                     width={20}
                     placeholder="Select Table"
-                    options={tableOptions}
+                    loadOptions={this.getTableSegments.bind(this)}
                     onChange={(e: SelectableValue<string>) => this.onTableFromChange(e.value)}
                     value={this.state.tableFrom || ''}
                   />
@@ -922,7 +918,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <Segment
                       width={20}
                       placeholder="time"
-                      options={timeOptions}
+                      options={this.getTimeColumnSegments.bind(this)}
                       onChange={(e: SelectableValue<string>) => this.onTimeColumnChange(e.value)}
                       value={this.state.timeColumn || ''}
                     />
@@ -971,12 +967,12 @@ export class QueryEditor extends PureComponent<Props, State> {
                           options={this.removeOption}
                           onChange={() => this.removeSelectSegment(segment)}
                         />
-                        <Segment
+                        <SegmentAsync
                           onChange={(e: SelectableValue<string>) => {
                             segment.value = e.value;
                             this.setSelectSegment(segment);
                           }}
-                          options={this.state.selectOptions}
+                          loadOptions={this.getSelectOptions.bind(this)}
                           value={segment.value || ''}
                           placeholder="Select field"
                         />
@@ -1080,7 +1076,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                             this.setWhereSegment(segment);
                             this.setWhereOperators(e.value);
                           }}
-                          options={this.state.selectOptions}
+                          options={this.getSelectOptions.bind(this)}
                           value={segment.expressionField || ''}
                           placeholder="Select field"
                         />
@@ -1090,7 +1086,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                             this.setWhereSegment(segment);
                           }}
                           options={this.state.whereOperators}
-                          value={segment.operator || ''}
+                          value={segment.operator || '='}
                           defaultValue={'='}
                         />
                         <SegmentInput
@@ -1234,10 +1230,10 @@ export class QueryEditor extends PureComponent<Props, State> {
                   </span>Use Temporal Field</InlineFormLabel>
               </div>
               {this.state.queryTypeStr === 'functionQuery' && this.state.useTemporalField && (
-                <Segment
+                <SegmentAsync
                   width={20}
                   placeholder="time"
-                  options={timeOptions}
+                  loadOptions={this.getTimeColumnSegments.bind(this)}
                   onChange={(e: SelectableValue<string>) => this.onTimeColumnChange(e.value)}
                   value={this.state.timeColumn || ''}
               />
@@ -1258,7 +1254,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <InlineFormLabel className="query-keyword">Duration</InlineFormLabel>
                     <SegmentInput
                       value={this.state.conflation.duration || 5}
-                      onChange={(e: string) => {
+                      onChange={(e: number) => {
                         this.onDurationChange(e);
                       }}
                     />
@@ -1303,13 +1299,12 @@ export class QueryEditor extends PureComponent<Props, State> {
                 />
             </div>
             <div className="gf-form">
-              <FormField className="query-keyword"
-                label="Row Limit"
+              <InlineFormLabel className="query-keyword" tooltip="An integer used to limit the number of rows loaded by Grafana for performance purposes.">Row Limit</InlineFormLabel>
+              <SegmentInput
                 value={this.state.rowCountLimit || ''}
-                labelWidth={10}
-                tooltip="An integer used to limit the number of rows loaded by Grafana for performance purposes."
-                placeholder="1000"
-                onChange={this.onRowLimitChange}
+                onChange={(e: number) => {
+                  this.onRowLimitChange(e);
+                }}
               />
             </div>
              <div className="gf-form">
