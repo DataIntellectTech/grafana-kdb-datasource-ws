@@ -11,9 +11,42 @@ export const durationMap = {
     h: 3600 * Math.pow(10,9)
 }
 
+export const defaultPostback : string = '{[query;formatter;id] .dg.dev.r:.gw.asyncexecjpt[.dg.dev.query:@[query;0;value];.dg.dev.proctypes:query[1;`asyncProcTypes],();{[res;id;fmt] -8!`o`ID!(fmt[raze res;""];id)}[;id;formatter];.dg.dev.pb:();.dg.dev.timeout:0Wn]}'
+
+export const callbackHandler: string = '.z.ws:{[x] \n ' +
+'  ds:-9!x; \n '+
+'  fmtter:@[value;ds[`formatFunc];{`$"\'",x}]; \n ' +
+'  r:$[ds`async; \n ' +
+'    @[value;ds[`i;1;`asyncPostbackFunction];{`$"\'",x}][ds[`i];fmtter;ds`ID]; \n ' +
+'    `o`ID!(fmtter[;ds`queryId] @[value;ds[`i];{`$"\'",x}];ds[`ID])]; \n ' +
+'  if[not ds`async;neg[.z.w] -8! r] \n '+
+'  }';
+
+// .z.ws:{[x] ds:-9!x;fmtter:@[value;ds[`formatFunc];{`$"'",x}];r:$[ds`async;@[value;ds[`i;1;`asyncPostbackFunction];{`$"'",x}][ds[`i];fmtter;ds`ID];`o`ID!(fmtter[;ds`queryId] @[value;ds[`i];{`$"'",x}];ds[`ID])];if[not ds`async;neg[.z.w] -8! r]}
+
+export const graphFormatFunc: string = '{ \n ' +
+` .[x;(y;z);{'\"Function:format - Error:\",x}]}[{[x;gfid] \n ` +
+' \n ' +
+' if[not .Q.qt x;:x];\n ' +
+' t:$[99h=type x; \n ' +
+' key[x]!([]data:flip each value x); \n ' +
+' ([id:1#`x]data:`#enlist x)]; \n ' +
+' :`payload`id`error`success!(t;gfid;$[(99h=type t)and(0<count x);\"OK\";\"NOT OK - Final table fault\"];1b); \n ' +
+' }]'
+
+export const tableFormatFunc:string = '{ \n ' +
+` .[x;(y;z);{'\"Function:format - Error Type:\",x}]}[{[x;gfid] \n ` +
+' \n ' +
+' if[not .Q.qt x;:x];\n ' +
+' t:0!x; \n ' +
+' rows:enlist{value x}each t; \n ' +
+' columns:enlist ([]text:key flip t); \n ' +
+' r:`columns`rows!(columns;rows); \n ' +
+' :`payload`id`error`success!(r;gfid;$[0<count x;\"OK\";\"NOT OK - Final table fault\"];1b); \n ' +
+' }]'
+
 //Graph response type
 export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error! - ",x;0b)}]}{[dict] \n ' +
-' \n ' +
 ' \n ' +
 ' conc:{ \n ' +
 ` .[x;(y;z);{'\"Function:conc - Error:\",x}]}[{[d;raw] \n ` +
@@ -64,15 +97,6 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' \n ' +
 ' g:d[`grouping]; \n ' +
 ' :$[99h=type g;$[end;g;{x!x}value g];{$[x~();0b;x!x]}distinct g]; \n ' +
-' }]; \n ' +
-' \n ' +
-' format:{ \n ' +
-` .[x;(y;z);{'\"Function:format - Error:\",x}]}[{[x;gfid] \n ` +
-' \n ' +
-' t:$[99h=type x; \n ' +
-' key[x]!([]data:flip each value x); \n ' +
-' ([id:1#`x]data:`#enlist x)]; \n ' +
-' :`payload`id`error`success!(t;gfid;$[(99h=type t)and(0<count x);\"OK\";\"NOT OK - Final table fault\"];1b); \n ' +
 ' }]; \n ' +
 ' \n ' +
 ' end:0b; \n ' +
@@ -178,7 +202,7 @@ export const graphFunction: string =  '{@[x;y;{`payload`error`success!(();"Error
 ' funcparts[`c]:{x!x}cols[raw]except d`grouping \n ' +
 ' ]; \n ' +
 ' final:?[raw;();funcparts[`b];funcparts[`c]]; \n ' +
-' :format[final;control`gfid]; \n ' +
+' :final; \n ' +
 ' }';
 
 //Table response type
@@ -235,16 +259,6 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ' \n ' +
 ' g:d[`grouping]; \n ' +
 ' :$[99h=type g;$[end;g;{x!x}value g];{$[x~();0b;x!x]}distinct g]; \n ' +
-' }]; \n ' +
-' \n ' +
-' format:{ \n ' +
-` .[x;(y;z);{'\"Function:format - Error Type:\",x}]}[{[x;gfid] \n ` +
-' \n ' +
-' t:0!x; \n ' +
-' rows:enlist{value x}each t; \n ' +
-' columns:enlist ([]text:key flip t); \n ' +
-' r:`columns`rows!(columns;rows); \n ' +
-' :`payload`id`error`success!(r;gfid;$[0<count x;\"OK\";\"NOT OK - Final table fault\"];1b); \n ' +
 ' }]; \n ' +
 ' \n ' +
 ' end:0b; \n ' +
@@ -341,7 +355,7 @@ export const tabFunction: string = '{@[x;y;{`payload`error`success!(();"Error! -
 ' if[qt=`select;final:{[t]((cols t)[0],{`$x} each count[1_cols t]#.Q.a) xcol t}final]; \n ' +
 ' final \n ' +
 ' ; \n ' +
-' :format[final;control`gfid]; \n ' +
+' :final; \n ' +
 ' } \n ' +
 '';
 

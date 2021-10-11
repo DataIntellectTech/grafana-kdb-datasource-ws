@@ -8,9 +8,9 @@ import { KdbRequest } from "./model/kdb-request";
 import { QueryParam } from "./model/query-param";
 import { QueryDictionary } from "./model/queryDictionary";
 import { ConflationParams } from "./model/conflationParams";
-import { graphFunction } from './model/kdb-request-config';
+import { graphFunction,graphFormatFunc, tableFormatFunc } from './model/kdb-request-config';
 import { conflationDurationDefault, conflationUnitDefault } from './query_ctrl';
-import { tabFunction,defaultTimeout,kdbEpoch,durationMap } from './model/kdb-request-config';
+import { tabFunction,defaultTimeout,kdbEpoch,durationMap,defaultPostback } from './model/kdb-request-config';
 export class KDBDatasource {
     //This is declaring the types of each member
     id: any;
@@ -69,6 +69,10 @@ export class KDBDatasource {
     private variablesReplace(target:any, search: string, replace:any) {
         //Format Options as array or scalar
         // console.log('VARIABLESREPLACE TARGET: ', target)
+        // if target doesn't have queryType as a key, it is not initialised yet, so skip injection
+        if (!target.queryType) {
+            return
+        }
         if (Array.isArray(replace)) {
             target.kdbFunction = target.kdbFunction.replace(search, replace.join(','))
         } else {
@@ -217,7 +221,9 @@ export class KDBDatasource {
         queryParam.column = this.buildColumnParams(target);
         queryParam.temporal_field = target.useTemporalField ? this.buildTemporalField(target) : [];
         queryParam.temporal_range = this.buildTemporalRange(target.range);
-        queryParam.maxRowCount = target.rowCountLimit
+        queryParam.maxRowCount = target.rowCountLimit;
+        queryParam.postbackFunction = target.postbackFunction;
+        
         if (target.queryType == 'selectQuery') queryParam.where = this.buildWhereParams(target.where);
         //conflation
         if (target.useConflation) {
@@ -247,8 +253,14 @@ export class KDBDatasource {
         kdbRequest.query = ''//query;
         kdbRequest.queryParam = Object.assign({}, queryParam);
         kdbRequest.format = target.format;
+        kdbRequest.formatFunc = target.format == 'time series' ? graphFormatFunc : tableFormatFunc;
         kdbRequest.queryId = target.queryId;
         kdbRequest.version = target.version;
+        kdbRequest.useAsyncFunction = (typeof target.useAsyncFunction === 'undefined') ? false : target.useAsyncFunction;
+        kdbRequest.useCustomPostback = (typeof target.useCustomPostback === 'undefined') ? false : target.useCustomPostback;
+        kdbRequest.asyncProcTypes = (typeof target.asyncProcTypes === 'undefined') ? '' : target.asyncProcTypes.split("`").splice(1).map(proc => "`"+proc);
+        //kdbRequest.asyncPostbackFunction = (typeof target.useCustomPostback === 'undefined') ? '' : target.useCustomPostback ? defaultPostback : target.postbackFunction;
+        kdbRequest.asyncPostbackFunction = kdbRequest.useCustomPostback ? target.postbackFunction : defaultPostback;
 
         return [
             ((target.format == 'time series') ? graphFunction : tabFunction),
@@ -553,6 +565,8 @@ export class KDBDatasource {
     //Response parser called here**********************
     private getQueryResult = (request: any): Promise<Object> => {
         let curRequest = request;
+        console.log('getQueryResult REQUEST:')
+        console.log(request)
         let timeoutError = "Query sent at " + new Date() + " timed out.";
         let malformedResError = "Malformed response. Check KDB+ WebSocket handler is correctly configured."
         let response = new Promise(resolve => {
@@ -572,6 +586,7 @@ export class KDBDatasource {
     }
 
     connectWS() {
+        console.log('connectWS');
         return new Promise (connected => {
         this.ws = new WebSocket(this.wsUrl);
         this.ws.binaryType = 'arraybuffer';
@@ -580,6 +595,7 @@ export class KDBDatasource {
         };
 
         this.ws.onopen = () => {
+            console.log('open WS')
             connected(true);
         }
         
@@ -603,9 +619,15 @@ export class KDBDatasource {
     executeAsyncQuery(request: any) {
         var requestResolve;
         let _c = this.c;
+        console.log('executeAsyncQuery: REQUEST:')
+        console.log(request);
         var requestPromise = new Promise(resolve => {
             let refIDn = Math.round(10000000 * Math.random());
-            var wrappedRequest = {i:request, ID:refIDn};
+            let formatter: string = typeof(request) ==  'string' ? '{[x;y] :x}' : request[1].formatFunc;
+            let asyncbool:boolean = typeof(request) ==  'string' ? false : request[1].useAsyncFunction;
+            var wrappedRequest = {async: asyncbool, formatFunc:formatter, i:request, ID:refIDn};
+            console.log('WRAPPED REQUEST: ')
+            console.log(wrappedRequest)
             this.ws.send(_c.serialize(wrappedRequest));
             this.requestSentIDList.push(refIDn);
             requestResolve = resolve;
@@ -619,11 +641,20 @@ export class KDBDatasource {
 
     executeAsyncReceive(responseObj) {
         let _c = this.c;
+        console.log('executeAsyncReceive: RESPONSE:')
+        console.log(responseObj);
         let deserializedResult = _c.deserialize(responseObj.data);
+        if (Array.isArray(deserializedResult)) {
+            if (deserializedResult.length !== 3) {
+                return console.log('received malformed data (array)')
+            }
+            //deserializedResult = { ...deserializedResult[0], ...deserializedResult[2] }
+            deserializedResult = { ID: deserializedResult[0], o:deserializedResult[2].o}
+        };
         if (!deserializedResult.ID) {
-            // return console.log('received malformed data')
+             return console.log('received malformed data')
         } else if (this.requestSentIDList.indexOf(deserializedResult.ID) === -1) {
-            // return console.log('received unrequested data');
+             return console.log('received unrequested data');
         } else {
             var requestNum = this.requestSentIDList.indexOf(deserializedResult.ID);
             this.requestSentList[requestNum].resolve(deserializedResult.o);
@@ -698,6 +729,7 @@ export class KDBDatasource {
 
     //This is the function called by Grafana when it is testing a connection on the configuration page
     testDatasource() {
+        console.log('testDatasource')
         return this.connect()
             .then((result) => {
                 return result;
@@ -705,6 +737,7 @@ export class KDBDatasource {
     };
 
     connect(): Promise<Object> {
+        console.log('connect')
         return new Promise<Object>((resolve, reject) => {
             if ("WebSocket" in window) {
                 this.$q.when(this.setupWebSocket()).then(setTimeout(() => {
@@ -721,6 +754,7 @@ export class KDBDatasource {
 
     //This checks the kdb+ connection state for the 'test connection' funciton
     checkConnectionState(): Promise<Object> {
+        console.log('checkconnectionstate')
         return new Promise(resolve => {
             return this.connectWS().then(connectStatus => {
                 if (connectStatus === false) {
@@ -733,7 +767,9 @@ export class KDBDatasource {
                         }, this.timeoutLength)
                     });
                     let response = new Promise(resolve => {
+                        console.log('running .z.ws query')
                         this.executeAsyncQuery('.z.ws').then(res => {
+                            console.log('res: ',res)
                             if (typeof res !== 'string') {
                                 resolve(this.buildResponse('fail', 'Malformed response. Check KDB+ WebSocket handler is correctly configured.', 'Fail'));
                             } else if (res.replace(' ', '').includes('ds:-9!x;')) {

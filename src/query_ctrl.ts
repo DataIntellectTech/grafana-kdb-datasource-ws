@@ -121,6 +121,7 @@ export class KDBQueryCtrl extends QueryCtrl {
             {text: 'Hours', value: 'h'}];
             
         this.target.version = this.datasource.meta.info.version;
+        this.target.postbackFunction = ''
 
         //If queryError isn't present, build it
         if(!this.target.queryError) {
@@ -769,6 +770,10 @@ export class KDBQueryCtrl extends QueryCtrl {
         if(!this.target.useTemporalField){
             this.target.useConflation = false;
         }
+        this.panelCtrl.refresh();
+    }
+
+    asyncFieldChanged() {
         this.panelCtrl.refresh();
     }
 
