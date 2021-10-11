@@ -87,7 +87,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     };
   }
 
-  async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
+  query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
            // console.log('options', options
            var prefilterResultCount = options.targets.length;
 
@@ -205,7 +205,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     }
 
     //This is the function called by Grafana when it is testing a connection on the configuration page
-  async testDatasource() {
+  testDatasource() {
       return this.connect()
           .then((result) => {
               return result;
