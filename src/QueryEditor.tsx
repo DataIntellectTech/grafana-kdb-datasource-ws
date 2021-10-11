@@ -810,7 +810,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       setTimeout(async() => {
         const response = await datasource.metricFindQueryDefault(metaBuilder.buildColumnQuery('time')).then(this.transformToSegments({}));
         const result = response.map((option: any) => {
-          return {value: option.value,label: option.label}
+          return {value: option.value, label: option.label}
         })
         resolve(result)
       }, 0);
@@ -915,10 +915,10 @@ export class QueryEditor extends PureComponent<Props, State> {
                     <InlineFormLabel className="query-keyword" tooltip="Time series data is plotted against this column.  Results are also automatically filtered on this field using the date extents of the graph.">
                       Time Column
                     </InlineFormLabel>
-                    <Segment
+                    <SegmentAsync
                       width={20}
                       placeholder="time"
-                      options={this.getTimeColumnSegments.bind(this)}
+                      loadOptions={this.getTimeColumnSegments.bind(this)}
                       onChange={(e: SelectableValue<string>) => this.onTimeColumnChange(e.value)}
                       value={this.state.timeColumn || ''}
                     />
