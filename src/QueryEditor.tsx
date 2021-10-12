@@ -152,7 +152,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     }
 
     this.state = {
-      queryTypeStr: 'selectQuery',
+      queryTypeStr: query.queryType,
       tableFrom: query.table,
       useTemporalField: query.useTemporalField,
       useConflation: query.useConflation,
@@ -191,9 +191,9 @@ export class QueryEditor extends PureComponent<Props, State> {
     } else if (queryType == 'functionQuery') {
       this.functionChanged();
     }
-    this.setState({ queryTypeStr: queryType });
-
     onRunQuery();
+    this.setState({ queryTypeStr: queryType });
+    this.forceUpdate()
   }
   //Function Builder
   functionChanged() {
