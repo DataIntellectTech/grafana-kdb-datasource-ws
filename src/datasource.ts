@@ -323,7 +323,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       // console.log('vname:',varname)
       if (scopedVarArray.indexOf(varname) == -1) {
         scopedVarArray.push(varname);
-        if (instVariables[i].current.text[0] === 'All') {
+        if (instVariables[i].current.text === 'All') {
           // console.log('trig1')
           scopedValueArray.push(instVariables[i].allValue);
         } else {
@@ -350,7 +350,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   //Change templateSrv object to be handled as variables
   private newGetVariables(templatesrv) {
     let instVariables = [];
-    let variables = templatesrv.getVariables();
+    let variables = JSON.parse(JSON.stringify(templatesrv.getVariables()));
     for (let i = 0; i < variables.length; i++) {
       //Set the 'all' value if the option is enabled
       if (variables[i].options[0] && variables[i].options[0].text === 'All') {
