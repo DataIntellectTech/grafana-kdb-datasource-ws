@@ -222,7 +222,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         );
       }
     });
-    return { data, error };
+    return { data, state: 'done' };
   }
 
   //This is the function called by Grafana when it is testing a connection on the configuration page
