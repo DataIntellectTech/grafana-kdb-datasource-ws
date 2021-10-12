@@ -431,7 +431,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     } else if (queryDetails.queryType == 'functionQuery' && queryDetails.funcTimeCol) {
       return '`' + queryDetails.funcTimeCol;
     } else {
-      return '';
+      return [];
     }
   }
 
