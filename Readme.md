@@ -147,3 +147,23 @@ To reference a variable within another variables query, you use the syntax $varn
 - In the `user` box type `admin`. In the `password` box type `admin`.
 - Click *Save & Test* and a green notification box should appear to tell you the connection was successful.
 - Repeat the previous 4 steps with `KDBBASEPORT+3` to connect the HDB.
+
+
+# Building the plugin
+### Build Dependencies:
+ - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
+
+**Please note that while you can build the plugin yourself, it will not be signed. Later versions of Grafana will not load unsigned plugins unless you configure it to do so.
+Signing plugin requires a GRAFANA_API_KEY environment variable to be set, the value of which is restricted to admins of the grafana page. To load an unsigned plugnin see [here](https://grafana.com/docs/grafana/latest/plugins/plugin-signatures/#allow-unsigned-plugins)**
+
+To build the plugin you need to run the following commands. 
+
+```
+yarn install
+yarn build
+```
+
+This will create a 'dist' directory at the root of your repo. You can then import this into your grafana instance, by adding it to a folder within the grafana plugins directory
+
+For example - .../GrafanaLabs/grafana/data/plugins/kdb - so your dist dir would exist at - .../GrafanaLabs/grafana/data/plugins/kdb/dist
+
