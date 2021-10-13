@@ -154,7 +154,7 @@ To reference a variable within another variables query, you use the syntax $varn
  - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
 
 **Please note that while you can build the plugin yourself, it will not be signed. Later versions of Grafana will not load unsigned plugins unless you configure it to do so.
-Signing plugin requires a GRAFANA_API_KEY environment variable to be set, the value of which is restricted to admins of the grafana page. To load an unsigned plugnin see [here](https://grafana.com/docs/grafana/latest/plugins/plugin-signatures/#allow-unsigned-plugins)**
+Signing plugin requires a GRAFANA_API_KEY environment variable to be set, the value of which is restricted to admins of the AquaQ grafana account. To load an unsigned plugnin see [here](https://grafana.com/docs/grafana/latest/plugins/plugin-signatures/#allow-unsigned-plugins)**
 
 To build the plugin you need to run the following commands. 
 
