@@ -44,10 +44,10 @@ type State = {
   firstWhere: boolean;
   whereOperators: SelectableValue<string>[];
   groupBy: string;
-  useAsyncFunction: boolean;
-  asyncField: string;
-  useCustomPostback: boolean;
-  postbackFunction: string;
+  // useAsyncFunction: boolean;
+  // asyncField: string;
+  // useCustomPostback: boolean;
+  // postbackFunction: string;
 };
 
 type WhereSegment = {
@@ -174,10 +174,10 @@ export class QueryEditor extends PureComponent<Props, State> {
       firstWhere: true,
       selectSegments: selectSegments,
       groupBy: query.groupingField,
-      asyncField: query.asyncProcTypes,
-      useAsyncFunction: query.useAsyncFunction,
-      useCustomPostback: query.useCustomPostback,
-      postbackFunction: query.postbackFunction,
+      // asyncField: query.asyncProcTypes,
+      // useAsyncFunction: query.useAsyncFunction,
+      // useCustomPostback: query.useCustomPostback,
+      // postbackFunction: query.postbackFunction,
     };
     // run the default query immediately to get default look
     onRunQuery();
@@ -802,40 +802,41 @@ export class QueryEditor extends PureComponent<Props, State> {
       }, 0);
     });
   }
-  useAsyncFunction(checked) {
-    const { onChange, query, onRunQuery } = this.props;
-    if (!checked) {
-      onChange({ ...query, useAsyncFunction: checked });
-      onRunQuery();
-      this.setState({ useAsyncFunction: checked });
-    } else {
-      onChange({ ...query, useAsyncFunction: checked, asyncProcTypes: '' });
-      onRunQuery();
-      this.setState({ useAsyncFunction: checked, asyncField: '' });
-    }
-  }
 
-  asyncFieldChanged(asyncField) {
-    const { onChange, query, onRunQuery } = this.props;
+  // useAsyncFunction(checked) {
+  //   const { onChange, query, onRunQuery } = this.props;
+  //   if (!checked) {
+  //     onChange({ ...query, useAsyncFunction: checked });
+  //     onRunQuery();
+  //     this.setState({ useAsyncFunction: checked });
+  //   } else {
+  //     onChange({ ...query, useAsyncFunction: checked, asyncProcTypes: '' });
+  //     onRunQuery();
+  //     this.setState({ useAsyncFunction: checked, asyncField: '' });
+  //   }
+  // }
 
-    onChange({ ...query, asyncProcTypes: asyncField });
-    onRunQuery();
+  // asyncFieldChanged(asyncField) {
+  //   const { onChange, query, onRunQuery } = this.props;
 
-    this.setState({ asyncField: asyncField });
-  }
+  //   onChange({ ...query, asyncProcTypes: asyncField });
+  //   onRunQuery();
 
-  useCustomPostback(checked) {
-    const { onChange, query, onRunQuery } = this.props;
-    if (!checked) {
-      onChange({ ...query, useCustomPostback: checked });
-      onRunQuery();
-      this.setState({ useCustomPostback: checked });
-    } else {
-      onChange({ ...query, useCustomPostback: checked, postbackFunction: '' });
-      onRunQuery();
-      this.setState({ useCustomPostback: checked, postbackFunction: '' });
-    }
-  }
+  //   this.setState({ asyncField: asyncField });
+  // }
+
+  // useCustomPostback(checked) {
+  //   const { onChange, query, onRunQuery } = this.props;
+  //   if (!checked) {
+  //     onChange({ ...query, useCustomPostback: checked });
+  //     onRunQuery();
+  //     this.setState({ useCustomPostback: checked });
+  //   } else {
+  //     onChange({ ...query, useCustomPostback: checked, postbackFunction: '' });
+  //     onRunQuery();
+  //     this.setState({ useCustomPostback: checked, postbackFunction: '' });
+  //   }
+  // }
 
   render() {
     const query = defaults(this.props.query, defaultQuery);
@@ -1130,7 +1131,7 @@ export class QueryEditor extends PureComponent<Props, State> {
         )}
         {this.state.queryTypeStr && this.state.queryTypeStr !== 'kdbSideQuery' && (
           <div>
-            {this.state.queryTypeStr && this.state.queryTypeStr == 'functionQuery' && (
+            {/* {this.state.queryTypeStr && this.state.queryTypeStr == 'functionQuery' && (
               <div>
                 <div className="gf-form-inline">
                   <div className="gf-form">
@@ -1202,7 +1203,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                   </div>
                 )}
               </div>
-            )}
+            )} */}
             {this.state.formatAs && this.state.formatAs !== 'table' && (
               <div className="gf-form-inline">
                 <div className="gf-form">

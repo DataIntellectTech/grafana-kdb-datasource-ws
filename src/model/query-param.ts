@@ -11,5 +11,5 @@ export class QueryParam {
   conflation: any;
   query: QueryDictionary;
   maxRowCount: number | string;
-  postbackFunction: string;
+  // postbackFunction: string;
 }

@@ -62,10 +62,10 @@ export const defaultQuery: Partial<MyQuery> = {
   select: [] = [],
   error: '',
   lastQueryError: '',
-  useAsyncFunction: false,
-  useCustomPostback: false,
-  asyncProcTypes: '',
-  postbackFunction: '',
+  // useAsyncFunction: false,
+  // useCustomPostback: false,
+  // asyncProcTypes: '',
+  // postbackFunction: '',
 };
 
 /**
