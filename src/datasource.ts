@@ -745,41 +745,47 @@ private buildKdbTimestampString(date : Date) {
   }
 
   //Called for query variables
-  async metricFindQuery(kdbRequest: KdbRequest): Promise<MetricFindValue[]> {
+  metricFindQuery(kdbRequest: KdbRequest): Promise<MetricFindValue[]> {
     kdbRequest = this.injectUserVars(kdbRequest);
     return new Promise((resolve, reject) => {
-      resolve(
-        this.executeAsyncQuery(kdbRequest).then((result) => {
-          const values = [];
-          var properties = [];
-          if (Array.isArray(result)) {
-            if (typeof result[0] === 'string') {
-              for (let i = 0; i < result.length; i++) {
-                values.push({ text: result[i] });
-              }
-            } else if (typeof result[0] === 'object') {
-              if (Object.keys(result[0]).length > 1) {
-                //checking that multiple rows for multiple columns don't come back as the preview tab only shows single values (not objects)
-                const errorResponse =
-                  'Can only select single values. Attempted to return an object of key-value pairs. Unsafe query';
-                throw new Error(errorResponse);
-              }
-              for (var key in result[0]) {
-                if (result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
-                  properties.push(key);
+      return this.connectWS().then((connectStatus) => {
+        if (connectStatus === true){
+            resolve(
+              this.executeAsyncQuery(kdbRequest).then((result) => {
+                const values = [];
+                var properties = [];
+                if (Array.isArray(result)) {
+                  if (typeof result[0] === 'string') {
+                    for (let i = 0; i < result.length; i++) {
+                      values.push({ text: result[i] });
+                    }
+                  } else if (typeof result[0] === 'object') {
+                    if (Object.keys(result[0]).length > 1) {
+                      //checking that multiple rows for multiple columns don't come back as the preview tab only shows single values (not objects)
+                      const errorResponse =
+                        'Can only select single values. Attempted to return an object of key-value pairs. Unsafe query';
+                      throw new Error(errorResponse);
+                    }
+                    for (var key in result[0]) {
+                      if (result[0].hasOwnProperty(key) && typeof result[0][key] !== 'function') {
+                        properties.push(key);
+                      }
+                    }
+                    for (let i = 0; i < result.length; i++) {
+                      values.push({ text: result[i][properties[0]] });
+                    }
+                  }
+                } else if (typeof result === 'string') {
+                  const errorResponse = `Check Query. Syntax error with: [ ${result} ]`;
+                  throw new Error(errorResponse);
                 }
-              }
-              for (let i = 0; i < result.length; i++) {
-                values.push({ text: result[i][properties[0]] });
-              }
-            }
-          } else if (typeof result === 'string') {
-            const errorResponse = `Check Query. Syntax error with: [ ${result} ]`;
-            throw new Error(errorResponse);
+                return values;
+              })
+            );
+          }else{
+            resolve([]);
           }
-          return values;
-        })
-      );
+      });
     });
   }
 

@@ -7,7 +7,7 @@
     "description": "A Grafana datasource plugin for kdb+",
     "author": {
       "name": "AquaQ Analytics",
-      "url": "aquaq.co.uk"
+      "url": "https://www.aquaq.co.uk"
     },
     "keywords": ["kdb", "kdb+"],
     "logos": {
