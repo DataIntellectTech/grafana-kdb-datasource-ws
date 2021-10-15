@@ -1057,13 +1057,13 @@ export class QueryEditor extends PureComponent<Props, State> {
                   )}
                   <div className="gf-form">
                     <Segment value="Expr" options={this.removeOption} onChange={() => this.removeSegment(segment)} />
-                    <Segment
+                    <SegmentAsync
                       onChange={(e: SelectableValue<string>) => {
                         segment.expressionField = e.value;
                         this.setWhereSegment(segment);
                         this.setWhereOperators(e.value);
                       }}
-                      options={this.getSelectOptions.bind(this)}
+                      loadOptions={this.getSelectOptions.bind(this)}
                       value={segment.expressionField || ''}
                       placeholder="Select field"
                     />
