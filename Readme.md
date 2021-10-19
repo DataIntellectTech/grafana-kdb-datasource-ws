@@ -8,7 +8,7 @@
  - If Grafana is not already installed, install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the [installation guide](https://grafana.com/docs/grafana/latest/installation/) for the relevant operating system.
 
 #### Installing kdb+ datasource plugin:
- - Download the [latest release](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases/tag/v1.0.1).
+ - Download the [latest release](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases/tag/v3.0.0).
  - Extract the entire *grafana-kdb-datasource-ws* folder to *{Grafana Install Directory}/grafana/data/plugins/*.
  - Start/restart the Grafana service (see **Grafana Service** below).
  
@@ -73,7 +73,7 @@ On **Linux** grafana will be installed as a service and can be controlled via `s
 ## Full Install/Setup Guide
 
 - Install Grafana from [grafana.com](https://grafana.com/grafana/download/) following the installation guide for the relevant operating system.
-- In your browser, navigate to [grafana-kdb-datasource-ws releases](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases). Click on the latest release and click the ‘Source code (zip)’ link to download the plugin.
+- In your browser, navigate to [grafana-kdb-datasource-ws releases](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/releases). Click on the latest release and click the ‘grafana-datasource-ws-X.0.0.zip’ link to download the plugin.
 - Extract the zip file in *{Grafana Install Directory}\grafana\data\plugins*.
 - Before moving on, check that the README.md is at the following location: *{Grafana Install Directory}\grafana\data\plugins\grafana-kdb-datasource-ws\README.md*.
 - Open file-explorer and navigate into *{Grafana Install Directory}\data\plugins\grafana-kdb-datasource-ws* then right-click and cut the file named *custom.ini*. Then navigate into *C:\Program Files\GrafanaLabs\grafana\conf* then right-click and paste. Confirm that this file, *custom.ini*, is present at the following location : *C:\Program Files\GrafanaLabs\grafana\conf\.
@@ -120,6 +120,15 @@ Global Grafana variables may also be used within queries. There is currently sup
 
 The adaptor will be able to support all of Grafana 7's built in panel visualisations. In addition, external plugins that support Grafana 7 will also work with the adaptor. Panel plugins untested on Grafana 7 will potentially come with compatibillity issues if run on Grafana 7 or later - however they will work on the adaptor if an earlier compatible Grafana version is being used.   
 
+#### Chained Variables
+
+**Note: This feature is only supported on Grafana version 7.0.0 or later**
+
+Support has been added for [Chained Variables](https://grafana.com/docs/grafana/v7.5/variables/variable-types/chained-variables/). To utilise chained variables you first create a variable as normal and then reference it when creating a new variable. This creates a parent-child relationship between variables.
+To reference a variable within another variables query, you use the syntax $varname.
+
+**Note the syntax differs from that used within the query builder and free-form queries, due to grafana restricting the '{}' characters within a variable query**
+ 
 # Demo
 ### Setting up a demo TorQ Stack (Windows)
 
@@ -138,3 +147,23 @@ The adaptor will be able to support all of Grafana 7's built in panel visualisat
 - In the `user` box type `admin`. In the `password` box type `admin`.
 - Click *Save & Test* and a green notification box should appear to tell you the connection was successful.
 - Repeat the previous 4 steps with `KDBBASEPORT+3` to connect the HDB.
+
+
+# Building the plugin
+### Build Dependencies:
+ - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
+
+**Please note that while you can build the plugin yourself, it will not be signed. Later versions of Grafana will not load unsigned plugins unless you configure it to do so.
+Signing plugin requires a GRAFANA_API_KEY environment variable to be set, the value of which is restricted to admins of the AquaQ grafana account. To load an unsigned plugnin see [here](https://grafana.com/docs/grafana/latest/plugins/plugin-signatures/#allow-unsigned-plugins)**
+
+To build the plugin you need to run the following commands. 
+
+```
+yarn install
+yarn build
+```
+
+This will create a 'dist' directory at the root of your repo. You can then import this into your grafana instance, by adding it to a folder within the grafana plugins directory
+
+For example - .../GrafanaLabs/grafana/data/plugins/kdb - so your dist dir would exist at - .../GrafanaLabs/grafana/data/plugins/kdb/dist
+
