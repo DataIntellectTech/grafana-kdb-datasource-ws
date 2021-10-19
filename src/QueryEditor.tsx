@@ -322,10 +322,11 @@ export class QueryEditor extends PureComponent<Props, State> {
   };
 
   useConflation = (checked: boolean) => {
+    // defaults
     let conflation: Conflation = {
-      unitType: '',
-      duration: 0,
-      aggregate: '',
+      unitType: 'm',
+      duration: 5,
+      aggregate: 'last',
     };
     this.allConflationSettingsSet(conflation, checked);
     this.setState({ useConflation: checked, conflation: conflation });
@@ -1299,7 +1300,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                         width={20}
                         options={this.unitOptions}
                         onChange={(e: SelectableValue<string>) => this.onUnitChange(e.value)}
-                        value={this.state.conflation.unitType || ''}
+                        value={this.state.conflation.unitType || 'm'}
                       />
                       <InlineFormLabel
                         className="query-keyword"
@@ -1312,7 +1313,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                         width={20}
                         options={this.aggregateOptions}
                         onChange={(e: SelectableValue<string>) => this.onAggregateChange(e.value)}
-                        value={this.state.conflation.aggregate || ''}
+                        value={this.state.conflation.aggregate || 'Last'}
                       />
                     </div>
                   )}

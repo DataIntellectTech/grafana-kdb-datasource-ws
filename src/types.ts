@@ -54,9 +54,9 @@ export const defaultQuery: Partial<MyQuery> = {
   conflationDurationMS: '',
   conflationDefaultAggType: '',
   conflation: {
-    unitType: '',
-    duration: 0,
-    aggregate: '',
+    unitType: 'm',
+    duration: 5,
+    aggregate: 'last',
   },
   where: [] = [],
   select: [] = [],
