@@ -1,7 +1,7 @@
 {
   "name": "aquaqanalytics-kdbadaptor-datasource",
-  "version": "3.0.0",
-  "description": "A Grafana datasource plugin for kdb+",
+  "version": "3.0.1",
+  "description": "A Grafana datasource plugin for kdb+ (deprecated)",
   "scripts": {
     "build": "grafana-toolkit plugin:build",
     "test": "grafana-toolkit plugin:test",

@@ -1,4 +1,9 @@
-![](https://github.com/AquaQAnalytics/grafana-kdb-datasource-ws/blob/master/images/aquaq_bubbles_grafana.png)
+# Maintenance-Only Notice
+**This plugin is deprecated and now in Maintenance Only mode. It will only be supported for critical bugs between Grafana versions 7.0.0 to 8.0.0. This plugin will remain available for current users as an End-of-Life product.**
+
+**New users should instead use the [new kdb+ datasource plugin found here](https://grafana.com/grafana/plugins/aquaqanalytics-kdbbackend-datasource/).**
+
+The new kdb+ datasource plugin's [GitHub page can be found here](https://github.com/AquaQAnalytics/grafana-kdb-backend-datasource).
 
 # Grafana and KDB+ Plugin Installation Instructions
 
