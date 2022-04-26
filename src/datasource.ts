@@ -688,6 +688,20 @@ private buildKdbTimestampString(date : Date) {
 
   connectWS() {
     return new Promise((connected) => {
+      if (this.ws) {
+        if (this.ws.readyState == 1) {
+          connected(true);
+          return;
+        }
+        if (this.ws.readyState > 1) {
+          connected(false);
+          return;
+        }
+        this.ws.addEventListener('onopen', function () { connected(true); });
+        this.ws.addEventListener('onclose', function () { connected(false); });
+        return;
+      }
+
       this.ws = new WebSocket(this.wsUrl);
       this.ws.binaryType = 'arraybuffer';
       this.ws.onmessage = (response) => {
@@ -848,7 +862,7 @@ private buildKdbTimestampString(date : Date) {
   connect(): Promise<Object> {
     return new Promise<Object>((resolve, reject) => {
       if ('WebSocket' in window) {
-        this.$q.when(this.setupWebSocket()).then(
+        this.$q.when().then(
           setTimeout(() => {
             resolve(
               this.checkConnectionState().then((result) => {
@@ -918,19 +932,6 @@ private buildKdbTimestampString(date : Date) {
         }
       });
     });
-  }
-
-  setupWebSocket() {
-    this.ws = new WebSocket(this.wsUrl);
-    this.ws.binaryType = 'arraybuffer';
-
-    this.ws.onopen = () => {};
-
-    this.ws.onmessage = (messageEvent: MessageEvent) => {};
-
-    this.ws.onclose = () => {};
-
-    this.ws.onerror = () => {};
   }
 
   buildResponse(status: string, message: string, title: string) {
